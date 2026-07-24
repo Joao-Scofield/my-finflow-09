@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Settings2, Upload, Wallet } from "lucide-react";
+import { Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Toaster } from "@/components/ui/sonner";
@@ -10,6 +10,7 @@ import { TransactionModal } from "@/components/finance/TransactionModal";
 import { TransactionsTable } from "@/components/finance/TransactionsTable";
 import { CategoriesManager } from "@/components/finance/CategoriesManager";
 import { ImportModal } from "@/components/finance/ImportModal";
+import { RulesManager } from "@/components/finance/RulesManager";
 import { ExpenseBreakdownChart, MonthlyComparisonChart } from "@/components/finance/Charts";
 import { ThemeToggle } from "@/components/finance/ThemeToggle";
 import { FinanceProvider, useFinance } from "@/lib/finance-store";
@@ -56,6 +57,7 @@ function Dashboard() {
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [catOpen, setCatOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
 
   const { transactions } = useFinance();
 
@@ -94,6 +96,10 @@ function Dashboard() {
             <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
               <Upload className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Importar Excel</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setRulesOpen(true)}>
+              <Sparkles className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Regras</span>
             </Button>
             <Button variant="outline" size="sm" onClick={() => setCatOpen(true)}>
               <Settings2 className="h-4 w-4 sm:mr-1" />
@@ -166,6 +172,7 @@ function Dashboard() {
       />
       <CategoriesManager open={catOpen} onOpenChange={setCatOpen} />
       <ImportModal open={importOpen} onOpenChange={setImportOpen} />
+      <RulesManager open={rulesOpen} onOpenChange={setRulesOpen} />
       <Toaster richColors position="top-right" />
     </div>
   );

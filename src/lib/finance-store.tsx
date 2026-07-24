@@ -142,6 +142,64 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
               : t,
           ),
         })),
+      importRows: (rows, opts) => {
+        const stats = { added: 0, categoriesCreated: 0, subcategoriesCreated: 0 };
+        const norm = (s: string) => s.trim().toLowerCase();
+        const palette = [
+          "#6366f1","#8b5cf6","#ec4899","#ef4444","#f59e0b",
+          "#10b981","#14b8a6","#06b6d4","#0ea5e9","#a855f7","#f97316","#84cc16",
+        ];
+        setState((s) => {
+          const categories = s.categories.map((c) => ({
+            ...c,
+            subcategories: [...c.subcategories],
+          }));
+          const findCat = (name: string, type: "income" | "expense") =>
+            categories.find((c) => norm(c.name) === norm(name) && c.type === type);
+          const newTx: Transaction[] = [];
+          for (const r of rows) {
+            let cat = findCat(r.categoryName, r.type);
+            if (!cat) {
+              cat = {
+                id: uid(),
+                name: r.categoryName.trim() || (r.type === "income" ? "Outras Receitas" : "Outras Despesas"),
+                color: palette[categories.length % palette.length],
+                icon: "Tag",
+                type: r.type,
+                subcategories: [],
+              };
+              categories.push(cat);
+              stats.categoriesCreated++;
+            }
+            let subId: string | undefined;
+            if (r.subcategoryName && r.subcategoryName.trim()) {
+              let sub = cat.subcategories.find(
+                (sc) => norm(sc.name) === norm(r.subcategoryName!),
+              );
+              if (!sub) {
+                sub = { id: uid(), name: r.subcategoryName.trim() };
+                cat.subcategories.push(sub);
+                stats.subcategoriesCreated++;
+              }
+              subId = sub.id;
+            }
+            newTx.push({
+              id: uid(),
+              type: r.type,
+              amount: r.amount,
+              date: r.date,
+              categoryId: cat.id,
+              subcategoryId: subId,
+              description: r.description,
+              status: r.status,
+            });
+            stats.added++;
+          }
+          const transactions = opts?.replace ? newTx : [...newTx, ...s.transactions];
+          return { categories, transactions };
+        });
+        return stats;
+      },
     }),
     [state],
   );

@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Settings2, Wallet } from "lucide-react";
+import { Plus, Settings2, Upload, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Toaster } from "@/components/ui/sonner";
 import { PeriodSelector } from "@/components/finance/PeriodSelector";
 import { SummaryCards } from "@/components/finance/SummaryCards";
 import { TransactionModal } from "@/components/finance/TransactionModal";
 import { TransactionsTable } from "@/components/finance/TransactionsTable";
 import { CategoriesManager } from "@/components/finance/CategoriesManager";
+import { ImportModal } from "@/components/finance/ImportModal";
 import { ExpenseBreakdownChart, MonthlyComparisonChart } from "@/components/finance/Charts";
 import { ThemeToggle } from "@/components/finance/ThemeToggle";
 import { FinanceProvider, useFinance } from "@/lib/finance-store";

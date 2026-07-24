@@ -26,7 +26,92 @@ export interface Transaction {
   status: TxStatus;
 }
 
+export interface Rule {
+  id: string;
+  name: string;
+  keywords: string[]; // matches if any keyword is a case-insensitive substring of description
+  categoryId: string;
+  subcategoryId?: string;
+  priority: number; // higher runs first
+  enabled: boolean;
+}
+
 export const uid = () => Math.random().toString(36).slice(2, 10);
+
+export const defaultRules: Rule[] = [
+  {
+    id: "rule-vr",
+    name: "Vale Refeição / VR",
+    keywords: ["sodexo", "vr benef", "ticket rest", "alelo refei", "vr aliment", "vr "],
+    categoryId: "cat-food",
+    subcategoryId: "sub-food-rest",
+    priority: 90,
+    enabled: true,
+  },
+  {
+    id: "rule-salary",
+    name: "Salário",
+    keywords: ["salario", "salário", "folha pagto", "pagamento salario"],
+    categoryId: "cat-salary",
+    subcategoryId: "sub-salary-clt",
+    priority: 100,
+    enabled: true,
+  },
+  {
+    id: "rule-uber",
+    name: "Apps de transporte",
+    keywords: ["uber", "99app", "99 app", "indriver", "cabify"],
+    categoryId: "cat-transport",
+    subcategoryId: "sub-tr-uber",
+    priority: 80,
+    enabled: true,
+  },
+  {
+    id: "rule-ifood",
+    name: "Delivery de comida",
+    keywords: ["ifood", "rappi", "james delivery"],
+    categoryId: "cat-food",
+    subcategoryId: "sub-food-delivery",
+    priority: 80,
+    enabled: true,
+  },
+  {
+    id: "rule-stream",
+    name: "Streaming",
+    keywords: ["netflix", "spotify", "disney", "hbo", "prime video", "youtube premium", "deezer"],
+    categoryId: "cat-leisure",
+    subcategoryId: "sub-le-stream",
+    priority: 70,
+    enabled: true,
+  },
+  {
+    id: "rule-fuel",
+    name: "Combustível",
+    keywords: ["posto", "shell", "ipiranga", "petrobras", "gasolina", "br mania"],
+    categoryId: "cat-transport",
+    subcategoryId: "sub-tr-fuel",
+    priority: 70,
+    enabled: true,
+  },
+  {
+    id: "rule-market",
+    name: "Supermercado",
+    keywords: ["mercado", "supermerc", "carrefour", "extra", "assai", "atacadao", "pao de acucar"],
+    categoryId: "cat-food",
+    subcategoryId: "sub-food-market",
+    priority: 60,
+    enabled: true,
+  },
+  {
+    id: "rule-pharma",
+    name: "Farmácia",
+    keywords: ["farmacia", "drogaria", "drogasil", "raia", "pacheco"],
+    categoryId: "cat-health",
+    subcategoryId: "sub-he-pharm",
+    priority: 60,
+    enabled: true,
+  },
+];
 
 export const defaultCategories: Category[] = [
   {

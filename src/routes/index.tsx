@@ -91,6 +91,10 @@ function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
+              <Upload className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Importar Excel</span>
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setCatOpen(true)}>
               <Settings2 className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Categorias</span>

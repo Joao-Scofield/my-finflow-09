@@ -15,6 +15,16 @@ interface State {
   transactions: Transaction[];
 }
 
+export interface ImportRow {
+  type: "income" | "expense";
+  amount: number;
+  date: string;
+  description: string;
+  categoryName: string;
+  subcategoryName?: string;
+  status: "paid" | "pending";
+}
+
 interface Ctx extends State {
   addTransaction: (t: Omit<Transaction, "id">) => void;
   updateTransaction: (id: string, t: Omit<Transaction, "id">) => void;
@@ -25,6 +35,10 @@ interface Ctx extends State {
   addSubcategory: (categoryId: string, name: string) => void;
   updateSubcategory: (categoryId: string, subId: string, name: string) => void;
   deleteSubcategory: (categoryId: string, subId: string) => void;
+  importRows: (
+    rows: ImportRow[],
+    opts?: { replace?: boolean },
+  ) => { added: number; categoriesCreated: number; subcategoriesCreated: number };
 }
 
 const FinanceContext = createContext<Ctx | null>(null);

@@ -165,6 +165,8 @@ function Dashboard() {
         ).padStart(2, "0")}`}
       />
       <CategoriesManager open={catOpen} onOpenChange={setCatOpen} />
+      <ImportModal open={importOpen} onOpenChange={setImportOpen} />
+      <Toaster richColors position="top-right" />
     </div>
   );
 }

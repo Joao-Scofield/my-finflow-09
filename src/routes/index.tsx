@@ -55,6 +55,7 @@ function Dashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [catOpen, setCatOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const { transactions } = useFinance();
 

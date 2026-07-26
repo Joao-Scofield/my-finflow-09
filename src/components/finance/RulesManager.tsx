@@ -256,8 +256,8 @@ export function RulesManager({ open, onOpenChange }: Props) {
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => {
-              const { updated } = reapplyRulesAll();
+            onClick={async () => {
+              const { updated } = await reapplyRulesAll();
               toast.success(
                 updated > 0
                   ? `Regras aplicadas: ${updated} transação(ões) atualizada(s)`

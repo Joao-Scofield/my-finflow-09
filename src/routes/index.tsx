@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
+import { Loader2, LogOut, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Toaster } from "@/components/ui/sonner";
@@ -11,11 +11,13 @@ import { TransactionsTable } from "@/components/finance/TransactionsTable";
 import { CategoriesManager } from "@/components/finance/CategoriesManager";
 import { ImportModal } from "@/components/finance/ImportModal";
 import { RulesManager } from "@/components/finance/RulesManager";
+import { Login } from "@/components/finance/Login";
 import { ExpenseBreakdownChart, MonthlyComparisonChart } from "@/components/finance/Charts";
 import { ThemeToggle } from "@/components/finance/ThemeToggle";
 import { FinanceProvider, useFinance } from "@/lib/finance-store";
 import { ThemeProvider } from "@/lib/theme";
 import { monthNamesPt, type Transaction } from "@/lib/finance-data";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,10 +44,44 @@ export const Route = createFileRoute("/")({
 function IndexPage() {
   return (
     <ThemeProvider>
-      <FinanceProvider>
-        <Dashboard />
-      </FinanceProvider>
+      <AuthShell />
     </ThemeProvider>
+  );
+}
+
+function AuthShell() {
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (mounted) setAuthenticated(Boolean(data.user));
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthenticated(Boolean(session?.user));
+    });
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (authenticated === null) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!authenticated) {
+    return <Login onLoggedIn={() => setAuthenticated(true)} />;
+  }
+
+  return (
+    <FinanceProvider>
+      <Dashboard />
+    </FinanceProvider>
   );
 }
 
@@ -59,7 +95,11 @@ function Dashboard() {
   const [importOpen, setImportOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
 
-  const { transactions } = useFinance();
+  const { transactions, profile, loading } = useFinance();
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+  }
 
   const monthTx = useMemo(
     () =>
@@ -93,6 +133,9 @@ function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <span className="hidden max-w-32 truncate text-sm text-muted-foreground md:inline">
+              {profile?.displayName}
+            </span>
             <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
               <Upload className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Importar Excel</span>
@@ -106,11 +149,20 @@ function Dashboard() {
               <span className="hidden sm:inline">Categorias</span>
             </Button>
             <ThemeToggle />
+            <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+        {loading ? (
+          <div className="grid min-h-96 place-items-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <>
         <section className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm text-muted-foreground">Período</p>
@@ -160,6 +212,8 @@ function Dashboard() {
             />
           </CardContent>
         </Card>
+          </>
+        )}
       </main>
 
       <TransactionModal

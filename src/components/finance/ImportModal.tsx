@@ -220,13 +220,13 @@ export function ImportModal({ open, onOpenChange }: Props) {
   const validCount = parsed.filter((p) => p.row).length;
   const invalidCount = parsed.length - validCount;
 
-  function doImport() {
+  async function doImport() {
     const rowsToImport = parsed.map((p) => p.row).filter((r): r is ImportRow => !!r);
     if (rowsToImport.length === 0) {
       toast.error("Nenhuma linha válida para importar.");
       return;
     }
-    const res = importRows(rowsToImport, { replace });
+    const res = await importRows(rowsToImport, { replace });
     toast.success(
       `${res.added} transações importadas${
         res.categoriesCreated ? `, ${res.categoriesCreated} categorias criadas` : ""

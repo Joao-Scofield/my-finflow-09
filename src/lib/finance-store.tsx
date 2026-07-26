@@ -1,22 +1,17 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { toast } from "sonner";
+
+import { supabase } from "@/integrations/supabase/client";
 import {
   defaultCategories,
   defaultRules,
   generateSeedTransactions,
-  uid,
   type Category,
   type Rule,
   type Subcategory,
   type Transaction,
+  type TxType,
 } from "./finance-data";
-
-const STORAGE_KEY = "finance-app:v1";
-
-interface State {
-  categories: Category[];
-  transactions: Transaction[];
-  rules: Rule[];
-}
 
 export interface ImportRow {
   type: "income" | "expense";
@@ -34,52 +29,91 @@ export interface RuleMatchResult {
   ruleId: string;
 }
 
-interface Ctx extends State {
-  addTransaction: (t: Omit<Transaction, "id">) => void;
-  updateTransaction: (id: string, t: Omit<Transaction, "id">) => void;
-  deleteTransaction: (id: string) => void;
-  addCategory: (c: Omit<Category, "id" | "subcategories">) => void;
-  updateCategory: (id: string, patch: Partial<Omit<Category, "id" | "subcategories">>) => void;
-  deleteCategory: (id: string) => void;
-  addSubcategory: (categoryId: string, name: string) => void;
-  updateSubcategory: (categoryId: string, subId: string, name: string) => void;
-  deleteSubcategory: (categoryId: string, subId: string) => void;
+interface Profile {
+  username: string;
+  displayName: string;
+}
+
+interface Ctx {
+  categories: Category[];
+  transactions: Transaction[];
+  rules: Rule[];
+  profile: Profile | null;
+  loading: boolean;
+  addTransaction: (t: Omit<Transaction, "id">) => Promise<void>;
+  updateTransaction: (id: string, t: Omit<Transaction, "id">) => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
+  addCategory: (c: Omit<Category, "id" | "subcategories">) => Promise<void>;
+  updateCategory: (id: string, patch: Partial<Omit<Category, "id" | "subcategories">>) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
+  addSubcategory: (categoryId: string, name: string) => Promise<void>;
+  updateSubcategory: (categoryId: string, subId: string, name: string) => Promise<void>;
+  deleteSubcategory: (categoryId: string, subId: string) => Promise<void>;
   importRows: (
     rows: ImportRow[],
     opts?: { replace?: boolean },
-  ) => { added: number; categoriesCreated: number; subcategoriesCreated: number };
-  addRule: (r: Omit<Rule, "id">) => void;
-  updateRule: (id: string, patch: Partial<Omit<Rule, "id">>) => void;
-  deleteRule: (id: string) => void;
+  ) => Promise<{ added: number; categoriesCreated: number; subcategoriesCreated: number }>;
+  addRule: (r: Omit<Rule, "id">) => Promise<void>;
+  updateRule: (id: string, patch: Partial<Omit<Rule, "id">>) => Promise<void>;
+  deleteRule: (id: string) => Promise<void>;
   matchRule: (description: string) => RuleMatchResult | null;
-  reapplyRulesAll: () => { updated: number };
+  reapplyRulesAll: () => Promise<{ updated: number }>;
 }
+
+type CategoryRow = {
+  color: string;
+  icon: string;
+  id: string;
+  name: string;
+  position: number;
+  type: string;
+};
+
+type SubcategoryRow = {
+  category_id: string;
+  id: string;
+  name: string;
+  position: number;
+};
+
+type TransactionRow = {
+  amount: number;
+  category_id: string;
+  description: string;
+  id: string;
+  status: string;
+  subcategory_id: string | null;
+  transaction_date: string;
+  type: string;
+};
+
+type RuleRow = {
+  category_id: string;
+  enabled: boolean;
+  id: string;
+  keywords: string[];
+  name: string;
+  priority: number;
+  subcategory_id: string | null;
+};
 
 const FinanceContext = createContext<Ctx | null>(null);
+const defaultsPromises = new Map<string, Promise<void>>();
 
-function loadInitial(): State {
-  if (typeof window === "undefined") {
-    return { categories: defaultCategories, transactions: [], rules: defaultRules };
-  }
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as Partial<State>;
-      return {
-        categories: parsed.categories ?? defaultCategories,
-        transactions: parsed.transactions ?? [],
-        rules: parsed.rules ?? defaultRules,
-      };
-    }
-  } catch {
-    // ignore
-  }
-  return {
-    categories: defaultCategories,
-    transactions: generateSeedTransactions(),
-    rules: defaultRules,
-  };
-}
+const palette = [
+  "#6366f1",
+  "#8b5cf6",
+  "#ec4899",
+  "#ef4444",
+  "#f59e0b",
+  "#10b981",
+  "#14b8a6",
+  "#06b6d4",
+  "#0ea5e9",
+  "#a855f7",
+  "#f97316",
+  "#84cc16",
+];
 
 function normalize(s: string) {
   return s
@@ -107,216 +141,479 @@ function matchRuleFor(
   return null;
 }
 
-export function FinanceProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<State>(() => ({
-    categories: defaultCategories,
-    transactions: [],
-    rules: defaultRules,
-  }));
-  const [hydrated, setHydrated] = useState(false);
+function mapCategories(rows: CategoryRow[], subRows: SubcategoryRow[]): Category[] {
+  return rows
+    .map((row) => ({
+      id: row.id,
+      name: row.name,
+      color: row.color,
+      icon: row.icon,
+      type: row.type as TxType,
+      subcategories: subRows
+        .filter((sub) => sub.category_id === row.id)
+        .sort((a, b) => a.position - b.position)
+        .map((sub) => ({ id: sub.id, name: sub.name })),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+}
 
-  useEffect(() => {
-    setState(loadInitial());
-    setHydrated(true);
+function mapTransactions(rows: TransactionRow[]): Transaction[] {
+  return rows.map((row) => ({
+    id: row.id,
+    type: row.type as TxType,
+    amount: Number(row.amount),
+    date: row.transaction_date,
+    categoryId: row.category_id,
+    subcategoryId: row.subcategory_id ?? undefined,
+    description: row.description,
+    status: row.status as "paid" | "pending",
+  }));
+}
+
+function mapRules(rows: RuleRow[]): Rule[] {
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    keywords: row.keywords,
+    categoryId: row.category_id,
+    subcategoryId: row.subcategory_id ?? undefined,
+    priority: row.priority,
+    enabled: row.enabled,
+  }));
+}
+
+async function getCurrentUserId() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) throw new Error("Sessão expirada. Entre novamente.");
+  return data.user.id;
+}
+
+export function FinanceProvider({ children }: { children: ReactNode }) {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [rules, setRules] = useState<Rule[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const userId = await getCurrentUserId();
+      await ensureDefaultsOnce(userId);
+
+      const [profileResult, categoriesResult, subcategoriesResult, transactionsResult, rulesResult] =
+        await Promise.all([
+          supabase.from("profiles").select("username, display_name").eq("user_id", userId).maybeSingle(),
+          supabase.from("finance_categories").select("id,name,color,icon,type,position").order("position"),
+          supabase.from("finance_subcategories").select("id,category_id,name,position").order("position"),
+          supabase
+            .from("finance_transactions")
+            .select("id,type,amount,transaction_date,category_id,subcategory_id,description,status")
+            .order("transaction_date", { ascending: false }),
+          supabase
+            .from("finance_rules")
+            .select("id,name,keywords,category_id,subcategory_id,priority,enabled")
+            .order("priority", { ascending: false }),
+        ]);
+
+      if (profileResult.error) throw profileResult.error;
+      if (categoriesResult.error) throw categoriesResult.error;
+      if (subcategoriesResult.error) throw subcategoriesResult.error;
+      if (transactionsResult.error) throw transactionsResult.error;
+      if (rulesResult.error) throw rulesResult.error;
+
+      setProfile(
+        profileResult.data
+          ? {
+              username: profileResult.data.username,
+              displayName: profileResult.data.display_name,
+            }
+          : null,
+      );
+      setCategories(
+        mapCategories(categoriesResult.data as CategoryRow[], subcategoriesResult.data as SubcategoryRow[]),
+      );
+      setTransactions(mapTransactions(transactionsResult.data as TransactionRow[]));
+      setRules(mapRules(rulesResult.data as RuleRow[]));
+    } catch (error) {
+      console.error(error);
+      toast.error("Não foi possível carregar seus dados financeiros.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      // ignore
+    void refresh();
+  }, [refresh]);
+
+  async function ensureDefaultsOnce(userId: string) {
+    const running = defaultsPromises.get(userId);
+    if (running) return running;
+
+    const promise = ensureDefaults(userId).finally(() => defaultsPromises.delete(userId));
+    defaultsPromises.set(userId, promise);
+    return promise;
+  }
+
+  async function ensureDefaults(userId: string) {
+    const [transactionCountResult, ruleCountResult] = await Promise.all([
+      supabase
+        .from("finance_transactions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId),
+      supabase.from("finance_rules").select("id", { count: "exact", head: true }).eq("user_id", userId),
+    ]);
+
+    if (transactionCountResult.error) throw transactionCountResult.error;
+    if (ruleCountResult.error) throw ruleCountResult.error;
+
+    const categoryIdMap = new Map<string, string>();
+    const subcategoryIdMap = new Map<string, string>();
+
+    for (const [index, category] of defaultCategories.entries()) {
+      const { data: insertedCategory, error: categoryError } = await supabase
+        .from("finance_categories")
+        .upsert(
+          {
+            user_id: userId,
+            name: category.name,
+            color: category.color,
+            icon: category.icon,
+            type: category.type,
+            position: index,
+          },
+          { onConflict: "user_id,type,name" },
+        )
+        .select("id")
+        .single();
+      if (categoryError) throw categoryError;
+      categoryIdMap.set(category.id, insertedCategory.id);
+
+      for (const [subIndex, subcategory] of category.subcategories.entries()) {
+        const { data: insertedSubcategory, error: subcategoryError } = await supabase
+          .from("finance_subcategories")
+          .upsert(
+            {
+              user_id: userId,
+              category_id: insertedCategory.id,
+              name: subcategory.name,
+              position: subIndex,
+            },
+            { onConflict: "category_id,name" },
+          )
+          .select("id")
+          .single();
+        if (subcategoryError) throw subcategoryError;
+        subcategoryIdMap.set(subcategory.id, insertedSubcategory.id);
+      }
     }
-  }, [state, hydrated]);
+
+    if ((transactionCountResult.count ?? 0) === 0) {
+      const seededTransactions = generateSeedTransactions()
+        .map((transaction) => {
+          const categoryId = categoryIdMap.get(transaction.categoryId);
+          if (!categoryId) return null;
+          return {
+            user_id: userId,
+            type: transaction.type,
+            amount: transaction.amount,
+            transaction_date: transaction.date,
+            category_id: categoryId,
+            subcategory_id: transaction.subcategoryId
+              ? subcategoryIdMap.get(transaction.subcategoryId) ?? null
+              : null,
+            description: transaction.description,
+            status: transaction.status,
+          };
+        })
+        .filter((transaction): transaction is NonNullable<typeof transaction> => transaction !== null);
+
+      if (seededTransactions.length > 0) {
+        const { error: txError } = await supabase.from("finance_transactions").insert(seededTransactions);
+        if (txError) throw txError;
+      }
+    }
+
+    if ((ruleCountResult.count ?? 0) === 0) {
+      const seededRules = defaultRules
+        .map((rule) => {
+          const categoryId = categoryIdMap.get(rule.categoryId);
+          if (!categoryId) return null;
+          return {
+            user_id: userId,
+            name: rule.name,
+            keywords: rule.keywords,
+            category_id: categoryId,
+            subcategory_id: rule.subcategoryId ? subcategoryIdMap.get(rule.subcategoryId) ?? null : null,
+            priority: rule.priority,
+            enabled: rule.enabled,
+          };
+        })
+        .filter((rule): rule is NonNullable<typeof rule> => rule !== null);
+
+      if (seededRules.length > 0) {
+        const { error: rulesError } = await supabase.from("finance_rules").insert(seededRules);
+        if (rulesError) throw rulesError;
+      }
+    }
+  }
 
   const value = useMemo<Ctx>(
     () => ({
-      ...state,
-      addTransaction: (t) => {
-        setState((s) => {
-          // Apply rules if description matches and user didn't already pick a specific subcategory
-          let tx = { ...t, id: uid() } as Transaction;
-          const match = matchRuleFor(t.description, s.rules, s.categories);
-          if (match) {
-            const matchedCat = s.categories.find((c) => c.id === match.categoryId);
-            // Only override when types are compatible
-            if (matchedCat && matchedCat.type === t.type) {
-              tx = { ...tx, categoryId: match.categoryId, subcategoryId: match.subcategoryId };
-            }
+      categories,
+      transactions,
+      rules,
+      profile,
+      loading,
+      addTransaction: async (t) => {
+        const userId = await getCurrentUserId();
+        let tx = t;
+        const match = matchRuleFor(t.description, rules, categories);
+        if (match) {
+          const matchedCat = categories.find((c) => c.id === match.categoryId);
+          if (matchedCat && matchedCat.type === t.type) {
+            tx = { ...tx, categoryId: match.categoryId, subcategoryId: match.subcategoryId };
           }
-          return { ...s, transactions: [tx, ...s.transactions] };
+        }
+        const { error } = await supabase.from("finance_transactions").insert({
+          user_id: userId,
+          type: tx.type,
+          amount: tx.amount,
+          transaction_date: tx.date,
+          category_id: tx.categoryId,
+          subcategory_id: tx.subcategoryId ?? null,
+          description: tx.description,
+          status: tx.status,
         });
+        if (error) throw error;
+        await refresh();
       },
-      updateTransaction: (id, t) =>
-        setState((s) => ({
-          ...s,
-          transactions: s.transactions.map((tx) => (tx.id === id ? { ...t, id } : tx)),
-        })),
-      deleteTransaction: (id) =>
-        setState((s) => ({ ...s, transactions: s.transactions.filter((tx) => tx.id !== id) })),
-      addCategory: (c) =>
-        setState((s) => ({
-          ...s,
-          categories: [...s.categories, { ...c, id: uid(), subcategories: [] }],
-        })),
-      updateCategory: (id, patch) =>
-        setState((s) => ({
-          ...s,
-          categories: s.categories.map((c) => (c.id === id ? { ...c, ...patch } : c)),
-        })),
-      deleteCategory: (id) =>
-        setState((s) => ({
-          ...s,
-          categories: s.categories.filter((c) => c.id !== id),
-          transactions: s.transactions.filter((t) => t.categoryId !== id),
-          rules: s.rules.filter((r) => r.categoryId !== id),
-        })),
-      addSubcategory: (categoryId, name) =>
-        setState((s) => ({
-          ...s,
-          categories: s.categories.map((c) =>
-            c.id === categoryId
-              ? { ...c, subcategories: [...c.subcategories, { id: uid(), name }] }
-              : c,
-          ),
-        })),
-      updateSubcategory: (categoryId, subId, name) =>
-        setState((s) => ({
-          ...s,
-          categories: s.categories.map((c) =>
-            c.id === categoryId
-              ? {
-                  ...c,
-                  subcategories: c.subcategories.map((sc) =>
-                    sc.id === subId ? { ...sc, name } : sc,
-                  ),
-                }
-              : c,
-          ),
-        })),
-      deleteSubcategory: (categoryId, subId) =>
-        setState((s) => ({
-          ...s,
-          categories: s.categories.map((c) =>
-            c.id === categoryId
-              ? { ...c, subcategories: c.subcategories.filter((sc) => sc.id !== subId) }
-              : c,
-          ),
-          transactions: s.transactions.map((t) =>
-            t.categoryId === categoryId && t.subcategoryId === subId
-              ? { ...t, subcategoryId: undefined }
-              : t,
-          ),
-          rules: s.rules.map((r) =>
-            r.categoryId === categoryId && r.subcategoryId === subId
-              ? { ...r, subcategoryId: undefined }
-              : r,
-          ),
-        })),
-      importRows: (rows, opts) => {
+      updateTransaction: async (id, t) => {
+        const { error } = await supabase
+          .from("finance_transactions")
+          .update({
+            type: t.type,
+            amount: t.amount,
+            transaction_date: t.date,
+            category_id: t.categoryId,
+            subcategory_id: t.subcategoryId ?? null,
+            description: t.description,
+            status: t.status,
+          })
+          .eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      deleteTransaction: async (id) => {
+        const { error } = await supabase.from("finance_transactions").delete().eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      addCategory: async (c) => {
+        const userId = await getCurrentUserId();
+        const { error } = await supabase.from("finance_categories").insert({
+          user_id: userId,
+          name: c.name,
+          color: c.color,
+          icon: c.icon,
+          type: c.type,
+          position: categories.length,
+        });
+        if (error) throw error;
+        await refresh();
+      },
+      updateCategory: async (id, patch) => {
+        const { error } = await supabase.from("finance_categories").update(patch).eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      deleteCategory: async (id) => {
+        const { error } = await supabase.from("finance_categories").delete().eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      addSubcategory: async (categoryId, name) => {
+        const userId = await getCurrentUserId();
+        const category = categories.find((c) => c.id === categoryId);
+        const { error } = await supabase.from("finance_subcategories").insert({
+          user_id: userId,
+          category_id: categoryId,
+          name,
+          position: category?.subcategories.length ?? 0,
+        });
+        if (error) throw error;
+        await refresh();
+      },
+      updateSubcategory: async (_categoryId, subId, name) => {
+        const { error } = await supabase.from("finance_subcategories").update({ name }).eq("id", subId);
+        if (error) throw error;
+        await refresh();
+      },
+      deleteSubcategory: async (_categoryId, subId) => {
+        const { error } = await supabase.from("finance_subcategories").delete().eq("id", subId);
+        if (error) throw error;
+        await refresh();
+      },
+      importRows: async (rows, opts) => {
+        const userId = await getCurrentUserId();
         const stats = { added: 0, categoriesCreated: 0, subcategoriesCreated: 0 };
         const norm = (s: string) => s.trim().toLowerCase();
-        const palette = [
-          "#6366f1","#8b5cf6","#ec4899","#ef4444","#f59e0b",
-          "#10b981","#14b8a6","#06b6d4","#0ea5e9","#a855f7","#f97316","#84cc16",
-        ];
-        setState((s) => {
-          const categories = s.categories.map((c) => ({
-            ...c,
-            subcategories: [...c.subcategories],
-          }));
-          const findCat = (name: string, type: "income" | "expense") =>
-            categories.find((c) => norm(c.name) === norm(name) && c.type === type);
-          const newTx: Transaction[] = [];
-          for (const r of rows) {
-            let cat = findCat(r.categoryName, r.type);
-            let subId: string | undefined;
+        const workingCategories = categories.map((c) => ({ ...c, subcategories: [...c.subcategories] }));
+        const newTransactions: Array<{
+          user_id: string;
+          type: "income" | "expense";
+          amount: number;
+          transaction_date: string;
+          category_id: string;
+          subcategory_id: string | null;
+          description: string;
+          status: "paid" | "pending";
+        }> = [];
 
-            // If import didn't specify a category, try rules first
-            const usedFallback = !r.categoryName || !r.categoryName.trim();
-            if (usedFallback) {
-              const match = matchRuleFor(r.description, s.rules, categories);
-              if (match) {
-                const mc = categories.find((c) => c.id === match.categoryId);
-                if (mc && mc.type === r.type) {
-                  cat = mc;
-                  subId = match.subcategoryId;
-                }
-              }
-            }
+        if (opts?.replace) {
+          const { error } = await supabase.from("finance_transactions").delete().eq("user_id", userId);
+          if (error) throw error;
+        }
 
-            if (!cat) {
-              cat = {
-                id: uid(),
-                name: r.categoryName.trim() || (r.type === "income" ? "Outras Receitas" : "Outras Despesas"),
-                color: palette[categories.length % palette.length],
+        for (const row of rows) {
+          let cat = workingCategories.find(
+            (c) => norm(c.name) === norm(row.categoryName) && c.type === row.type,
+          );
+          let subId: string | undefined;
+
+          if (!cat) {
+            const { data, error } = await supabase
+              .from("finance_categories")
+              .insert({
+                user_id: userId,
+                name:
+                  row.categoryName.trim() ||
+                  (row.type === "income" ? "Outras Receitas" : "Outras Despesas"),
+                color: palette[workingCategories.length % palette.length],
                 icon: "Tag",
-                type: r.type,
-                subcategories: [],
-              };
-              categories.push(cat);
-              stats.categoriesCreated++;
-            }
-            if (!subId && r.subcategoryName && r.subcategoryName.trim()) {
-              let sub = cat.subcategories.find(
-                (sc) => norm(sc.name) === norm(r.subcategoryName!),
-              );
-              if (!sub) {
-                sub = { id: uid(), name: r.subcategoryName.trim() };
-                cat.subcategories.push(sub);
-                stats.subcategoriesCreated++;
-              }
-              subId = sub.id;
-            }
-            newTx.push({
-              id: uid(),
-              type: r.type,
-              amount: r.amount,
-              date: r.date,
-              categoryId: cat.id,
-              subcategoryId: subId,
-              description: r.description,
-              status: r.status,
-            });
-            stats.added++;
+                type: row.type,
+                position: workingCategories.length,
+              })
+              .select("id,name,color,icon,type")
+              .single();
+            if (error) throw error;
+            cat = { ...data, type: data.type as TxType, subcategories: [] };
+            workingCategories.push(cat);
+            stats.categoriesCreated++;
           }
-          const transactions = opts?.replace ? newTx : [...newTx, ...s.transactions];
-          return { ...s, categories, transactions };
-        });
+
+          if (row.subcategoryName && row.subcategoryName.trim()) {
+            let sub = cat.subcategories.find((sc) => norm(sc.name) === norm(row.subcategoryName ?? ""));
+            if (!sub) {
+              const { data, error } = await supabase
+                .from("finance_subcategories")
+                .insert({
+                  user_id: userId,
+                  category_id: cat.id,
+                  name: row.subcategoryName.trim(),
+                  position: cat.subcategories.length,
+                })
+                .select("id,name")
+                .single();
+              if (error) throw error;
+              sub = data;
+              cat.subcategories.push(sub);
+              stats.subcategoriesCreated++;
+            }
+            subId = sub.id;
+          } else {
+            const match = matchRuleFor(row.description, rules, workingCategories);
+            if (match) {
+              const matchedCat = workingCategories.find((c) => c.id === match.categoryId);
+              if (matchedCat && matchedCat.type === row.type) {
+                cat = matchedCat;
+                subId = match.subcategoryId;
+              }
+            }
+          }
+
+          newTransactions.push({
+            user_id: userId,
+            type: row.type,
+            amount: row.amount,
+            transaction_date: row.date,
+            category_id: cat.id,
+            subcategory_id: subId ?? null,
+            description: row.description,
+            status: row.status,
+          });
+          stats.added++;
+        }
+
+        if (newTransactions.length > 0) {
+          const { error } = await supabase.from("finance_transactions").insert(newTransactions);
+          if (error) throw error;
+        }
+        await refresh();
         return stats;
       },
-      addRule: (r) =>
-        setState((s) => ({ ...s, rules: [...s.rules, { ...r, id: uid() }] })),
-      updateRule: (id, patch) =>
-        setState((s) => ({
-          ...s,
-          rules: s.rules.map((r) => (r.id === id ? { ...r, ...patch } : r)),
-        })),
-      deleteRule: (id) =>
-        setState((s) => ({ ...s, rules: s.rules.filter((r) => r.id !== id) })),
-      matchRule: (description) => matchRuleFor(description, state.rules, state.categories),
-      reapplyRulesAll: () => {
-        let updated = 0;
-        setState((s) => {
-          const transactions = s.transactions.map((t) => {
-            const match = matchRuleFor(t.description, s.rules, s.categories);
-            if (!match) return t;
-            const cat = s.categories.find((c) => c.id === match.categoryId);
-            if (!cat || cat.type !== t.type) return t;
-            if (
-              t.categoryId === match.categoryId &&
-              t.subcategoryId === match.subcategoryId
-            )
-              return t;
-            updated++;
-            return { ...t, categoryId: match.categoryId, subcategoryId: match.subcategoryId };
-          });
-          return { ...s, transactions };
+      addRule: async (r) => {
+        const userId = await getCurrentUserId();
+        const { error } = await supabase.from("finance_rules").insert({
+          user_id: userId,
+          name: r.name,
+          keywords: r.keywords,
+          category_id: r.categoryId,
+          subcategory_id: r.subcategoryId ?? null,
+          priority: r.priority,
+          enabled: r.enabled,
         });
+        if (error) throw error;
+        await refresh();
+      },
+      updateRule: async (id, patch) => {
+        const payload = {
+          ...(patch.name !== undefined ? { name: patch.name } : {}),
+          ...(patch.keywords !== undefined ? { keywords: patch.keywords } : {}),
+          ...(patch.categoryId !== undefined ? { category_id: patch.categoryId } : {}),
+          ...(patch.subcategoryId !== undefined ? { subcategory_id: patch.subcategoryId ?? null } : {}),
+          ...(patch.priority !== undefined ? { priority: patch.priority } : {}),
+          ...(patch.enabled !== undefined ? { enabled: patch.enabled } : {}),
+        };
+        const { error } = await supabase.from("finance_rules").update(payload).eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      deleteRule: async (id) => {
+        const { error } = await supabase.from("finance_rules").delete().eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      matchRule: (description) => matchRuleFor(description, rules, categories),
+      reapplyRulesAll: async () => {
+        let updated = 0;
+        for (const transaction of transactions) {
+          const match = matchRuleFor(transaction.description, rules, categories);
+          if (!match) continue;
+          const cat = categories.find((c) => c.id === match.categoryId);
+          if (!cat || cat.type !== transaction.type) continue;
+          if (
+            transaction.categoryId === match.categoryId &&
+            transaction.subcategoryId === match.subcategoryId
+          ) {
+            continue;
+          }
+          const { error } = await supabase
+            .from("finance_transactions")
+            .update({
+              category_id: match.categoryId,
+              subcategory_id: match.subcategoryId ?? null,
+            })
+            .eq("id", transaction.id);
+          if (error) throw error;
+          updated++;
+        }
+        if (updated > 0) await refresh();
         return { updated };
       },
     }),
-    [state],
+    [categories, loading, profile, refresh, rules, transactions],
   );
 
   return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;

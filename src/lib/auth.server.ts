@@ -74,7 +74,7 @@ function createPublicAuthClient() {
   });
 }
 
-async function ensureDemoUser(username: DemoUsername, password: string) {
+async function ensureDemoUser(username: DemoUsername, authPassword: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const demoUser = DEMO_USERS[username];
   const metadata = { username, display_name: demoUser.displayName };
@@ -90,7 +90,7 @@ async function ensureDemoUser(username: DemoUsername, password: string) {
 
   if (userId) {
     const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-      password,
+      password: authPassword,
       email_confirm: true,
       user_metadata: metadata,
     });
@@ -100,7 +100,7 @@ async function ensureDemoUser(username: DemoUsername, password: string) {
 
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email: demoUser.email,
-    password,
+    password: authPassword,
     email_confirm: true,
     user_metadata: metadata,
   });
@@ -131,19 +131,21 @@ export async function loginWithDemoCredentials(input: {
   const username = input.username.trim().toLowerCase();
   const password = input.password;
   const expectedPassword = process.env.FINLYN_DEMO_PASSWORD;
+  const authPassword = process.env.FINLYN_LOGIN_SECRET;
 
   if (!expectedPassword) throw new Error("Senha de teste não configurada no backend.");
+  if (!authPassword) throw new Error("Senha interna de autenticação não configurada no backend.");
   if (!isDemoUsername(username) || !safeEquals(password, expectedPassword)) {
     return { ok: false, message: "Usuário ou senha inválidos." };
   }
 
-  const userId = await ensureDemoUser(username, expectedPassword);
+  const userId = await ensureDemoUser(username, authPassword);
   await upsertProfile(userId, username);
 
   const authClient = createPublicAuthClient();
   const { data, error } = await authClient.auth.signInWithPassword({
     email: DEMO_USERS[username].email,
-    password: expectedPassword,
+    password: authPassword,
   });
 
   if (error || !data.session) {

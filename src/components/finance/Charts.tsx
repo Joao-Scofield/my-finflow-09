@@ -25,10 +25,47 @@ interface Props {
 }
 
 export function ExpenseBreakdownChart({ monthTransactions }: { monthTransactions: Transaction[] }) {
+  return (
+    <BreakdownChart
+      monthTransactions={monthTransactions}
+      type="expense"
+      title="Despesas por categoria"
+      emptyLabel="Sem despesas neste período."
+      drillPrefix="Despesas"
+    />
+  );
+}
+
+export function IncomeBreakdownChart({ monthTransactions }: { monthTransactions: Transaction[] }) {
+  return (
+    <BreakdownChart
+      monthTransactions={monthTransactions}
+      type="income"
+      title="Receitas por categoria"
+      emptyLabel="Sem receitas neste período."
+      drillPrefix="Receitas"
+    />
+  );
+}
+
+function BreakdownChart({
+  monthTransactions,
+  type,
+  title,
+  emptyLabel,
+  drillPrefix,
+}: {
+  monthTransactions: Transaction[];
+  type: "income" | "expense";
+  title: string;
+  emptyLabel: string;
+  drillPrefix: string;
+}) {
   const { categories } = useFinance();
   const [drillCategoryId, setDrillCategoryId] = useState<string | null>(null);
 
-  const expenses = monthTransactions.filter((t) => t.type === "expense");
+  const expenses = monthTransactions.filter((t) => t.type === type);
+
 
   const catData = useMemo(() => {
     const map = new Map<string, number>();
@@ -70,8 +107,9 @@ export function ExpenseBreakdownChart({ monthTransactions }: { monthTransactions
     <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
         <CardTitle className="text-base">
-          {drillCat ? `Despesas: ${drillCat.name}` : "Despesas por categoria"}
+          {drillCat ? `${drillPrefix}: ${drillCat.name}` : title}
         </CardTitle>
+
         {drillCategoryId && (
           <Button variant="ghost" size="sm" onClick={() => setDrillCategoryId(null)}>
             <ArrowLeft className="mr-1 h-4 w-4" />
@@ -82,7 +120,8 @@ export function ExpenseBreakdownChart({ monthTransactions }: { monthTransactions
       <CardContent>
         {active.length === 0 ? (
           <div className="grid h-[280px] place-items-center text-sm text-muted-foreground">
-            Sem despesas neste período.
+            {emptyLabel}
+
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-[1fr_1fr] md:items-center">

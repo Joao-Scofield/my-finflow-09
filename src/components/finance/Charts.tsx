@@ -25,10 +25,47 @@ interface Props {
 }
 
 export function ExpenseBreakdownChart({ monthTransactions }: { monthTransactions: Transaction[] }) {
+  return (
+    <BreakdownChart
+      monthTransactions={monthTransactions}
+      type="expense"
+      title="Despesas por categoria"
+      emptyLabel="Sem despesas neste período."
+      drillPrefix="Despesas"
+    />
+  );
+}
+
+export function IncomeBreakdownChart({ monthTransactions }: { monthTransactions: Transaction[] }) {
+  return (
+    <BreakdownChart
+      monthTransactions={monthTransactions}
+      type="income"
+      title="Receitas por categoria"
+      emptyLabel="Sem receitas neste período."
+      drillPrefix="Receitas"
+    />
+  );
+}
+
+function BreakdownChart({
+  monthTransactions,
+  type,
+  title,
+  emptyLabel,
+  drillPrefix,
+}: {
+  monthTransactions: Transaction[];
+  type: "income" | "expense";
+  title: string;
+  emptyLabel: string;
+  drillPrefix: string;
+}) {
   const { categories } = useFinance();
   const [drillCategoryId, setDrillCategoryId] = useState<string | null>(null);
 
-  const expenses = monthTransactions.filter((t) => t.type === "expense");
+  const expenses = monthTransactions.filter((t) => t.type === type);
+
 
   const catData = useMemo(() => {
     const map = new Map<string, number>();

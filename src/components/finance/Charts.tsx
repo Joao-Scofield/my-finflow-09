@@ -107,8 +107,9 @@ function BreakdownChart({
     <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
         <CardTitle className="text-base">
-          {drillCat ? `Despesas: ${drillCat.name}` : "Despesas por categoria"}
+          {drillCat ? `${drillPrefix}: ${drillCat.name}` : title}
         </CardTitle>
+
         {drillCategoryId && (
           <Button variant="ghost" size="sm" onClick={() => setDrillCategoryId(null)}>
             <ArrowLeft className="mr-1 h-4 w-4" />

@@ -12,7 +12,12 @@ import { CategoriesManager } from "@/components/finance/CategoriesManager";
 import { ImportModal } from "@/components/finance/ImportModal";
 import { RulesManager } from "@/components/finance/RulesManager";
 import { Login } from "@/components/finance/Login";
-import { ExpenseBreakdownChart, MonthlyComparisonChart } from "@/components/finance/Charts";
+import {
+  ExpenseBreakdownChart,
+  IncomeBreakdownChart,
+  MonthlyComparisonChart,
+} from "@/components/finance/Charts";
+
 import { ThemeToggle } from "@/components/finance/ThemeToggle";
 import { FinanceProvider, useFinance } from "@/lib/finance-store";
 import { ThemeProvider } from "@/lib/theme";

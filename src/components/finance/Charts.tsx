@@ -120,7 +120,8 @@ function BreakdownChart({
       <CardContent>
         {active.length === 0 ? (
           <div className="grid h-[280px] place-items-center text-sm text-muted-foreground">
-            Sem despesas neste período.
+            {emptyLabel}
+
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-[1fr_1fr] md:items-center">

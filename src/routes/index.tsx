@@ -200,8 +200,11 @@ function Dashboard() {
 
         <div className="grid gap-4 lg:grid-cols-2">
           <ExpenseBreakdownChart monthTransactions={monthTx} />
-          <MonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
+          <IncomeBreakdownChart monthTransactions={monthTx} />
         </div>
+
+        <MonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
+
 
         <Card>
           <CardHeader>

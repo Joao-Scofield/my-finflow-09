@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      finance_accounts: {
+        Row: {
+          balance: number
+          color: string
+          created_at: string
+          id: string
+          kind: string
+          name: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          color?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          name: string
+          position?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          color?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       finance_categories: {
         Row: {
           color: string
@@ -149,6 +185,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          payment_method: string
           status: string
           subcategory_id: string | null
           transaction_date: string
@@ -162,6 +199,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          payment_method?: string
           status: string
           subcategory_id?: string | null
           transaction_date: string
@@ -175,6 +213,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          payment_method?: string
           status?: string
           subcategory_id?: string | null
           transaction_date?: string

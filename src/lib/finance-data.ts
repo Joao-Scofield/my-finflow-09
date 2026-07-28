@@ -15,6 +15,66 @@ export interface Category {
   subcategories: Subcategory[];
 }
 
+export type PaymentMethod =
+  | "pix"
+  | "credito"
+  | "debito"
+  | "dinheiro"
+  | "vr"
+  | "va"
+  | "boleto"
+  | "transferencia"
+  | "investimento"
+  | "outro";
+
+export const paymentMethods: { value: PaymentMethod; label: string; color: string }[] = [
+  { value: "pix", label: "PIX", color: "#10b981" },
+  { value: "credito", label: "Crédito", color: "#6366f1" },
+  { value: "debito", label: "Débito", color: "#0ea5e9" },
+  { value: "dinheiro", label: "Dinheiro", color: "#f59e0b" },
+  { value: "vr", label: "VR (Refeição)", color: "#ec4899" },
+  { value: "va", label: "VA (Alimentação)", color: "#a855f7" },
+  { value: "boleto", label: "Boleto", color: "#64748b" },
+  { value: "transferencia", label: "Transferência", color: "#14b8a6" },
+  { value: "investimento", label: "Investimento", color: "#8b5cf6" },
+  { value: "outro", label: "Outro", color: "#94a3b8" },
+];
+
+export const paymentMethodLabel = (m: string) =>
+  paymentMethods.find((p) => p.value === m)?.label ?? "Outro";
+export const paymentMethodColor = (m: string) =>
+  paymentMethods.find((p) => p.value === m)?.color ?? "#94a3b8";
+
+export type AccountKind =
+  | "dinheiro"
+  | "conta_corrente"
+  | "poupanca"
+  | "investimento"
+  | "carteira_digital"
+  | "vr"
+  | "outro";
+
+export const accountKinds: { value: AccountKind; label: string }[] = [
+  { value: "dinheiro", label: "Dinheiro físico" },
+  { value: "conta_corrente", label: "Conta corrente" },
+  { value: "poupanca", label: "Poupança" },
+  { value: "investimento", label: "Investimento" },
+  { value: "carteira_digital", label: "Carteira digital" },
+  { value: "vr", label: "VR / VA" },
+  { value: "outro", label: "Outro" },
+];
+
+export const accountKindLabel = (k: string) =>
+  accountKinds.find((a) => a.value === k)?.label ?? "Outro";
+
+export interface Account {
+  id: string;
+  name: string;
+  kind: AccountKind;
+  balance: number;
+  color: string;
+}
+
 export interface Transaction {
   id: string;
   type: TxType;
@@ -24,6 +84,7 @@ export interface Transaction {
   subcategoryId?: string;
   description: string;
   status: TxStatus;
+  paymentMethod: PaymentMethod;
 }
 
 export interface Rule {
@@ -220,197 +281,6 @@ export const defaultCategories: Category[] = [
     ],
   },
 ];
-
-function d(year: number, month: number, day: number) {
-  const m = String(month).padStart(2, "0");
-  const dd = String(day).padStart(2, "0");
-  return `${year}-${m}-${dd}`;
-}
-
-function seedForMonth(year: number, month: number): Transaction[] {
-  return [
-    {
-      id: uid(),
-      type: "income",
-      amount: 8500,
-      date: d(year, month, 5),
-      categoryId: "cat-salary",
-      subcategoryId: "sub-salary-clt",
-      description: "Salário mensal",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "income",
-      amount: 1800,
-      date: d(year, month, 12),
-      categoryId: "cat-freelance",
-      subcategoryId: "sub-free-dev",
-      description: "Projeto landing page",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "income",
-      amount: 420,
-      date: d(year, month, 20),
-      categoryId: "cat-invest",
-      subcategoryId: "sub-inv-div",
-      description: "Dividendos ITSA4",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 2400,
-      date: d(year, month, 10),
-      categoryId: "cat-housing",
-      subcategoryId: "sub-house-rent",
-      description: "Aluguel apartamento",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 180,
-      date: d(year, month, 15),
-      categoryId: "cat-housing",
-      subcategoryId: "sub-house-energy",
-      description: "Conta de energia",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 129,
-      date: d(year, month, 8),
-      categoryId: "cat-housing",
-      subcategoryId: "sub-house-internet",
-      description: "Fibra 500MB",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 780,
-      date: d(year, month, 7),
-      categoryId: "cat-food",
-      subcategoryId: "sub-food-market",
-      description: "Compra mensal",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 220,
-      date: d(year, month, 14),
-      categoryId: "cat-food",
-      subcategoryId: "sub-food-rest",
-      description: "Jantar aniversário",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 96,
-      date: d(year, month, 18),
-      categoryId: "cat-food",
-      subcategoryId: "sub-food-delivery",
-      description: "iFood",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 340,
-      date: d(year, month, 9),
-      categoryId: "cat-transport",
-      subcategoryId: "sub-tr-fuel",
-      description: "Gasolina",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 145,
-      date: d(year, month, 22),
-      categoryId: "cat-transport",
-      subcategoryId: "sub-tr-uber",
-      description: "Corridas do mês",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 55,
-      date: d(year, month, 3),
-      categoryId: "cat-leisure",
-      subcategoryId: "sub-le-stream",
-      description: "Netflix + Spotify",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 180,
-      date: d(year, month, 21),
-      categoryId: "cat-leisure",
-      subcategoryId: "sub-le-cinema",
-      description: "Cinema + jantar",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 520,
-      date: d(year, month, 5),
-      categoryId: "cat-health",
-      subcategoryId: "sub-he-plan",
-      description: "Plano de saúde",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 120,
-      date: d(year, month, 16),
-      categoryId: "cat-health",
-      subcategoryId: "sub-he-gym",
-      description: "Academia",
-      status: "paid",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 89,
-      date: d(year, month, 25),
-      categoryId: "cat-health",
-      subcategoryId: "sub-he-pharm",
-      description: "Farmácia",
-      status: "pending",
-    },
-    {
-      id: uid(),
-      type: "expense",
-      amount: 249,
-      date: d(year, month, 11),
-      categoryId: "cat-edu",
-      subcategoryId: "sub-ed-course",
-      description: "Curso online",
-      status: "pending",
-    },
-  ];
-}
-
-export function generateSeedTransactions(): Transaction[] {
-  const now = new Date();
-  const tx: Transaction[] = [];
-  for (let i = 5; i >= 0; i--) {
-    const dt = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    tx.push(...seedForMonth(dt.getFullYear(), dt.getMonth() + 1));
-  }
-  return tx;
-}
 
 export const formatBRL = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

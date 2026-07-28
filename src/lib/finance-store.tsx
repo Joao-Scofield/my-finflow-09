@@ -5,10 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   defaultCategories,
   defaultRules,
-  generateSeedTransactions,
+  type Account,
+  type AccountKind,
   type Category,
   type Rule,
   type Subcategory,
+  type PaymentMethod,
   type Transaction,
   type TxType,
 } from "./finance-data";
@@ -21,6 +23,7 @@ export interface ImportRow {
   categoryName: string;
   subcategoryName?: string;
   status: "paid" | "pending";
+  paymentMethod?: PaymentMethod;
 }
 
 export interface RuleMatchResult {
@@ -38,6 +41,7 @@ interface Ctx {
   categories: Category[];
   transactions: Transaction[];
   rules: Rule[];
+  accounts: Account[];
   profile: Profile | null;
   loading: boolean;
   addTransaction: (t: Omit<Transaction, "id">) => Promise<void>;
@@ -53,6 +57,9 @@ interface Ctx {
     rows: ImportRow[],
     opts?: { replace?: boolean },
   ) => Promise<{ added: number; categoriesCreated: number; subcategoriesCreated: number }>;
+  addAccount: (a: Omit<Account, "id">) => Promise<void>;
+  updateAccount: (id: string, patch: Partial<Omit<Account, "id">>) => Promise<void>;
+  deleteAccount: (id: string) => Promise<void>;
   addRule: (r: Omit<Rule, "id">) => Promise<void>;
   updateRule: (id: string, patch: Partial<Omit<Rule, "id">>) => Promise<void>;
   deleteRule: (id: string) => Promise<void>;
@@ -85,6 +92,16 @@ type TransactionRow = {
   subcategory_id: string | null;
   transaction_date: string;
   type: string;
+  payment_method: string;
+};
+
+type AccountRow = {
+  id: string;
+  name: string;
+  kind: string;
+  balance: number;
+  color: string;
+  position: number;
 };
 
 type RuleRow = {
@@ -167,6 +184,17 @@ function mapTransactions(rows: TransactionRow[]): Transaction[] {
     subcategoryId: row.subcategory_id ?? undefined,
     description: row.description,
     status: row.status as "paid" | "pending",
+    paymentMethod: (row.payment_method ?? "outro") as PaymentMethod,
+  }));
+}
+
+function mapAccounts(rows: AccountRow[]): Account[] {
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    kind: row.kind as AccountKind,
+    balance: Number(row.balance),
+    color: row.color,
   }));
 }
 
@@ -192,6 +220,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [rules, setRules] = useState<Rule[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -201,19 +230,32 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       const userId = await getCurrentUserId();
       await ensureDefaultsOnce(userId);
 
-      const [profileResult, categoriesResult, subcategoriesResult, transactionsResult, rulesResult] =
+      const [
+        profileResult,
+        categoriesResult,
+        subcategoriesResult,
+        transactionsResult,
+        rulesResult,
+        accountsResult,
+      ] =
         await Promise.all([
           supabase.from("profiles").select("username, display_name").eq("user_id", userId).maybeSingle(),
           supabase.from("finance_categories").select("id,name,color,icon,type,position").order("position"),
           supabase.from("finance_subcategories").select("id,category_id,name,position").order("position"),
           supabase
             .from("finance_transactions")
-            .select("id,type,amount,transaction_date,category_id,subcategory_id,description,status")
+            .select(
+              "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method",
+            )
             .order("transaction_date", { ascending: false }),
           supabase
             .from("finance_rules")
             .select("id,name,keywords,category_id,subcategory_id,priority,enabled")
             .order("priority", { ascending: false }),
+          supabase
+            .from("finance_accounts")
+            .select("id,name,kind,balance,color,position")
+            .order("position"),
         ]);
 
       if (profileResult.error) throw profileResult.error;
@@ -221,6 +263,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       if (subcategoriesResult.error) throw subcategoriesResult.error;
       if (transactionsResult.error) throw transactionsResult.error;
       if (rulesResult.error) throw rulesResult.error;
+      if (accountsResult.error) throw accountsResult.error;
 
       setProfile(
         profileResult.data
@@ -235,6 +278,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       );
       setTransactions(mapTransactions(transactionsResult.data as TransactionRow[]));
       setRules(mapRules(rulesResult.data as RuleRow[]));
+      setAccounts(mapAccounts(accountsResult.data as AccountRow[]));
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível carregar seus dados financeiros.");
@@ -257,15 +301,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }
 
   async function ensureDefaults(userId: string) {
-    const [transactionCountResult, ruleCountResult] = await Promise.all([
-      supabase
-        .from("finance_transactions")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", userId),
-      supabase.from("finance_rules").select("id", { count: "exact", head: true }).eq("user_id", userId),
-    ]);
+    const ruleCountResult = await supabase
+      .from("finance_rules")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId);
 
-    if (transactionCountResult.error) throw transactionCountResult.error;
     if (ruleCountResult.error) throw ruleCountResult.error;
 
     const categoryIdMap = new Map<string, string>();
@@ -309,32 +349,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    if ((transactionCountResult.count ?? 0) === 0) {
-      const seededTransactions = generateSeedTransactions()
-        .map((transaction) => {
-          const categoryId = categoryIdMap.get(transaction.categoryId);
-          if (!categoryId) return null;
-          return {
-            user_id: userId,
-            type: transaction.type,
-            amount: transaction.amount,
-            transaction_date: transaction.date,
-            category_id: categoryId,
-            subcategory_id: transaction.subcategoryId
-              ? subcategoryIdMap.get(transaction.subcategoryId) ?? null
-              : null,
-            description: transaction.description,
-            status: transaction.status,
-          };
-        })
-        .filter((transaction): transaction is NonNullable<typeof transaction> => transaction !== null);
-
-      if (seededTransactions.length > 0) {
-        const { error: txError } = await supabase.from("finance_transactions").insert(seededTransactions);
-        if (txError) throw txError;
-      }
-    }
-
     if ((ruleCountResult.count ?? 0) === 0) {
       const seededRules = defaultRules
         .map((rule) => {
@@ -364,6 +378,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       categories,
       transactions,
       rules,
+      accounts,
       profile,
       loading,
       addTransaction: async (t) => {
@@ -385,6 +400,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           subcategory_id: tx.subcategoryId ?? null,
           description: tx.description,
           status: tx.status,
+          payment_method: tx.paymentMethod,
         });
         if (error) throw error;
         await refresh();
@@ -400,6 +416,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             subcategory_id: t.subcategoryId ?? null,
             description: t.description,
             status: t.status,
+            payment_method: t.paymentMethod,
           })
           .eq("id", id);
         if (error) throw error;
@@ -469,6 +486,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           subcategory_id: string | null;
           description: string;
           status: "paid" | "pending";
+          payment_method: string;
         }> = [];
 
         if (opts?.replace) {
@@ -542,6 +560,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             subcategory_id: subId ?? null,
             description: row.description,
             status: row.status,
+            payment_method: row.paymentMethod ?? "outro",
           });
           stats.added++;
         }
@@ -552,6 +571,29 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         }
         await refresh();
         return stats;
+      },
+      addAccount: async (a) => {
+        const userId = await getCurrentUserId();
+        const { error } = await supabase.from("finance_accounts").insert({
+          user_id: userId,
+          name: a.name,
+          kind: a.kind,
+          balance: a.balance,
+          color: a.color,
+          position: accounts.length,
+        });
+        if (error) throw error;
+        await refresh();
+      },
+      updateAccount: async (id, patch) => {
+        const { error } = await supabase.from("finance_accounts").update(patch).eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      deleteAccount: async (id) => {
+        const { error } = await supabase.from("finance_accounts").delete().eq("id", id);
+        if (error) throw error;
+        await refresh();
       },
       addRule: async (r) => {
         const userId = await getCurrentUserId();
@@ -613,7 +655,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         return { updated };
       },
     }),
-    [categories, loading, profile, refresh, rules, transactions],
+    [accounts, categories, loading, profile, refresh, rules, transactions],
   );
 
   return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;
@@ -625,4 +667,4 @@ export function useFinance() {
   return ctx;
 }
 
-export type { Category, Rule, Subcategory, Transaction };
+export type { Account, Category, Rule, Subcategory, Transaction };

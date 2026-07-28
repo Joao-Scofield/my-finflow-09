@@ -13,7 +13,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useFinance } from "@/lib/finance-store";
-import { formatBRL, type Transaction } from "@/lib/finance-data";
+import {
+  formatBRL,
+  paymentMethodColor,
+  paymentMethodLabel,
+  paymentMethods,
+  type Transaction,
+} from "@/lib/finance-data";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -27,6 +33,7 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [catFilter, setCatFilter] = useState<string>("all");
   const [subFilter, setSubFilter] = useState<string>("all");
+  const [methodFilter, setMethodFilter] = useState<string>("all");
 
   const catMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
 
@@ -41,15 +48,16 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
         if (typeFilter !== "all" && t.type !== typeFilter) return false;
         if (catFilter !== "all" && t.categoryId !== catFilter) return false;
         if (subFilter !== "all" && t.subcategoryId !== subFilter) return false;
+        if (methodFilter !== "all" && t.paymentMethod !== methodFilter) return false;
         if (q && !t.description.toLowerCase().includes(q.toLowerCase())) return false;
         return true;
       })
       .sort((a, b) => (a.date < b.date ? 1 : -1));
-  }, [transactions, typeFilter, catFilter, subFilter, q]);
+  }, [transactions, typeFilter, catFilter, subFilter, methodFilter, q]);
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_auto_auto_auto]">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_auto_auto_auto_auto]">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -105,6 +113,19 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
             ))}
           </SelectContent>
         </Select>
+        <Select value={methodFilter} onValueChange={setMethodFilter}>
+          <SelectTrigger className="w-full sm:w-[170px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos pagamentos</SelectItem>
+            {paymentMethods.map((m) => (
+              <SelectItem key={m.value} value={m.value}>
+                {m.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="overflow-hidden rounded-lg border">
@@ -114,6 +135,7 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
               <TableHead>Data</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead>Categoria</TableHead>
+              <TableHead>Pagamento</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Valor</TableHead>
               <TableHead className="w-[80px]"></TableHead>
@@ -122,7 +144,7 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
           <TableBody>
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                   Nenhuma transação encontrada.
                 </TableCell>
               </TableRow>
@@ -148,6 +170,15 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
                         style={{ backgroundColor: cat?.color ?? "#888" }}
                       />
                       {cat?.name ?? "—"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="inline-flex items-center gap-2 whitespace-nowrap text-sm">
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: paymentMethodColor(t.paymentMethod) }}
+                      />
+                      {paymentMethodLabel(t.paymentMethod)}
                     </span>
                   </TableCell>
                   <TableCell>

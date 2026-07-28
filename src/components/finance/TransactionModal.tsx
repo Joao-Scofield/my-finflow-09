@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { useFinance } from "@/lib/finance-store";
-import type { Transaction, TxType } from "@/lib/finance-data";
+import { paymentMethods, type PaymentMethod, type Transaction, type TxType } from "@/lib/finance-data";
 
 interface Props {
   open: boolean;
@@ -33,6 +33,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
   const [subcategoryId, setSubcategoryId] = useState("");
   const [description, setDescription] = useState("");
   const [paid, setPaid] = useState(true);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
 
   useEffect(() => {
     if (!open) return;
@@ -44,6 +45,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       setSubcategoryId(editing.subcategoryId ?? "");
       setDescription(editing.description);
       setPaid(editing.status === "paid");
+      setPaymentMethod(editing.paymentMethod ?? "outro");
     } else {
       setType("expense");
       setAmount("");
@@ -52,6 +54,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       setSubcategoryId("");
       setDescription("");
       setPaid(true);
+      setPaymentMethod("pix");
     }
   }, [open, editing, defaultDate]);
 
@@ -82,6 +85,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       subcategoryId: subcategoryId || undefined,
       description,
       status: paid ? ("paid" as const) : ("pending" as const),
+      paymentMethod,
     };
     if (editing) updateTransaction(editing.id, payload);
     else addTransaction(payload);
@@ -194,6 +198,25 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div>
+            <Label>Forma de pagamento</Label>
+            <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                {paymentMethods.map((m) => (
+                  <SelectItem key={m.value} value={m.value}>
+                    <span className="flex items-center gap-2">
+                      <span className="h-3 w-3 rounded-full" style={{ backgroundColor: m.color }} />
+                      {m.label}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

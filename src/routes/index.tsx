@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Loader2, LogOut, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
+import { Landmark, Loader2, LogOut, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Toaster } from "@/components/ui/sonner";
@@ -11,11 +11,13 @@ import { TransactionsTable } from "@/components/finance/TransactionsTable";
 import { CategoriesManager } from "@/components/finance/CategoriesManager";
 import { ImportModal } from "@/components/finance/ImportModal";
 import { RulesManager } from "@/components/finance/RulesManager";
+import { AccountsManager } from "@/components/finance/AccountsManager";
 import { Login } from "@/components/finance/Login";
 import {
   ExpenseBreakdownChart,
   IncomeBreakdownChart,
   MonthlyComparisonChart,
+  PaymentMethodChart,
 } from "@/components/finance/Charts";
 
 import { ThemeToggle } from "@/components/finance/ThemeToggle";
@@ -99,8 +101,9 @@ function Dashboard() {
   const [catOpen, setCatOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
+  const [accountsOpen, setAccountsOpen] = useState(false);
 
-  const { transactions, profile, loading } = useFinance();
+  const { transactions, accounts, profile, loading } = useFinance();
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -121,6 +124,7 @@ function Dashboard() {
   const expense = monthTx
     .filter((t) => t.type === "expense")
     .reduce((s, t) => s + t.amount, 0);
+  const accountsTotal = accounts.reduce((s, a) => s + a.balance, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -144,6 +148,10 @@ function Dashboard() {
             <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
               <Upload className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Importar Excel</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setAccountsOpen(true)}>
+              <Landmark className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Saldos</span>
             </Button>
             <Button variant="outline" size="sm" onClick={() => setRulesOpen(true)}>
               <Sparkles className="h-4 w-4 sm:mr-1" />
@@ -196,12 +204,14 @@ function Dashboard() {
           </div>
         </section>
 
-        <SummaryCards income={income} expense={expense} />
+        <SummaryCards income={income} expense={expense} accountsTotal={accountsTotal} />
 
         <div className="grid gap-4 lg:grid-cols-2">
           <ExpenseBreakdownChart monthTransactions={monthTx} />
           <IncomeBreakdownChart monthTransactions={monthTx} />
         </div>
+
+        <PaymentMethodChart monthTransactions={monthTx} />
 
         <MonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
 
@@ -235,6 +245,7 @@ function Dashboard() {
       <CategoriesManager open={catOpen} onOpenChange={setCatOpen} />
       <ImportModal open={importOpen} onOpenChange={setImportOpen} />
       <RulesManager open={rulesOpen} onOpenChange={setRulesOpen} />
+      <AccountsManager open={accountsOpen} onOpenChange={setAccountsOpen} />
       <Toaster richColors position="top-right" />
     </div>
   );

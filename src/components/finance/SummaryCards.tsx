@@ -6,15 +6,16 @@ import { cn } from "@/lib/utils";
 interface Props {
   income: number;
   expense: number;
+  accountsTotal: number;
 }
 
-export function SummaryCards({ income, expense }: Props) {
+export function SummaryCards({ income, expense, accountsTotal }: Props) {
   const balance = income - expense;
-  const total = income - expense;
+  const total = accountsTotal;
 
   const items = [
     {
-      label: "Saldo Total",
+      label: "Patrimônio (saldos)",
       value: total,
       icon: Wallet,
       accent: "text-primary",

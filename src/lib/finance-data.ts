@@ -15,6 +15,66 @@ export interface Category {
   subcategories: Subcategory[];
 }
 
+export type PaymentMethod =
+  | "pix"
+  | "credito"
+  | "debito"
+  | "dinheiro"
+  | "vr"
+  | "va"
+  | "boleto"
+  | "transferencia"
+  | "investimento"
+  | "outro";
+
+export const paymentMethods: { value: PaymentMethod; label: string; color: string }[] = [
+  { value: "pix", label: "PIX", color: "#10b981" },
+  { value: "credito", label: "Crédito", color: "#6366f1" },
+  { value: "debito", label: "Débito", color: "#0ea5e9" },
+  { value: "dinheiro", label: "Dinheiro", color: "#f59e0b" },
+  { value: "vr", label: "VR (Refeição)", color: "#ec4899" },
+  { value: "va", label: "VA (Alimentação)", color: "#a855f7" },
+  { value: "boleto", label: "Boleto", color: "#64748b" },
+  { value: "transferencia", label: "Transferência", color: "#14b8a6" },
+  { value: "investimento", label: "Investimento", color: "#8b5cf6" },
+  { value: "outro", label: "Outro", color: "#94a3b8" },
+];
+
+export const paymentMethodLabel = (m: string) =>
+  paymentMethods.find((p) => p.value === m)?.label ?? "Outro";
+export const paymentMethodColor = (m: string) =>
+  paymentMethods.find((p) => p.value === m)?.color ?? "#94a3b8";
+
+export type AccountKind =
+  | "dinheiro"
+  | "conta_corrente"
+  | "poupanca"
+  | "investimento"
+  | "carteira_digital"
+  | "vr"
+  | "outro";
+
+export const accountKinds: { value: AccountKind; label: string }[] = [
+  { value: "dinheiro", label: "Dinheiro físico" },
+  { value: "conta_corrente", label: "Conta corrente" },
+  { value: "poupanca", label: "Poupança" },
+  { value: "investimento", label: "Investimento" },
+  { value: "carteira_digital", label: "Carteira digital" },
+  { value: "vr", label: "VR / VA" },
+  { value: "outro", label: "Outro" },
+];
+
+export const accountKindLabel = (k: string) =>
+  accountKinds.find((a) => a.value === k)?.label ?? "Outro";
+
+export interface Account {
+  id: string;
+  name: string;
+  kind: AccountKind;
+  balance: number;
+  color: string;
+}
+
 export interface Transaction {
   id: string;
   type: TxType;
@@ -24,6 +84,7 @@ export interface Transaction {
   subcategoryId?: string;
   description: string;
   status: TxStatus;
+  paymentMethod: PaymentMethod;
 }
 
 export interface Rule {

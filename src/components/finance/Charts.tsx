@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFinance } from "@/lib/finance-store";
-import { formatBRL, monthNamesPt, type Transaction } from "@/lib/finance-data";
+import { formatBRL, monthNamesPt, paymentMethods, type Transaction } from "@/lib/finance-data";
 
 interface Props {
   month: number;
@@ -253,6 +253,63 @@ export function MonthlyComparisonChart({ month, year }: Props) {
             </BarChart>
           </ResponsiveContainer>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function PaymentMethodChart({ monthTransactions }: { monthTransactions: Transaction[] }) {
+  const data = useMemo(() => {
+    const map = new Map<string, { Receitas: number; Despesas: number }>();
+    monthTransactions.forEach((t) => {
+      const key = t.paymentMethod ?? "outro";
+      const entry = map.get(key) ?? { Receitas: 0, Despesas: 0 };
+      if (t.type === "income") entry.Receitas += t.amount;
+      else entry.Despesas += t.amount;
+      map.set(key, entry);
+    });
+    return paymentMethods
+      .filter((m) => map.has(m.value))
+      .map((m) => ({ name: m.label, ...map.get(m.value)! }));
+  }, [monthTransactions]);
+
+  return (
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle className="text-base">Recebimentos e custos por forma de pagamento</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {data.length === 0 ? (
+          <div className="grid h-[280px] place-items-center text-sm text-muted-foreground">
+            Sem lançamentos neste período.
+          </div>
+        ) : (
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} />
+                <YAxis
+                  stroke="var(--muted-foreground)"
+                  fontSize={12}
+                  tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
+                />
+                <Tooltip
+                  formatter={(value: number) => formatBRL(Number(value))}
+                  contentStyle={{
+                    background: "var(--popover)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                    color: "var(--popover-foreground)",
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Bar dataKey="Receitas" fill="var(--income)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="Despesas" fill="var(--expense)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

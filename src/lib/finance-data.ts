@@ -71,6 +71,9 @@ export interface Account {
   id: string;
   name: string;
   kind: AccountKind;
+  /** saldo inicial informado pelo usuário */
+  initialBalance: number;
+  /** saldo atual = inicial + entradas - saídas lançadas nessa conta */
   balance: number;
   color: string;
 }
@@ -85,6 +88,7 @@ export interface Transaction {
   description: string;
   status: TxStatus;
   paymentMethod: PaymentMethod;
+  accountId?: string;
 }
 
 export interface Rule {

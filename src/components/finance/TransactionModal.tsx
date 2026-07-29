@@ -24,7 +24,7 @@ interface Props {
 }
 
 export function TransactionModal({ open, onOpenChange, editing, defaultDate }: Props) {
-  const { categories, addTransaction, updateTransaction } = useFinance();
+  const { categories, accounts, addTransaction, updateTransaction } = useFinance();
 
   const [type, setType] = useState<TxType>("expense");
   const [amount, setAmount] = useState("");
@@ -34,6 +34,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
   const [description, setDescription] = useState("");
   const [paid, setPaid] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
+  const [accountId, setAccountId] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -46,6 +47,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       setDescription(editing.description);
       setPaid(editing.status === "paid");
       setPaymentMethod(editing.paymentMethod ?? "outro");
+      setAccountId(editing.accountId ?? "");
     } else {
       setType("expense");
       setAmount("");
@@ -55,8 +57,9 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       setDescription("");
       setPaid(true);
       setPaymentMethod("pix");
+      setAccountId(accounts.length === 1 ? accounts[0].id : "");
     }
-  }, [open, editing, defaultDate]);
+  }, [open, editing, defaultDate, accounts]);
 
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.type === type),
@@ -73,7 +76,8 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
     }
   }, [type, categoryId, currentCategory]);
 
-  const canSave = amount && Number(amount) > 0 && date && categoryId;
+  const canSave =
+    amount && Number(amount) > 0 && date && categoryId && (accounts.length === 0 || accountId);
 
   function save() {
     if (!canSave) return;
@@ -86,6 +90,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       description,
       status: paid ? ("paid" as const) : ("pending" as const),
       paymentMethod,
+      accountId: accountId || undefined,
     };
     if (editing) updateTransaction(editing.id, payload);
     else addTransaction(payload);
@@ -217,6 +222,34 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label>Saldo (conta)</Label>
+            <Select value={accountId} onValueChange={setAccountId} disabled={accounts.length === 0}>
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={
+                    accounts.length === 0 ? "Cadastre um saldo primeiro" : "Selecione o saldo"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {accounts.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>
+                    <span className="flex items-center gap-2">
+                      <span className="h-3 w-3 rounded-full" style={{ backgroundColor: a.color }} />
+                      {a.name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {type === "income"
+                ? "O valor entra nesse saldo automaticamente."
+                : "O valor sai desse saldo automaticamente."}
+            </p>
           </div>
 
           <div>

@@ -57,8 +57,8 @@ interface Ctx {
     rows: ImportRow[],
     opts?: { replace?: boolean },
   ) => Promise<{ added: number; categoriesCreated: number; subcategoriesCreated: number }>;
-  addAccount: (a: Omit<Account, "id">) => Promise<void>;
-  updateAccount: (id: string, patch: Partial<Omit<Account, "id">>) => Promise<void>;
+  addAccount: (a: Omit<Account, "id" | "balance">) => Promise<void>;
+  updateAccount: (id: string, patch: Partial<Omit<Account, "id" | "balance">>) => Promise<void>;
   deleteAccount: (id: string) => Promise<void>;
   addRule: (r: Omit<Rule, "id">) => Promise<void>;
   updateRule: (id: string, patch: Partial<Omit<Rule, "id">>) => Promise<void>;
@@ -93,6 +93,7 @@ type TransactionRow = {
   transaction_date: string;
   type: string;
   payment_method: string;
+  account_id: string | null;
 };
 
 type AccountRow = {
@@ -185,6 +186,7 @@ function mapTransactions(rows: TransactionRow[]): Transaction[] {
     description: row.description,
     status: row.status as "paid" | "pending",
     paymentMethod: (row.payment_method ?? "outro") as PaymentMethod,
+    accountId: row.account_id ?? undefined,
   }));
 }
 
@@ -261,7 +263,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           supabase
             .from("finance_transactions")
             .select(
-              "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method",
+              "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id",
             )
             .order("transaction_date", { ascending: false }),
           supabase
@@ -394,7 +396,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       categories,
       transactions,
       rules,
-      accounts,
+      accounts: withComputedBalances(accounts, transactions),
       profile,
       loading,
       addTransaction: async (t) => {
@@ -417,6 +419,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           description: tx.description,
           status: tx.status,
           payment_method: tx.paymentMethod,
+          account_id: tx.accountId ?? null,
         });
         if (error) throw error;
         await refresh();
@@ -433,6 +436,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             description: t.description,
             status: t.status,
             payment_method: t.paymentMethod,
+            account_id: t.accountId ?? null,
           })
           .eq("id", id);
         if (error) throw error;
@@ -594,7 +598,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           user_id: userId,
           name: a.name,
           kind: a.kind,
-          balance: a.balance,
+          balance: a.initialBalance,
           color: a.color,
           position: accounts.length,
         });
@@ -602,7 +606,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         await refresh();
       },
       updateAccount: async (id, patch) => {
-        const { error } = await supabase.from("finance_accounts").update(patch).eq("id", id);
+        const payload = {
+          ...(patch.name !== undefined ? { name: patch.name } : {}),
+          ...(patch.kind !== undefined ? { kind: patch.kind } : {}),
+          ...(patch.color !== undefined ? { color: patch.color } : {}),
+          ...(patch.initialBalance !== undefined ? { balance: patch.initialBalance } : {}),
+        };
+        const { error } = await supabase.from("finance_accounts").update(payload).eq("id", id);
         if (error) throw error;
         await refresh();
       },

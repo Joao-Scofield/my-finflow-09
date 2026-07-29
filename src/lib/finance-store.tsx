@@ -193,10 +193,26 @@ function mapAccounts(rows: AccountRow[]): Account[] {
     id: row.id,
     name: row.name,
     kind: row.kind as AccountKind,
+    initialBalance: Number(row.balance),
     balance: Number(row.balance),
     color: row.color,
   }));
 }
+
+/** saldo atual = saldo inicial + entradas - saídas lançadas naquela conta */
+function withComputedBalances(accounts: Account[], transactions: Transaction[]): Account[] {
+  const delta = new Map<string, number>();
+  for (const t of transactions) {
+    if (!t.accountId) continue;
+    const current = delta.get(t.accountId) ?? 0;
+    delta.set(t.accountId, current + (t.type === "income" ? t.amount : -t.amount));
+  }
+  return accounts.map((a) => ({
+    ...a,
+    balance: a.initialBalance + (delta.get(a.id) ?? 0),
+  }));
+}
+
 
 function mapRules(rows: RuleRow[]): Rule[] {
   return rows.map((row) => ({

@@ -1,46 +1,31 @@
-## Plano
+Sim, é totalmente possível — e a tabela de transações já existe (`finance_transactions`, com categoria, subcategoria, forma de pagamento, saldo/conta e status). Falta só a porta de entrada externa.
 
-### 1. Ativar backend e autenticação
-- Habilitar Lovable Cloud para ter banco de dados e login reais.
-- Criar autenticação simples por usuário/senha no servidor.
-- Criar os usuários iniciais de teste:
-  - `rebeka` / `123`
-  - `joao` / `123`
-- Criar uma tela pública de login e proteger o painel financeiro para exigir sessão.
-- Incluir opção de sair da conta no cabeçalho.
+## O que será construído
 
-### 2. Criar estrutura de dados persistente por usuário
-Como você escolheu dados **individuais**, cada usuário verá somente sua própria base, sincronizada entre dispositivos.
+**1. Tokens pessoais de API**
+- Nova tabela para guardar tokens de integração de cada usuário: nome do token, prefixo visível (ex.: `fin_ab12…`), hash do token (o valor completo nunca fica salvo em texto), data de criação e último uso.
+- Somente o próprio dono enxerga seus tokens; a validação externa é feita no servidor.
 
-Criar tabelas no banco para:
-- Perfis de usuário: username, nome exibido e preferências básicas.
-- Categorias.
-- Subcategorias.
-- Transações.
-- Regras de categorização automática.
+**2. Tela "Integrações / API" no painel**
+- Botão no topo do dashboard abrindo um modal onde o usuário cria um token, dá um nome (ex.: "n8n", "Planilha", "Zapier") e vê o valor completo **uma única vez** para copiar.
+- Lista de tokens ativos com opção de revogar.
+- Exemplo pronto de requisição (cURL) com a URL do projeto já preenchida.
 
-As tabelas terão políticas de segurança para cada usuário ler e alterar apenas os próprios dados.
+**3. Endpoint externo**
+Rota pública em `/api/public/transactions`, autenticada por `Authorization: Bearer <token>`:
+- `POST` — cria um lançamento. Campos: valor, data, tipo (entrada/saída), descrição, categoria (por nome ou id), subcategoria, forma de pagamento e saldo/conta. Se a categoria não existir, é criada automaticamente; se a descrição bater com o motor de regras, a categorização automática é aplicada, igual ao que acontece no app.
+- `GET` — lista os lançamentos do usuário, com filtros opcionais de período e limite.
+- Erros claros: 401 (token inválido/revogado), 400 (dados inválidos), 200/201 (sucesso).
+- Aceita também envio em lote (array de lançamentos) para importações maiores.
 
-### 3. Migrar o app do localStorage para banco de dados
-O problema atual confirmado no código é que os dados ficam no `localStorage` do navegador (`finance-app:v1`), então eles só existem naquele aparelho/navegador. Vou substituir essa camada por persistência no banco.
+## Detalhes técnicos
 
-- Carregar transações, categorias, subcategorias e regras do banco ao abrir o app.
-- Salvar no banco ao criar, editar, importar Excel ou excluir dados.
-- Manter a experiência atual do painel, mas com dados sincronizados por login.
-- Inicializar categorias e regras padrão para cada usuário quando ele entrar pela primeira vez.
+- Rota TanStack em `src/routes/api/public/transactions.ts` com handlers `GET`, `POST` e `OPTIONS` (CORS liberado), validação com Zod.
+- O token é gerado com bytes aleatórios; guardamos apenas o SHA-256. A rota faz o hash do token recebido, encontra o dono e grava usando o cliente administrativo do backend, sempre com o `user_id` derivado do token (nunca do corpo da requisição).
+- Migração: tabela `finance_api_tokens` com GRANTs e RLS (leitura/gestão apenas do próprio dono; validação via service role).
+- URL estável para configurar no serviço externo: `https://my-finflow-09.lovable.app/api/public/transactions`.
+- Sem alteração no comportamento atual do app; a gestão de saldos continua automática, pois os lançamentos vindos da API também apontam para uma conta.
 
-### 4. Adaptar recursos existentes
-- Importação de Excel passará a inserir as linhas no banco.
-- Criação automática de categorias/subcategorias durante importação continuará funcionando.
-- Motor de regras continuará categorizando transações novas e importadas.
-- Reaplicar regras atualizará as transações salvas no banco.
-- Tabela, cards e gráficos continuarão usando o mesmo visual e filtros.
-
-### 5. Validação e segurança
-- Validar entradas no cliente e no servidor antes de gravar.
-- Não deixar senha hardcoded no frontend.
-- Armazenar senha de teste de forma segura no backend, não em código visível ao navegador.
-- Verificar que `rebeka` e `joao` não conseguem ver dados um do outro.
-
-### Observação importante
-A senha `123` é aceitável só para teste. Se esse app virar uso real, recomendo trocar por senhas fortes e/ou login gerenciado com recuperação de senha.
+## Fora do escopo agora
+- Editar/excluir lançamentos via API (só criar e consultar).
+- Integração direta com bancos (Open Finance/Pluggy) — segue pendente de credenciais.

@@ -275,7 +275,18 @@ export const Route = createFileRoute("/api/public/transactions")({
         }
 
         const items = Array.isArray(parsed.data) ? parsed.data : [parsed.data];
-        const rows: Record<string, unknown>[] = [];
+        const rows: {
+          user_id: string;
+          type: string;
+          amount: number;
+          transaction_date: string;
+          description: string;
+          status: string;
+          payment_method: string;
+          category_id: string;
+          subcategory_id: string | null;
+          account_id: string | null;
+        }[] = [];
 
         for (const item of items) {
           const description = item.description?.trim() ?? "";

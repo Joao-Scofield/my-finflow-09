@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Landmark, Loader2, LogOut, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
+import { KeyRound, Landmark, Loader2, LogOut, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Toaster } from "@/components/ui/sonner";

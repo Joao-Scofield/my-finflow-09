@@ -43,7 +43,7 @@ export function AccountsManager({ open, onOpenChange }: Props) {
       await addAccount({
         name: name.trim(),
         kind,
-        balance: Number(balance || 0),
+        initialBalance: Number(balance || 0),
         color: colors[accounts.length % colors.length],
       });
       setName("");
@@ -67,7 +67,7 @@ export function AccountsManager({ open, onOpenChange }: Props) {
           <div className="flex items-center justify-between rounded-lg border p-4">
             <span className="flex items-center gap-2 text-sm text-muted-foreground">
               <Wallet className="h-4 w-4" />
-              Patrimônio total
+              Patrimônio total (atualizado pelos lançamentos)
             </span>
             <span className="text-lg font-semibold tabular-nums">{formatBRL(total)}</span>
           </div>
@@ -97,7 +97,7 @@ export function AccountsManager({ open, onOpenChange }: Props) {
               </Select>
             </div>
             <div>
-              <Label className="text-xs">Saldo (R$)</Label>
+              <Label className="text-xs">Saldo inicial (R$)</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -129,16 +129,24 @@ export function AccountsManager({ open, onOpenChange }: Props) {
                   <p className="truncate text-sm font-medium">{a.name}</p>
                   <p className="text-xs text-muted-foreground">{accountKindLabel(a.kind)}</p>
                 </div>
-                <Input
-                  type="number"
-                  step="0.01"
-                  defaultValue={a.balance}
-                  className="w-32 tabular-nums"
-                  onBlur={(e) => {
-                    const next = Number(e.target.value || 0);
-                    if (next !== a.balance) void updateAccount(a.id, { balance: next });
-                  }}
-                />
+                <div className="text-right">
+                  <p className="text-[11px] text-muted-foreground">Saldo atual</p>
+                  <p className="text-sm font-semibold tabular-nums">{formatBRL(a.balance)}</p>
+                </div>
+                <div>
+                  <p className="mb-1 text-[11px] text-muted-foreground">Inicial</p>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    defaultValue={a.initialBalance}
+                    className="w-28 tabular-nums"
+                    onBlur={(e) => {
+                      const next = Number(e.target.value || 0);
+                      if (next !== a.initialBalance)
+                        void updateAccount(a.id, { initialBalance: next });
+                    }}
+                  />
+                </div>
                 <Button size="icon" variant="ghost" onClick={() => void deleteAccount(a.id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>

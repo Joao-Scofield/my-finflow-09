@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Landmark, Loader2, LogOut, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
+import { KeyRound, Landmark, Loader2, LogOut, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Toaster } from "@/components/ui/sonner";
 import { PeriodSelector } from "@/components/finance/PeriodSelector";
+import { ApiTokensManager } from "@/components/finance/ApiTokensManager";
 import { SummaryCards } from "@/components/finance/SummaryCards";
 import { TransactionModal } from "@/components/finance/TransactionModal";
 import { TransactionsTable } from "@/components/finance/TransactionsTable";
@@ -102,6 +103,7 @@ function Dashboard() {
   const [importOpen, setImportOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [accountsOpen, setAccountsOpen] = useState(false);
+  const [apiOpen, setApiOpen] = useState(false);
 
   const { transactions, accounts, profile, loading } = useFinance();
 
@@ -156,6 +158,10 @@ function Dashboard() {
             <Button variant="outline" size="sm" onClick={() => setRulesOpen(true)}>
               <Sparkles className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Regras</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setApiOpen(true)}>
+              <KeyRound className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">API</span>
             </Button>
             <Button variant="outline" size="sm" onClick={() => setCatOpen(true)}>
               <Settings2 className="h-4 w-4 sm:mr-1" />
@@ -246,6 +252,7 @@ function Dashboard() {
       <ImportModal open={importOpen} onOpenChange={setImportOpen} />
       <RulesManager open={rulesOpen} onOpenChange={setRulesOpen} />
       <AccountsManager open={accountsOpen} onOpenChange={setAccountsOpen} />
+      <ApiTokensManager open={apiOpen} onOpenChange={setApiOpen} />
       <Toaster richColors position="top-right" />
     </div>
   );

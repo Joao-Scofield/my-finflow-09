@@ -230,10 +230,16 @@ export function MonthlyComparisonChart({ month, year }: Props) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} />
+              <XAxis
+                dataKey="name"
+                stroke="var(--muted-foreground)"
+                fontSize={12}
+                tick={{ fill: "var(--muted-foreground)" }}
+              />
               <YAxis
                 stroke="var(--muted-foreground)"
                 fontSize={12}
+                tick={{ fill: "var(--muted-foreground)" }}
                 tickFormatter={(v: number) =>
                   v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)
                 }
@@ -247,7 +253,7 @@ export function MonthlyComparisonChart({ month, year }: Props) {
                   color: "var(--popover-foreground)",
                 }}
               />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Legend wrapperStyle={{ fontSize: 12, color: "var(--foreground)" }} />
               <Bar dataKey="Receitas" fill="var(--income)" radius={[6, 6, 0, 0]} />
               <Bar dataKey="Despesas" fill="var(--expense)" radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -288,10 +294,16 @@ export function PaymentMethodChart({ monthTransactions }: { monthTransactions: T
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} />
+                <XAxis
+                  dataKey="name"
+                  stroke="var(--muted-foreground)"
+                  fontSize={12}
+                  tick={{ fill: "var(--muted-foreground)" }}
+                />
                 <YAxis
                   stroke="var(--muted-foreground)"
                   fontSize={12}
+                  tick={{ fill: "var(--muted-foreground)" }}
                   tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
                 />
                 <Tooltip
@@ -303,7 +315,7 @@ export function PaymentMethodChart({ monthTransactions }: { monthTransactions: T
                     color: "var(--popover-foreground)",
                   }}
                 />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 12, color: "var(--foreground)" }} />
                 <Bar dataKey="Receitas" fill="var(--income)" radius={[6, 6, 0, 0]} />
                 <Bar dataKey="Despesas" fill="var(--expense)" radius={[6, 6, 0, 0]} />
               </BarChart>

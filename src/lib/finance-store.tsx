@@ -44,6 +44,7 @@ interface Ctx {
   accounts: Account[];
   profile: Profile | null;
   loading: boolean;
+  refresh: () => Promise<void>;
   addTransaction: (t: Omit<Transaction, "id">) => Promise<void>;
   updateTransaction: (id: string, t: Omit<Transaction, "id">) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
@@ -398,6 +399,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       rules,
       accounts: withComputedBalances(accounts, transactions),
       profile,
+      refresh,
       loading,
       addTransaction: async (t) => {
         const userId = await getCurrentUserId();

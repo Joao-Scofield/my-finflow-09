@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as FrotaRouteImport } from './routes/frota'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicTransactionsRouteImport } from './routes/api/public/transactions'
 
+const FrotaRoute = FrotaRouteImport.update({
+  id: '/frota',
+  path: '/frota',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -25,32 +31,43 @@ const ApiPublicTransactionsRoute = ApiPublicTransactionsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/frota': typeof FrotaRoute
   '/api/public/transactions': typeof ApiPublicTransactionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/frota': typeof FrotaRoute
   '/api/public/transactions': typeof ApiPublicTransactionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/frota': typeof FrotaRoute
   '/api/public/transactions': typeof ApiPublicTransactionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/transactions'
+  fullPaths: '/' | '/frota' | '/api/public/transactions'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/transactions'
-  id: '__root__' | '/' | '/api/public/transactions'
+  to: '/' | '/frota' | '/api/public/transactions'
+  id: '__root__' | '/' | '/frota' | '/api/public/transactions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FrotaRoute: typeof FrotaRoute
   ApiPublicTransactionsRoute: typeof ApiPublicTransactionsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/frota': {
+      id: '/frota'
+      path: '/frota'
+      fullPath: '/frota'
+      preLoaderRoute: typeof FrotaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FrotaRoute: FrotaRoute,
   ApiPublicTransactionsRoute: ApiPublicTransactionsRoute,
 }
 export const routeTree = rootRouteImport

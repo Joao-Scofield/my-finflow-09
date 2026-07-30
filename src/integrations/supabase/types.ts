@@ -281,6 +281,237 @@ export type Database = {
           },
         ]
       }
+      fleet_fixed_costs: {
+        Row: {
+          amount: number
+          created_at: string
+          end_date: string | null
+          id: string
+          kind: string
+          name: string
+          periodicity: string
+          start_date: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          kind?: string
+          name: string
+          periodicity?: string
+          start_date: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          periodicity?: string
+          start_date?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_fixed_costs_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "finance_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_fixed_costs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_fuelings: {
+        Row: {
+          created_at: string
+          fuel_type: string
+          fueling_date: string
+          full_tank: boolean
+          id: string
+          liters: number
+          notes: string
+          odometer: number
+          station: string
+          total_amount: number
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          fuel_type?: string
+          fueling_date: string
+          full_tank?: boolean
+          id?: string
+          liters: number
+          notes?: string
+          odometer: number
+          station?: string
+          total_amount: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          fuel_type?: string
+          fueling_date?: string
+          full_tank?: boolean
+          id?: string
+          liters?: number
+          notes?: string
+          odometer?: number
+          station?: string
+          total_amount?: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_fuelings_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "finance_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_fuelings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_maintenances: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          kind: string
+          maintenance_date: string
+          next_odometer: number | null
+          odometer: number
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          kind?: string
+          maintenance_date: string
+          next_odometer?: number | null
+          odometer?: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          kind?: string
+          maintenance_date?: string
+          next_odometer?: number | null
+          odometer?: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_maintenances_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "finance_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_maintenances_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_vehicles: {
+        Row: {
+          brand_model: string
+          color: string
+          created_at: string
+          fuel_type: string
+          id: string
+          initial_odometer: number
+          name: string
+          plate: string
+          position: number
+          updated_at: string
+          user_id: string
+          year: number | null
+        }
+        Insert: {
+          brand_model?: string
+          color?: string
+          created_at?: string
+          fuel_type?: string
+          id?: string
+          initial_odometer?: number
+          name: string
+          plate?: string
+          position?: number
+          updated_at?: string
+          user_id: string
+          year?: number | null
+        }
+        Update: {
+          brand_model?: string
+          color?: string
+          created_at?: string
+          fuel_type?: string
+          id?: string
+          initial_odometer?: number
+          name?: string
+          plate?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

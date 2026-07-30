@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { KeyRound, Landmark, Loader2, LogOut, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Car, KeyRound, Landmark, Loader2, LogOut, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Toaster } from "@/components/ui/sonner";
@@ -167,7 +168,14 @@ function Dashboard() {
               <Settings2 className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Categorias</span>
             </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/frota">
+                <Car className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Frota</span>
+              </Link>
+            </Button>
             <ThemeToggle />
+
             <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
               <LogOut className="h-4 w-4" />
             </Button>

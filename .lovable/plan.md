@@ -1,31 +1,46 @@
-Sim, é totalmente possível — e a tabela de transações já existe (`finance_transactions`, com categoria, subcategoria, forma de pagamento, saldo/conta e status). Falta só a porta de entrada externa.
+## Objetivo
 
-## O que será construído
+Criar uma página dedicada à gestão financeira de frota, com custo por km rodado por veículo.
 
-**1. Tokens pessoais de API**
-- Nova tabela para guardar tokens de integração de cada usuário: nome do token, prefixo visível (ex.: `fin_ab12…`), hash do token (o valor completo nunca fica salvo em texto), data de criação e último uso.
-- Somente o próprio dono enxerga seus tokens; a validação externa é feita no servidor.
+## Navegação
 
-**2. Tela "Integrações / API" no painel**
-- Botão no topo do dashboard abrindo um modal onde o usuário cria um token, dá um nome (ex.: "n8n", "Planilha", "Zapier") e vê o valor completo **uma única vez** para copiar.
-- Lista de tokens ativos com opção de revogar.
-- Exemplo pronto de requisição (cURL) com a URL do projeto já preenchida.
+- Nova rota `/frota`, com um menu no topo alternando entre **Painel** e **Frota** (mesmo cabeçalho, tema claro/escuro e login já existentes).
 
-**3. Endpoint externo**
-Rota pública em `/api/public/transactions`, autenticada por `Authorization: Bearer <token>`:
-- `POST` — cria um lançamento. Campos: valor, data, tipo (entrada/saída), descrição, categoria (por nome ou id), subcategoria, forma de pagamento e saldo/conta. Se a categoria não existir, é criada automaticamente; se a descrição bater com o motor de regras, a categorização automática é aplicada, igual ao que acontece no app.
-- `GET` — lista os lançamentos do usuário, com filtros opcionais de período e limite.
-- Erros claros: 401 (token inválido/revogado), 400 (dados inválidos), 200/201 (sucesso).
-- Aceita também envio em lote (array de lançamentos) para importações maiores.
+## O que a página terá
+
+**1. Veículos**
+Cadastro de veículos: nome/apelido, placa, marca/modelo, ano, tipo de combustível, odômetro inicial e odômetro atual. Cartão por veículo mostrando km rodados, custo total e **custo por km**.
+
+**2. Abastecimentos**
+Data, veículo, odômetro, litros, preço por litro (ou total), posto e tipo de combustível. A partir disso o sistema calcula:
+- km rodados entre abastecimentos
+- consumo médio (km/l)
+- custo de combustível por km
+
+**3. Manutenções e pneus**
+Data, veículo, odômetro, tipo (revisão, óleo, pneus, freios, outro), descrição, valor e, opcionalmente, "próxima revisão em X km" — com aviso quando o odômetro se aproximar.
+
+**4. Custos fixos**
+IPVA, seguro, licenciamento, financiamento/parcela: valor, periodicidade (mensal/anual/único) e vigência. Rateados proporcionalmente no período analisado.
+
+**5. Indicadores e gráficos**
+- Cards: km rodados no período, gasto total, custo/km, consumo médio, gasto por categoria (combustível, manutenção, fixos).
+- Gráfico de evolução do custo por km ao longo dos meses.
+- Gráfico de composição dos custos (combustível x manutenção x fixos).
+- Comparativo entre veículos quando houver mais de um.
+
+**6. Integração opcional com o financeiro**
+Cada abastecimento, manutenção ou custo fixo terá a opção "lançar no financeiro". Quando marcada, cria automaticamente uma saída com categoria (ex.: Frota > Combustível) e o saldo/conta escolhido, exatamente como um lançamento manual. Sem marcar, o registro fica só no módulo de frota.
 
 ## Detalhes técnicos
 
-- Rota TanStack em `src/routes/api/public/transactions.ts` com handlers `GET`, `POST` e `OPTIONS` (CORS liberado), validação com Zod.
-- O token é gerado com bytes aleatórios; guardamos apenas o SHA-256. A rota faz o hash do token recebido, encontra o dono e grava usando o cliente administrativo do backend, sempre com o `user_id` derivado do token (nunca do corpo da requisição).
-- Migração: tabela `finance_api_tokens` com GRANTs e RLS (leitura/gestão apenas do próprio dono; validação via service role).
-- URL estável para configurar no serviço externo: `https://my-finflow-09.lovable.app/api/public/transactions`.
-- Sem alteração no comportamento atual do app; a gestão de saldos continua automática, pois os lançamentos vindos da API também apontam para uma conta.
+- Migração no banco criando `fleet_vehicles`, `fleet_fuelings`, `fleet_maintenances` e `fleet_fixed_costs`, todas com `user_id`, RLS por dono e GRANTs — mesmo padrão das tabelas atuais.
+- Quando "lançar no financeiro" estiver marcado, o registro guarda o id da transação criada em `finance_transactions`, para que editar/excluir na frota reflita no financeiro.
+- Store própria (`fleet-store`) seguindo o padrão de `finance-store`, com cálculos derivados (km, consumo, custo/km) feitos no cliente.
+- Componentes novos em `src/components/fleet/`; rota em `src/routes/frota.tsx` com metadados próprios de SEO.
+- Cores e textos usando os tokens do tema atual (legível em claro e escuro).
 
 ## Fora do escopo agora
-- Editar/excluir lançamentos via API (só criar e consultar).
-- Integração direta com bancos (Open Finance/Pluggy) — segue pendente de credenciais.
+
+- Motoristas, jornadas e rastreamento por GPS.
+- Importação de planilhas de abastecimento (pode vir depois, reaproveitando o importador atual).

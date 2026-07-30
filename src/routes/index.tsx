@@ -167,7 +167,14 @@ function Dashboard() {
               <Settings2 className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Categorias</span>
             </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/frota">
+                <Car className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Frota</span>
+              </Link>
+            </Button>
             <ThemeToggle />
+
             <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
               <LogOut className="h-4 w-4" />
             </Button>

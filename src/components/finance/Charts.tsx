@@ -155,6 +155,8 @@ function BreakdownChart({
                       borderRadius: 8,
                       color: "var(--popover-foreground)",
                     }}
+                    itemStyle={{ color: "var(--popover-foreground)" }}
+                    labelStyle={{ color: "var(--popover-foreground)" }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -252,8 +254,12 @@ export function MonthlyComparisonChart({ month, year }: Props) {
                   borderRadius: 8,
                   color: "var(--popover-foreground)",
                 }}
+                itemStyle={{ color: "var(--popover-foreground)" }}
+                labelStyle={{ color: "var(--popover-foreground)" }}
               />
-              <Legend wrapperStyle={{ fontSize: 12, color: "var(--foreground)" }} />
+              <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value: string) => (
+                <span style={{ color: "var(--foreground)" }}>{value}</span>
+              )} />
               <Bar dataKey="Receitas" fill="var(--income)" radius={[6, 6, 0, 0]} />
               <Bar dataKey="Despesas" fill="var(--expense)" radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -315,7 +321,9 @@ export function PaymentMethodChart({ monthTransactions }: { monthTransactions: T
                     color: "var(--popover-foreground)",
                   }}
                 />
-                <Legend wrapperStyle={{ fontSize: 12, color: "var(--foreground)" }} />
+                <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value: string) => (
+                <span style={{ color: "var(--foreground)" }}>{value}</span>
+              )} />
                 <Bar dataKey="Receitas" fill="var(--income)" radius={[6, 6, 0, 0]} />
                 <Bar dataKey="Despesas" fill="var(--expense)" radius={[6, 6, 0, 0]} />
               </BarChart>

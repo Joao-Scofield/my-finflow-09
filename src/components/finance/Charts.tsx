@@ -320,6 +320,8 @@ export function PaymentMethodChart({ monthTransactions }: { monthTransactions: T
                     borderRadius: 8,
                     color: "var(--popover-foreground)",
                   }}
+                  itemStyle={{ color: "var(--popover-foreground)" }}
+                  labelStyle={{ color: "var(--popover-foreground)" }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value: string) => (
                 <span style={{ color: "var(--foreground)" }}>{value}</span>

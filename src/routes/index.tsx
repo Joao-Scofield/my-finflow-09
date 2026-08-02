@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Car, KeyRound, Landmark, Loader2, LogOut, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
+import { Car, ChevronDown, KeyRound, Landmark, Loader2, LogOut, Menu, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -148,38 +157,55 @@ function Dashboard() {
             <span className="hidden max-w-32 truncate text-sm text-muted-foreground md:inline">
               {profile?.displayName}
             </span>
-            <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
-              <Upload className="h-4 w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Importar Excel</span>
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setAccountsOpen(true)}>
-              <Landmark className="h-4 w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Saldos</span>
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setRulesOpen(true)}>
-              <Sparkles className="h-4 w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Regras</span>
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setApiOpen(true)}>
-              <KeyRound className="h-4 w-4 sm:mr-1" />
-              <span className="hidden sm:inline">API</span>
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setCatOpen(true)}>
-              <Settings2 className="h-4 w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Categorias</span>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/frota">
-                <Car className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">Frota</span>
-              </Link>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" className="gap-2">
+                  <Menu className="h-4 w-4" />
+                  Menu
+                  <ChevronDown className="h-4 w-4 opacity-80" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Ferramentas</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => setImportOpen(true)}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Importar Excel
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setAccountsOpen(true)}>
+                  <Landmark className="mr-2 h-4 w-4" />
+                  Saldos
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setRulesOpen(true)}>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Regras
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setApiOpen(true)}>
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  API
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setCatOpen(true)}>
+                  <Settings2 className="mr-2 h-4 w-4" />
+                  Categorias
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Módulos</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to="/frota">
+                    <Car className="mr-2 h-4 w-4" />
+                    Frota
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => handleSignOut()}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <ThemeToggle />
-
-            <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
-              <LogOut className="h-4 w-4" />
-            </Button>
           </div>
+
         </div>
       </header>
 

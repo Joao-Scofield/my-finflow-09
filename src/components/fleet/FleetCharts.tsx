@@ -111,8 +111,10 @@ export function CostPerKmChart({
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} tick={axisTick} />
               <YAxis stroke="var(--muted-foreground)" fontSize={12} tick={axisTick} />
-              <Tooltip formatter={(v: number) => formatBRL(Number(v))} contentStyle={tooltipStyle} />
-              <Legend wrapperStyle={{ fontSize: 12, color: "var(--foreground)" }} />
+              <Tooltip formatter={(v: number) => formatBRL(Number(v))} contentStyle={tooltipStyle} itemStyle={{ color: "var(--popover-foreground)" }} labelStyle={{ color: "var(--popover-foreground)" }} />
+              <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value: string) => (
+                <span style={{ color: "var(--foreground)" }}>{value}</span>
+              )} />
               <Line
                 type="monotone"
                 dataKey="Custo/km"
@@ -170,8 +172,10 @@ export function CostCompositionChart({
                     <Cell key={d.name} fill={d.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: number) => formatBRL(Number(v))} contentStyle={tooltipStyle} />
-                <Legend wrapperStyle={{ fontSize: 12, color: "var(--foreground)" }} />
+                <Tooltip formatter={(v: number) => formatBRL(Number(v))} contentStyle={tooltipStyle} itemStyle={{ color: "var(--popover-foreground)" }} labelStyle={{ color: "var(--popover-foreground)" }} />
+                <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value: string) => (
+                <span style={{ color: "var(--foreground)" }}>{value}</span>
+              )} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -215,8 +219,10 @@ export function VehicleComparisonChart({ month, year }: { month: number; year: n
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} tick={axisTick} />
               <YAxis stroke="var(--muted-foreground)" fontSize={12} tick={axisTick} />
-              <Tooltip formatter={(v: number) => formatBRL(Number(v))} contentStyle={tooltipStyle} />
-              <Legend wrapperStyle={{ fontSize: 12, color: "var(--foreground)" }} />
+              <Tooltip formatter={(v: number) => formatBRL(Number(v))} contentStyle={tooltipStyle} itemStyle={{ color: "var(--popover-foreground)" }} labelStyle={{ color: "var(--popover-foreground)" }} />
+              <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value: string) => (
+                <span style={{ color: "var(--foreground)" }}>{value}</span>
+              )} />
               <Bar dataKey="Custo total" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
               <Bar dataKey="Custo/km" fill="var(--chart-3)" radius={[6, 6, 0, 0]} />
             </BarChart>

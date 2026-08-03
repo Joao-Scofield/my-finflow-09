@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SaldosRouteImport } from './routes/saldos'
 import { Route as FrotaRouteImport } from './routes/frota'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicTransactionsRouteImport } from './routes/api/public/transactions'
 
+const SaldosRoute = SaldosRouteImport.update({
+  id: '/saldos',
+  path: '/saldos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FrotaRoute = FrotaRouteImport.update({
   id: '/frota',
   path: '/frota',
@@ -32,35 +38,46 @@ const ApiPublicTransactionsRoute = ApiPublicTransactionsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/frota': typeof FrotaRoute
+  '/saldos': typeof SaldosRoute
   '/api/public/transactions': typeof ApiPublicTransactionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/frota': typeof FrotaRoute
+  '/saldos': typeof SaldosRoute
   '/api/public/transactions': typeof ApiPublicTransactionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/frota': typeof FrotaRoute
+  '/saldos': typeof SaldosRoute
   '/api/public/transactions': typeof ApiPublicTransactionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/frota' | '/api/public/transactions'
+  fullPaths: '/' | '/frota' | '/saldos' | '/api/public/transactions'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/frota' | '/api/public/transactions'
-  id: '__root__' | '/' | '/frota' | '/api/public/transactions'
+  to: '/' | '/frota' | '/saldos' | '/api/public/transactions'
+  id: '__root__' | '/' | '/frota' | '/saldos' | '/api/public/transactions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FrotaRoute: typeof FrotaRoute
+  SaldosRoute: typeof SaldosRoute
   ApiPublicTransactionsRoute: typeof ApiPublicTransactionsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/saldos': {
+      id: '/saldos'
+      path: '/saldos'
+      fullPath: '/saldos'
+      preLoaderRoute: typeof SaldosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/frota': {
       id: '/frota'
       path: '/frota'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FrotaRoute: FrotaRoute,
+  SaldosRoute: SaldosRoute,
   ApiPublicTransactionsRoute: ApiPublicTransactionsRoute,
 }
 export const routeTree = rootRouteImport

@@ -174,7 +174,7 @@ function Dashboard() {
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setAccountsOpen(true)}>
                   <Landmark className="mr-2 h-4 w-4" />
-                  Saldos
+                  Gerenciar saldos
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setRulesOpen(true)}>
                   <Sparkles className="mr-2 h-4 w-4" />
@@ -190,6 +190,12 @@ function Dashboard() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Módulos</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to="/saldos">
+                    <Landmark className="mr-2 h-4 w-4" />
+                    Saldos
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/frota">
                     <Car className="mr-2 h-4 w-4" />

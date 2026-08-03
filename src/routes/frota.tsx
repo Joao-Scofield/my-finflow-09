@@ -189,6 +189,9 @@ function FleetPage() {
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/">Painel</Link>
               </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/saldos">Saldos</Link>
+              </Button>
               <Button variant="secondary" size="sm" asChild>
                 <Link to="/frota">Frota</Link>
               </Button>

@@ -23,33 +23,45 @@ export function BalanceHistoryChart() {
 
   const { data, hasData } = useMemo(() => {
     const now = new Date();
-    const points: Record<string, number | string>[] = [];
-
+    const cutoffs: { label: string; cutoff: string }[] = [];
     for (let i = months - 1; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = d.getFullYear();
       const month = d.getMonth() + 1;
-      const cutoff = `${year}-${String(month).padStart(2, "0")}-31`;
-
-      const point: Record<string, number | string> = {
+      cutoffs.push({
         label: `${monthNamesPt[month - 1].slice(0, 3)}/${String(year).slice(2)}`,
-      };
+        cutoff: `${year}-${String(month).padStart(2, "0")}-31`,
+      });
+    }
 
+    // Uma passada só: acumula o delta de cada conta no primeiro mês em que se aplica.
+    const deltas = new Map<string, number[]>();
+    for (const account of accounts) deltas.set(account.id, new Array(cutoffs.length).fill(0));
+    for (const t of transactions) {
+      const bucket = deltas.get(t.accountId ?? "");
+      if (!bucket) continue;
+      const index = cutoffs.findIndex((c) => t.date <= c.cutoff);
+      if (index === -1) continue;
+      bucket[index] += t.type === "income" ? t.amount : -t.amount;
+    }
+
+    const points = cutoffs.map(({ label }, index) => {
+      const point: Record<string, number | string> = { label };
       let total = 0;
       for (const account of accounts) {
-        const delta = transactions
-          .filter((t) => t.accountId === account.id && t.date <= cutoff)
-          .reduce((sum, t) => sum + (t.type === "income" ? t.amount : -t.amount), 0);
-        const value = account.initialBalance + delta;
+        const bucket = deltas.get(account.id)!;
+        let value = account.initialBalance;
+        for (let i = 0; i <= index; i++) value += bucket[i];
         point[account.id] = value;
         total += value;
       }
       point.__total = total;
-      points.push(point);
-    }
+      return point;
+    });
 
     return { data: points, hasData: accounts.length > 0 };
   }, [accounts, transactions, months]);
+
 
   return (
     <Card>

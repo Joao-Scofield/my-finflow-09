@@ -191,6 +191,12 @@ function Dashboard() {
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Módulos</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
+                  <Link to="/saldos">
+                    <Landmark className="mr-2 h-4 w-4" />
+                    Saldos
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/frota">
                     <Car className="mr-2 h-4 w-4" />
                     Frota

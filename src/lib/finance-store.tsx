@@ -320,15 +320,26 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }
 
   async function ensureDefaults(userId: string) {
-    const ruleCountResult = await supabase
-      .from("finance_rules")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId);
+    const [categoryCountResult, ruleCountResult] = await Promise.all([
+      supabase
+        .from("finance_categories")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId),
+      supabase
+        .from("finance_rules")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId),
+    ]);
 
+    if (categoryCountResult.error) throw categoryCountResult.error;
     if (ruleCountResult.error) throw ruleCountResult.error;
+
+    // Usuário já inicializado: nada a semear (evita dezenas de upserts a cada carregamento).
+    if ((categoryCountResult.count ?? 0) > 0 && (ruleCountResult.count ?? 0) > 0) return;
 
     const categoryIdMap = new Map<string, string>();
     const subcategoryIdMap = new Map<string, string>();
+
 
     for (const [index, category] of defaultCategories.entries()) {
       const { data: insertedCategory, error: categoryError } = await supabase

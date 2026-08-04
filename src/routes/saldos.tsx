@@ -16,7 +16,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeToggle } from "@/components/finance/ThemeToggle";
 import { Login } from "@/components/finance/Login";
 import { AccountsManager } from "@/components/finance/AccountsManager";
-import { BalanceHistoryChart } from "@/components/finance/BalanceHistoryChart";
+import { LazyBalanceHistoryChart } from "@/components/finance/LazyCharts";
+import { BalancesSkeleton } from "@/components/finance/Skeletons";
 import { FinanceProvider, useFinance } from "@/lib/finance-store";
 import { ThemeProvider } from "@/lib/theme";
 import { accountKindLabel, formatBRL } from "@/lib/finance-data";
@@ -133,7 +134,7 @@ function BalancesPage() {
             <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
               <Landmark className="h-5 w-5" />
             </div>
-            <nav className="flex items-center gap-1">
+            <nav className="flex items-center gap-0.5 overflow-x-auto">
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/">Painel</Link>
               </Button>
@@ -147,8 +148,8 @@ function BalancesPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setManagerOpen(true)}>
-              <Settings2 className="mr-1 h-4 w-4" />
-              Gerenciar
+              <Settings2 className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Gerenciar</span>
             </Button>
             <ThemeToggle />
             <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
@@ -158,11 +159,9 @@ function BalancesPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-5 sm:px-6 sm:py-6">
         {loading ? (
-          <div className="grid min-h-96 place-items-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          <BalancesSkeleton />
         ) : (
           <>
             <section>
@@ -205,7 +204,7 @@ function BalancesPage() {
               </Card>
             </div>
 
-            <BalanceHistoryChart />
+            <LazyBalanceHistoryChart />
 
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {rows.map(({ account, change, pct }) => (
@@ -249,13 +248,14 @@ function BalancesPage() {
               <CardHeader>
                 <CardTitle className="text-base">Detalhamento por saldo</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-3 sm:px-6">
                 {rows.length === 0 ? (
                   <p className="py-8 text-center text-sm text-muted-foreground">
                     Nenhum saldo cadastrado ainda.
                   </p>
                 ) : (
-                  <Table>
+                  <div className="-mx-3 overflow-x-auto px-3 sm:mx-0 sm:px-0">
+                  <Table className="min-w-[720px]">
                     <TableHeader>
                       <TableRow>
                         <TableHead>Saldo</TableHead>
@@ -293,6 +293,7 @@ function BalancesPage() {
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
                 )}
               </CardContent>
             </Card>

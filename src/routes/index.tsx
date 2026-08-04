@@ -266,7 +266,7 @@ function Dashboard() {
           <CardHeader>
             <CardTitle className="text-base">Transações do mês</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-3 sm:px-6">
             <TransactionsTable
               transactions={monthTx}
               onEdit={(t) => {

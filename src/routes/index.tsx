@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Car, ChevronDown, KeyRound, Landmark, Loader2, LogOut, Menu, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
 import {
@@ -20,16 +20,19 @@ import { SummaryCards } from "@/components/finance/SummaryCards";
 import { TransactionModal } from "@/components/finance/TransactionModal";
 import { TransactionsTable } from "@/components/finance/TransactionsTable";
 import { CategoriesManager } from "@/components/finance/CategoriesManager";
-import { ImportModal } from "@/components/finance/ImportModal";
+const ImportModal = lazy(() =>
+  import("@/components/finance/ImportModal").then((m) => ({ default: m.ImportModal })),
+);
 import { RulesManager } from "@/components/finance/RulesManager";
 import { AccountsManager } from "@/components/finance/AccountsManager";
 import { Login } from "@/components/finance/Login";
+import { DashboardSkeleton } from "@/components/finance/Skeletons";
 import {
-  ExpenseBreakdownChart,
-  IncomeBreakdownChart,
-  MonthlyComparisonChart,
-  PaymentMethodChart,
-} from "@/components/finance/Charts";
+  LazyExpenseBreakdownChart,
+  LazyIncomeBreakdownChart,
+  LazyMonthlyComparisonChart,
+  LazyPaymentMethodChart,
+} from "@/components/finance/LazyCharts";
 
 import { ThemeToggle } from "@/components/finance/ThemeToggle";
 import { FinanceProvider, useFinance } from "@/lib/finance-store";
@@ -215,17 +218,15 @@ function Dashboard() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-5 sm:px-6 sm:py-6">
         {loading ? (
-          <div className="grid min-h-96 place-items-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          <DashboardSkeleton />
         ) : (
           <>
-        <section className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+        <section className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <p className="text-sm text-muted-foreground">Período</p>
-            <h2 className="text-xl font-semibold tracking-tight">
+            <h2 className="truncate text-lg font-semibold tracking-tight sm:text-xl">
               {monthNamesPt[month - 1]} / {year}
             </h2>
           </div>
@@ -239,6 +240,7 @@ function Dashboard() {
               }}
             />
             <Button
+              className="w-full sm:w-auto"
               onClick={() => {
                 setEditing(null);
                 setModalOpen(true);
@@ -253,20 +255,20 @@ function Dashboard() {
         <SummaryCards income={income} expense={expense} accountsTotal={accountsTotal} />
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <ExpenseBreakdownChart monthTransactions={monthTx} />
-          <IncomeBreakdownChart monthTransactions={monthTx} />
+          <LazyExpenseBreakdownChart monthTransactions={monthTx} />
+          <LazyIncomeBreakdownChart monthTransactions={monthTx} />
         </div>
 
-        <PaymentMethodChart monthTransactions={monthTx} />
+        <LazyPaymentMethodChart monthTransactions={monthTx} />
 
-        <MonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
+        <LazyMonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
 
 
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Transações do mês</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-3 sm:px-6">
             <TransactionsTable
               transactions={monthTx}
               onEdit={(t) => {
@@ -289,7 +291,11 @@ function Dashboard() {
         ).padStart(2, "0")}`}
       />
       <CategoriesManager open={catOpen} onOpenChange={setCatOpen} />
-      <ImportModal open={importOpen} onOpenChange={setImportOpen} />
+      {importOpen && (
+        <Suspense fallback={null}>
+          <ImportModal open={importOpen} onOpenChange={setImportOpen} />
+        </Suspense>
+      )}
       <RulesManager open={rulesOpen} onOpenChange={setRulesOpen} />
       <AccountsManager open={accountsOpen} onOpenChange={setAccountsOpen} />
       <ApiTokensManager open={apiOpen} onOpenChange={setApiOpen} />

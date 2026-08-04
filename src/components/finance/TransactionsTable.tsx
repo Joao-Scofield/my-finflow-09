@@ -128,7 +128,81 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
         </Select>
       </div>
 
-      <div className="overflow-hidden rounded-lg border">
+      {/* Mobile: card list */}
+      <div className="space-y-2 md:hidden">
+        {filtered.length === 0 && (
+          <p className="rounded-lg border py-10 text-center text-sm text-muted-foreground">
+            Nenhuma transação encontrada.
+          </p>
+        )}
+        {filtered.map((t) => {
+          const cat = catMap.get(t.categoryId);
+          const sub = cat?.subcategories.find((s) => s.id === t.subcategoryId);
+          return (
+            <div key={t.id} className="rounded-lg border p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{t.description || "—"}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {new Date(t.date + "T00:00:00").toLocaleDateString("pt-BR")}
+                    {sub ? ` · ${sub.name}` : ""}
+                  </p>
+                </div>
+                <p
+                  className={cn(
+                    "shrink-0 whitespace-nowrap text-right font-semibold tabular-nums",
+                    t.type === "income" ? "text-income" : "text-expense",
+                  )}
+                >
+                  {t.type === "income" ? "+" : "-"} {formatBRL(t.amount)}
+                </p>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs">
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{ backgroundColor: cat?.color ?? "#888" }}
+                  />
+                  {cat?.name ?? "—"}
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs">
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{ backgroundColor: paymentMethodColor(t.paymentMethod) }}
+                  />
+                  {paymentMethodLabel(t.paymentMethod)}
+                </span>
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "text-xs",
+                    t.status === "paid"
+                      ? "border-income/40 bg-income/10 text-income"
+                      : "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                  )}
+                >
+                  {t.status === "paid" ? "Pago" : "Pendente"}
+                </Badge>
+                <div className="ml-auto flex gap-1">
+                  <Button size="icon" variant="ghost" onClick={() => onEdit(t)} aria-label="Editar">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => deleteTransaction(t.id)}
+                    aria-label="Excluir"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="hidden overflow-x-auto rounded-lg border md:block">
         <Table>
           <TableHeader>
             <TableRow>

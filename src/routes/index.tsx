@@ -216,17 +216,15 @@ function Dashboard() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-5 sm:px-6 sm:py-6">
         {loading ? (
-          <div className="grid min-h-96 place-items-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          <DashboardSkeleton />
         ) : (
           <>
-        <section className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+        <section className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <p className="text-sm text-muted-foreground">Período</p>
-            <h2 className="text-xl font-semibold tracking-tight">
+            <h2 className="truncate text-lg font-semibold tracking-tight sm:text-xl">
               {monthNamesPt[month - 1]} / {year}
             </h2>
           </div>
@@ -240,6 +238,7 @@ function Dashboard() {
               }}
             />
             <Button
+              className="w-full sm:w-auto"
               onClick={() => {
                 setEditing(null);
                 setModalOpen(true);
@@ -254,13 +253,13 @@ function Dashboard() {
         <SummaryCards income={income} expense={expense} accountsTotal={accountsTotal} />
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <ExpenseBreakdownChart monthTransactions={monthTx} />
-          <IncomeBreakdownChart monthTransactions={monthTx} />
+          <LazyExpenseBreakdownChart monthTransactions={monthTx} />
+          <LazyIncomeBreakdownChart monthTransactions={monthTx} />
         </div>
 
-        <PaymentMethodChart monthTransactions={monthTx} />
+        <LazyPaymentMethodChart monthTransactions={monthTx} />
 
-        <MonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
+        <LazyMonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
 
 
         <Card>

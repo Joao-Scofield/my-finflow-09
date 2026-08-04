@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Car, ChevronDown, KeyRound, Landmark, Loader2, LogOut, Menu, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
 import {
@@ -20,7 +20,9 @@ import { SummaryCards } from "@/components/finance/SummaryCards";
 import { TransactionModal } from "@/components/finance/TransactionModal";
 import { TransactionsTable } from "@/components/finance/TransactionsTable";
 import { CategoriesManager } from "@/components/finance/CategoriesManager";
-import { ImportModal } from "@/components/finance/ImportModal";
+const ImportModal = lazy(() =>
+  import("@/components/finance/ImportModal").then((m) => ({ default: m.ImportModal })),
+);
 import { RulesManager } from "@/components/finance/RulesManager";
 import { AccountsManager } from "@/components/finance/AccountsManager";
 import { Login } from "@/components/finance/Login";
@@ -289,7 +291,11 @@ function Dashboard() {
         ).padStart(2, "0")}`}
       />
       <CategoriesManager open={catOpen} onOpenChange={setCatOpen} />
-      <ImportModal open={importOpen} onOpenChange={setImportOpen} />
+      {importOpen && (
+        <Suspense fallback={null}>
+          <ImportModal open={importOpen} onOpenChange={setImportOpen} />
+        </Suspense>
+      )}
       <RulesManager open={rulesOpen} onOpenChange={setRulesOpen} />
       <AccountsManager open={accountsOpen} onOpenChange={setAccountsOpen} />
       <ApiTokensManager open={apiOpen} onOpenChange={setApiOpen} />

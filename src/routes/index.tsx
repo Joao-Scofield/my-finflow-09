@@ -24,12 +24,13 @@ import { ImportModal } from "@/components/finance/ImportModal";
 import { RulesManager } from "@/components/finance/RulesManager";
 import { AccountsManager } from "@/components/finance/AccountsManager";
 import { Login } from "@/components/finance/Login";
+import { DashboardSkeleton } from "@/components/finance/Skeletons";
 import {
-  ExpenseBreakdownChart,
-  IncomeBreakdownChart,
-  MonthlyComparisonChart,
-  PaymentMethodChart,
-} from "@/components/finance/Charts";
+  LazyExpenseBreakdownChart,
+  LazyIncomeBreakdownChart,
+  LazyMonthlyComparisonChart,
+  LazyPaymentMethodChart,
+} from "@/components/finance/LazyCharts";
 
 import { ThemeToggle } from "@/components/finance/ThemeToggle";
 import { FinanceProvider, useFinance } from "@/lib/finance-store";

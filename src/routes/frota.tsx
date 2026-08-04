@@ -19,12 +19,12 @@ import { PeriodSelector } from "@/components/finance/PeriodSelector";
 import { ThemeToggle } from "@/components/finance/ThemeToggle";
 import { Login } from "@/components/finance/Login";
 import {
-  CostCompositionChart,
-  CostPerKmChart,
-  VehicleComparisonChart,
-  costInMonth,
-  kmInMonth,
-} from "@/components/fleet/FleetCharts";
+  LazyCostCompositionChart,
+  LazyCostPerKmChart,
+  LazyVehicleComparisonChart,
+} from "@/components/fleet/LazyFleetCharts";
+import { costInMonth, kmInMonth } from "@/lib/fleet-metrics";
+import { DashboardSkeleton } from "@/components/finance/Skeletons";
 import {
   FixedCostDialog,
   FuelingDialog,
@@ -185,7 +185,7 @@ function FleetPage() {
             <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
               <Car className="h-5 w-5" />
             </div>
-            <nav className="flex items-center gap-1">
+            <nav className="flex items-center gap-0.5 overflow-x-auto">
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/">Painel</Link>
               </Button>
@@ -206,11 +206,9 @@ function FleetPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-5 sm:px-6 sm:py-6">
         {loading ? (
-          <div className="grid min-h-96 place-items-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          <DashboardSkeleton />
         ) : (
           <>
             <section className="flex flex-wrap items-center justify-between gap-3">
@@ -313,11 +311,11 @@ function FleetPage() {
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-2">
-                  <CostPerKmChart month={month} year={year} vehicle={selected} />
-                  <CostCompositionChart month={month} year={year} vehicle={selected} />
+                  <LazyCostPerKmChart month={month} year={year} vehicle={selected} />
+                  <LazyCostCompositionChart month={month} year={year} vehicle={selected} />
                 </div>
 
-                <VehicleComparisonChart month={month} year={year} />
+                <LazyVehicleComparisonChart month={month} year={year} />
 
                 <Card>
                   <CardHeader>
@@ -406,7 +404,7 @@ function FleetPage() {
                 </Card>
 
                 <Tabs defaultValue="fuel">
-                  <TabsList>
+                  <TabsList className="w-full justify-start overflow-x-auto">
                     <TabsTrigger value="fuel">Abastecimentos</TabsTrigger>
                     <TabsTrigger value="maint">Manutenções</TabsTrigger>
                     <TabsTrigger value="fixed">Custos fixos</TabsTrigger>
@@ -421,8 +419,8 @@ function FleetPage() {
                           Novo
                         </Button>
                       </CardHeader>
-                      <CardContent className="overflow-x-auto">
-                        <Table>
+                      <CardContent className="overflow-x-auto px-3 sm:px-6">
+                        <Table className="min-w-[720px]">
                           <TableHeader>
                             <TableRow>
                               <TableHead>Data</TableHead>
@@ -489,8 +487,8 @@ function FleetPage() {
                           Nova
                         </Button>
                       </CardHeader>
-                      <CardContent className="overflow-x-auto">
-                        <Table>
+                      <CardContent className="overflow-x-auto px-3 sm:px-6">
+                        <Table className="min-w-[720px]">
                           <TableHeader>
                             <TableRow>
                               <TableHead>Data</TableHead>
@@ -555,8 +553,8 @@ function FleetPage() {
                           Novo
                         </Button>
                       </CardHeader>
-                      <CardContent className="overflow-x-auto">
-                        <Table>
+                      <CardContent className="overflow-x-auto px-3 sm:px-6">
+                        <Table className="min-w-[720px]">
                           <TableHeader>
                             <TableRow>
                               <TableHead>Nome</TableHead>

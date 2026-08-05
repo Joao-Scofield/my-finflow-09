@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Car, ChevronDown, KeyRound, Landmark, Loader2, LogOut, Menu, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
+import { CalendarClock, Car, ChevronDown, KeyRound, Landmark, Loader2, LogOut, Menu, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,7 @@ import { CategoriesManager } from "@/components/finance/CategoriesManager";
 const ImportModal = lazy(() =>
   import("@/components/finance/ImportModal").then((m) => ({ default: m.ImportModal })),
 );
+import { RecurringsManager } from "@/components/finance/RecurringsManager";
 import { RulesManager } from "@/components/finance/RulesManager";
 import { AccountsManager } from "@/components/finance/AccountsManager";
 import { Login } from "@/components/finance/Login";
@@ -117,6 +118,7 @@ function Dashboard() {
   const [rulesOpen, setRulesOpen] = useState(false);
   const [accountsOpen, setAccountsOpen] = useState(false);
   const [apiOpen, setApiOpen] = useState(false);
+  const [recurringOpen, setRecurringOpen] = useState(false);
 
   const { transactions, accounts, profile, loading } = useFinance();
 
@@ -178,6 +180,10 @@ function Dashboard() {
                 <DropdownMenuItem onSelect={() => setAccountsOpen(true)}>
                   <Landmark className="mr-2 h-4 w-4" />
                   Gerenciar saldos
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setRecurringOpen(true)}>
+                  <CalendarClock className="mr-2 h-4 w-4" />
+                  Recorrentes
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setRulesOpen(true)}>
                   <Sparkles className="mr-2 h-4 w-4" />
@@ -296,6 +302,7 @@ function Dashboard() {
           <ImportModal open={importOpen} onOpenChange={setImportOpen} />
         </Suspense>
       )}
+      <RecurringsManager open={recurringOpen} onOpenChange={setRecurringOpen} />
       <RulesManager open={rulesOpen} onOpenChange={setRulesOpen} />
       <AccountsManager open={accountsOpen} onOpenChange={setAccountsOpen} />
       <ApiTokensManager open={apiOpen} onOpenChange={setApiOpen} />

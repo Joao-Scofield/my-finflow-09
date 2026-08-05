@@ -357,7 +357,7 @@ export function FuelingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+      <DialogContent className="max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Novo abastecimento</DialogTitle>
           <DialogDescription>Base para consumo (km/l) e custo por km.</DialogDescription>
@@ -494,7 +494,7 @@ export function MaintenanceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+      <DialogContent className="max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nova manutenção</DialogTitle>
           <DialogDescription>Revisões, óleo, pneus, freios e reparos.</DialogDescription>
@@ -622,7 +622,7 @@ export function FixedCostDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+      <DialogContent className="max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Novo custo fixo</DialogTitle>
           <DialogDescription>IPVA, seguro, licenciamento, financiamento.</DialogDescription>

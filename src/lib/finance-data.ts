@@ -91,7 +91,23 @@ export interface Transaction {
   accountId?: string;
 }
 
+export interface Recurring {
+  id: string;
+  type: TxType;
+  amount: number;
+  description: string;
+  categoryId: string;
+  subcategoryId?: string;
+  accountId?: string;
+  paymentMethod: PaymentMethod;
+  dayOfMonth: number;
+  startDate: string; // yyyy-mm-dd
+  endDate?: string;
+  active: boolean;
+}
+
 export interface Rule {
+
   id: string;
   name: string;
   keywords: string[]; // matches if any keyword is a case-insensitive substring of description

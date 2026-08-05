@@ -281,7 +281,20 @@ async function generateRecurringTransactions(
   );
   const now = new Date();
   const lastIndex = now.getFullYear() * 12 + now.getMonth();
-  const rows: Record<string, unknown>[] = [];
+  const rows: {
+    user_id: string;
+    type: string;
+    amount: number;
+    transaction_date: string;
+    category_id: string;
+    subcategory_id: string | null;
+    description: string;
+    status: string;
+    payment_method: string;
+    account_id: string | null;
+    recurring_id: string;
+    recurring_month: string;
+  }[] = [];
 
   for (const r of recurrings) {
     if (!r.active) continue;

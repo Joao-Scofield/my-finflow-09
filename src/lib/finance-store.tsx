@@ -8,6 +8,7 @@ import {
   type Account,
   type AccountKind,
   type Category,
+  type Recurring,
   type Rule,
   type Subcategory,
   type PaymentMethod,
@@ -39,6 +40,7 @@ interface Profile {
 
 interface Ctx {
   categories: Category[];
+  recurrings: Recurring[];
   transactions: Transaction[];
   rules: Rule[];
   accounts: Account[];
@@ -64,6 +66,9 @@ interface Ctx {
   addRule: (r: Omit<Rule, "id">) => Promise<void>;
   updateRule: (id: string, patch: Partial<Omit<Rule, "id">>) => Promise<void>;
   deleteRule: (id: string) => Promise<void>;
+  addRecurring: (r: Omit<Recurring, "id">) => Promise<void>;
+  updateRecurring: (id: string, patch: Partial<Omit<Recurring, "id">>) => Promise<void>;
+  deleteRecurring: (id: string) => Promise<void>;
   matchRule: (description: string) => RuleMatchResult | null;
   reapplyRulesAll: () => Promise<{ updated: number }>;
 }
@@ -104,6 +109,21 @@ type AccountRow = {
   balance: number;
   color: string;
   position: number;
+};
+
+type RecurringRow = {
+  id: string;
+  type: string;
+  amount: number;
+  description: string;
+  category_id: string;
+  subcategory_id: string | null;
+  account_id: string | null;
+  payment_method: string;
+  day_of_month: number;
+  start_date: string;
+  end_date: string | null;
+  active: boolean;
 };
 
 type RuleRow = {
@@ -217,6 +237,96 @@ function withComputedBalances(accounts: Account[], transactions: Transaction[]):
 }
 
 
+function mapRecurrings(rows: RecurringRow[]): Recurring[] {
+  return rows.map((row) => ({
+    id: row.id,
+    type: row.type as TxType,
+    amount: Number(row.amount),
+    description: row.description,
+    categoryId: row.category_id,
+    subcategoryId: row.subcategory_id ?? undefined,
+    accountId: row.account_id ?? undefined,
+    paymentMethod: (row.payment_method ?? "outro") as PaymentMethod,
+    dayOfMonth: row.day_of_month,
+    startDate: row.start_date,
+    endDate: row.end_date ?? undefined,
+    active: row.active,
+  }));
+}
+
+const RECURRING_SELECT =
+  "id,type,amount,description,category_id,subcategory_id,account_id,payment_method,day_of_month,start_date,end_date,active";
+
+const TRANSACTION_SELECT =
+  "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id,recurring_id,recurring_month";
+
+function monthKey(year: number, month: number) {
+  return `${year}-${String(month).padStart(2, "0")}`;
+}
+
+function daysInMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate();
+}
+
+/** Gera os lançamentos mensais faltantes das recorrências ativas (do início até o mês atual). */
+async function generateRecurringTransactions(
+  userId: string,
+  recurrings: Recurring[],
+  existing: { recurring_id: string | null; recurring_month: string | null }[],
+) {
+  const done = new Set(
+    existing
+      .filter((t) => t.recurring_id && t.recurring_month)
+      .map((t) => `${t.recurring_id}|${t.recurring_month}`),
+  );
+  const now = new Date();
+  const lastIndex = now.getFullYear() * 12 + now.getMonth();
+  const rows: Record<string, unknown>[] = [];
+
+  for (const r of recurrings) {
+    if (!r.active) continue;
+    const [sy, sm] = r.startDate.split("-").map(Number);
+    if (!sy || !sm) continue;
+    let index = (sy as number) * 12 + ((sm as number) - 1);
+    // limite de 24 meses retroativos para não gerar histórico infinito
+    index = Math.max(index, lastIndex - 23);
+    let endIndex = lastIndex;
+    if (r.endDate) {
+      const [ey, em] = r.endDate.split("-").map(Number);
+      if (ey && em) endIndex = Math.min(endIndex, (ey as number) * 12 + ((em as number) - 1));
+    }
+    for (; index <= endIndex; index++) {
+      const year = Math.floor(index / 12);
+      const month = (index % 12) + 1;
+      const key = monthKey(year, month);
+      if (done.has(`${r.id}|${key}`)) continue;
+      const day = Math.min(Math.max(r.dayOfMonth, 1), daysInMonth(year, month));
+      rows.push({
+        user_id: userId,
+        type: r.type,
+        amount: r.amount,
+        transaction_date: `${key}-${String(day).padStart(2, "0")}`,
+        category_id: r.categoryId,
+        subcategory_id: r.subcategoryId ?? null,
+        description: r.description,
+        status: "paid",
+        payment_method: r.paymentMethod,
+        account_id: r.accountId ?? null,
+        recurring_id: r.id,
+        recurring_month: key,
+      });
+    }
+  }
+
+  if (rows.length === 0) return 0;
+  const { error } = await supabase.from("finance_transactions").insert(rows);
+  if (error) {
+    console.error(error);
+    return 0;
+  }
+  return rows.length;
+}
+
 function mapRules(rows: RuleRow[]): Rule[] {
   return rows.map((row) => ({
     id: row.id,
@@ -239,6 +349,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [rules, setRules] = useState<Rule[]>([]);
+  const [recurrings, setRecurrings] = useState<Recurring[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -256,6 +367,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         transactionsResult,
         rulesResult,
         accountsResult,
+        recurringsResult,
       ] =
         await Promise.all([
           supabase.from("profiles").select("username, display_name").eq("user_id", userId).maybeSingle(),
@@ -263,9 +375,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           supabase.from("finance_subcategories").select("id,category_id,name,position").order("position"),
           supabase
             .from("finance_transactions")
-            .select(
-              "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id",
-            )
+            .select(TRANSACTION_SELECT)
             .order("transaction_date", { ascending: false }),
           supabase
             .from("finance_rules")
@@ -275,6 +385,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             .from("finance_accounts")
             .select("id,name,kind,balance,color,position")
             .order("position"),
+          supabase.from("finance_recurrings").select(RECURRING_SELECT).order("created_at"),
         ]);
 
       if (profileResult.error) throw profileResult.error;
@@ -283,6 +394,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       if (transactionsResult.error) throw transactionsResult.error;
       if (rulesResult.error) throw rulesResult.error;
       if (accountsResult.error) throw accountsResult.error;
+      if (recurringsResult.error) throw recurringsResult.error;
 
       setProfile(
         profileResult.data
@@ -295,7 +407,23 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       setCategories(
         mapCategories(categoriesResult.data as CategoryRow[], subcategoriesResult.data as SubcategoryRow[]),
       );
-      setTransactions(mapTransactions(transactionsResult.data as TransactionRow[]));
+      const recurringList = mapRecurrings(recurringsResult.data as RecurringRow[]);
+      setRecurrings(recurringList);
+
+      let transactionRows = transactionsResult.data as TransactionRow[];
+      const generated = await generateRecurringTransactions(
+        userId,
+        recurringList,
+        transactionsResult.data as { recurring_id: string | null; recurring_month: string | null }[],
+      );
+      if (generated > 0) {
+        const { data: refreshed } = await supabase
+          .from("finance_transactions")
+          .select(TRANSACTION_SELECT)
+          .order("transaction_date", { ascending: false });
+        if (refreshed) transactionRows = refreshed as TransactionRow[];
+      }
+      setTransactions(mapTransactions(transactionRows));
       setRules(mapRules(rulesResult.data as RuleRow[]));
       setAccounts(mapAccounts(accountsResult.data as AccountRow[]));
     } catch (error) {
@@ -408,6 +536,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       categories,
       transactions,
       rules,
+      recurrings,
       accounts: withComputedBalances(accounts, transactions),
       profile,
       refresh,
@@ -666,6 +795,48 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
         await refresh();
       },
+      addRecurring: async (r) => {
+        const userId = await getCurrentUserId();
+        const { error } = await supabase.from("finance_recurrings").insert({
+          user_id: userId,
+          type: r.type,
+          amount: r.amount,
+          description: r.description,
+          category_id: r.categoryId,
+          subcategory_id: r.subcategoryId ?? null,
+          account_id: r.accountId ?? null,
+          payment_method: r.paymentMethod,
+          day_of_month: r.dayOfMonth,
+          start_date: r.startDate,
+          end_date: r.endDate ?? null,
+          active: r.active,
+        });
+        if (error) throw error;
+        await refresh();
+      },
+      updateRecurring: async (id, patch) => {
+        const payload = {
+          ...(patch.type !== undefined ? { type: patch.type } : {}),
+          ...(patch.amount !== undefined ? { amount: patch.amount } : {}),
+          ...(patch.description !== undefined ? { description: patch.description } : {}),
+          ...(patch.categoryId !== undefined ? { category_id: patch.categoryId } : {}),
+          ...(patch.subcategoryId !== undefined ? { subcategory_id: patch.subcategoryId ?? null } : {}),
+          ...(patch.accountId !== undefined ? { account_id: patch.accountId ?? null } : {}),
+          ...(patch.paymentMethod !== undefined ? { payment_method: patch.paymentMethod } : {}),
+          ...(patch.dayOfMonth !== undefined ? { day_of_month: patch.dayOfMonth } : {}),
+          ...(patch.startDate !== undefined ? { start_date: patch.startDate } : {}),
+          ...(patch.endDate !== undefined ? { end_date: patch.endDate ?? null } : {}),
+          ...(patch.active !== undefined ? { active: patch.active } : {}),
+        };
+        const { error } = await supabase.from("finance_recurrings").update(payload).eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      deleteRecurring: async (id) => {
+        const { error } = await supabase.from("finance_recurrings").delete().eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
       matchRule: (description) => matchRuleFor(description, rules, categories),
       reapplyRulesAll: async () => {
         let updated = 0;
@@ -694,7 +865,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         return { updated };
       },
     }),
-    [accounts, categories, loading, profile, refresh, rules, transactions],
+    [accounts, categories, loading, profile, recurrings, refresh, rules, transactions],
   );
 
   return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;

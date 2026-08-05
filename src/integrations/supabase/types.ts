@@ -119,6 +119,82 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_recurrings: {
+        Row: {
+          account_id: string | null
+          active: boolean
+          amount: number
+          category_id: string
+          created_at: string
+          day_of_month: number
+          description: string
+          end_date: string | null
+          id: string
+          payment_method: string
+          start_date: string
+          subcategory_id: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          active?: boolean
+          amount: number
+          category_id: string
+          created_at?: string
+          day_of_month?: number
+          description?: string
+          end_date?: string | null
+          id?: string
+          payment_method?: string
+          start_date?: string
+          subcategory_id?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          active?: boolean
+          amount?: number
+          category_id?: string
+          created_at?: string
+          day_of_month?: number
+          description?: string
+          end_date?: string | null
+          id?: string
+          payment_method?: string
+          start_date?: string
+          subcategory_id?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_recurrings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "finance_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_recurrings_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "finance_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_recurrings_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "finance_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       finance_rules: {
         Row: {
           category_id: string
@@ -220,6 +296,8 @@ export type Database = {
           description: string
           id: string
           payment_method: string
+          recurring_id: string | null
+          recurring_month: string | null
           status: string
           subcategory_id: string | null
           transaction_date: string
@@ -235,6 +313,8 @@ export type Database = {
           description?: string
           id?: string
           payment_method?: string
+          recurring_id?: string | null
+          recurring_month?: string | null
           status: string
           subcategory_id?: string | null
           transaction_date: string
@@ -250,6 +330,8 @@ export type Database = {
           description?: string
           id?: string
           payment_method?: string
+          recurring_id?: string | null
+          recurring_month?: string | null
           status?: string
           subcategory_id?: string | null
           transaction_date?: string
@@ -270,6 +352,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "finance_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_transactions_recurring_id_fkey"
+            columns: ["recurring_id"]
+            isOneToOne: false
+            referencedRelation: "finance_recurrings"
             referencedColumns: ["id"]
           },
           {

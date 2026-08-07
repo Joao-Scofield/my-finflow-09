@@ -1,46 +1,47 @@
 ## Objetivo
 
-Criar uma página dedicada à gestão financeira de frota, com custo por km rodado por veículo.
-
-## Navegação
-
-- Nova rota `/frota`, com um menu no topo alternando entre **Painel** e **Frota** (mesmo cabeçalho, tema claro/escuro e login já existentes).
+Nova aba **Lista de compras / desejos** (`/lista`), no mesmo estilo das abas Saldos e Frota, para cadastrar itens que você quer comprar.
 
 ## O que a página terá
 
-**1. Veículos**
-Cadastro de veículos: nome/apelido, placa, marca/modelo, ano, tipo de combustível, odômetro inicial e odômetro atual. Cartão por veículo mostrando km rodados, custo total e **custo por km**.
+**Cadastro de item**
+- Nome do item
+- Valor estimado
+- Link de compra (abre em nova aba)
+- Loja
+- Quantidade
+- Prioridade: alta / média / baixa
+- Categoria (usa as mesmas categorias de despesa do financeiro)
+- Observações
 
-**2. Abastecimentos**
-Data, veículo, odômetro, litros, preço por litro (ou total), posto e tipo de combustível. A partir disso o sistema calcula:
-- km rodados entre abastecimentos
-- consumo médio (km/l)
-- custo de combustível por km
+**Lista única com filtros**
+- Filtro por prioridade, categoria e por status (pendentes / comprados)
+- Ordenação por prioridade, valor ou data de criação
+- Agrupamento visual por categoria
+- Busca por nome
 
-**3. Manutenções e pneus**
-Data, veículo, odômetro, tipo (revisão, óleo, pneus, freios, outro), descrição, valor e, opcionalmente, "próxima revisão em X km" — com aviso quando o odômetro se aproximar.
+**Cards de resumo**
+- Total estimado dos itens pendentes
+- Total já comprado
+- Quantidade de itens por prioridade
 
-**4. Custos fixos**
-IPVA, seguro, licenciamento, financiamento/parcela: valor, periodicidade (mensal/anual/único) e vigência. Rateados proporcionalmente no período analisado.
+**Marcar como comprado**
+- Ao marcar, abre uma confirmação com a opção "lançar no financeiro" (igual à Frota): valor real pago, data, categoria/subcategoria, saldo (conta) e forma de pagamento.
+- Marcando a opção, cria automaticamente uma saída em Lançamentos vinculada ao item; desmarcando/desfazendo a compra, o lançamento vinculado é removido.
+- Sem marcar, o item só fica registrado como comprado na lista.
 
-**5. Indicadores e gráficos**
-- Cards: km rodados no período, gasto total, custo/km, consumo médio, gasto por categoria (combustível, manutenção, fixos).
-- Gráfico de evolução do custo por km ao longo dos meses.
-- Gráfico de composição dos custos (combustível x manutenção x fixos).
-- Comparativo entre veículos quando houver mais de um.
-
-**6. Integração opcional com o financeiro**
-Cada abastecimento, manutenção ou custo fixo terá a opção "lançar no financeiro". Quando marcada, cria automaticamente uma saída com categoria (ex.: Frota > Combustível) e o saldo/conta escolhido, exatamente como um lançamento manual. Sem marcar, o registro fica só no módulo de frota.
+**Mobile**
+- Cartões no celular (em vez de tabela), com o mesmo padrão já usado na tabela de transações.
 
 ## Detalhes técnicos
 
-- Migração no banco criando `fleet_vehicles`, `fleet_fuelings`, `fleet_maintenances` e `fleet_fixed_costs`, todas com `user_id`, RLS por dono e GRANTs — mesmo padrão das tabelas atuais.
-- Quando "lançar no financeiro" estiver marcado, o registro guarda o id da transação criada em `finance_transactions`, para que editar/excluir na frota reflita no financeiro.
-- Store própria (`fleet-store`) seguindo o padrão de `finance-store`, com cálculos derivados (km, consumo, custo/km) feitos no cliente.
-- Componentes novos em `src/components/fleet/`; rota em `src/routes/frota.tsx` com metadados próprios de SEO.
-- Cores e textos usando os tokens do tema atual (legível em claro e escuro).
+- Migração criando `shopping_items` com `user_id`, RLS por dono e GRANTs, seguindo o padrão das tabelas atuais. Campos: nome, valor estimado, valor pago, link, loja, quantidade, prioridade, `category_id`/`subcategory_id`, notas, `purchased` + `purchased_at`, `transaction_id` (vínculo com `finance_transactions`), `position`.
+- Store própria `src/lib/shopping-store.tsx` no padrão do `fleet-store`, incluindo criação/remoção da transação vinculada.
+- Componentes em `src/components/shopping/`; rota `src/routes/lista.tsx` com head() próprio de SEO e skeleton de carregamento.
+- Link "Lista" adicionado à navegação dos cabeçalhos de `/`, `/saldos` e `/frota`.
+- Cores e prioridade usando tokens do tema (legível em claro e escuro).
 
 ## Fora do escopo agora
 
-- Motoristas, jornadas e rastreamento por GPS.
-- Importação de planilhas de abastecimento (pode vir depois, reaproveitando o importador atual).
+- Várias listas separadas (fica uma lista única com filtros).
+- Comparação de preços automática ou leitura de preço pelo link.

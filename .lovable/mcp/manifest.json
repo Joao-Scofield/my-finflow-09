@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://frfwrwqkypoyaoufxqsu.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "my-money-garden",
+      "version": "0.1.0",
+      "title": "My Money Garden"
+    },
+    "tools": [
+      {
+        "name": "list_categories",
+        "title": "List categories",
+        "description": "List the signed-in user's income and expense categories with their subcategories and ids.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_accounts",
+        "title": "List accounts (saldos)",
+        "description": "List the signed-in user's accounts/balances (saldos) with their ids, kind and current balance.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_transactions",
+        "title": "List transactions",
+        "description": "List the signed-in user's transactions, optionally filtered by date range and type. Returns the most recent first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "description": "Start date (inclusive), format YYYY-MM-DD."
+            },
+            "to": {
+              "type": "string",
+              "description": "End date (inclusive), format YYYY-MM-DD."
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "income",
+                "expense"
+              ],
+              "description": "Filter by income or expense."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum rows to return (default 50, max 200)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_transaction",
+        "title": "Create transaction",
+        "description": "Create an income or expense for the signed-in user. Use list_categories and list_accounts first to get valid ids.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "income",
+                "expense"
+              ],
+              "description": "Income or expense."
+            },
+            "amount": {
+              "type": "number",
+              "description": "Positive amount in BRL."
+            },
+            "date": {
+              "type": "string",
+              "description": "Transaction date, format YYYY-MM-DD."
+            },
+            "description": {
+              "type": "string",
+              "description": "Short description of the transaction."
+            },
+            "categoryId": {
+              "type": "string",
+              "description": "Category id from list_categories."
+            },
+            "subcategoryId": {
+              "type": "string",
+              "description": "Optional subcategory id."
+            },
+            "accountId": {
+              "type": "string",
+              "description": "Optional account (saldo) id from list_accounts."
+            },
+            "paymentMethod": {
+              "type": "string",
+              "enum": [
+                "pix",
+                "credito",
+                "debito",
+                "dinheiro",
+                "vr",
+                "va",
+                "boleto",
+                "transferencia",
+                "investimento",
+                "outro"
+              ],
+              "description": "Payment method; defaults to 'outro'."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "paid",
+                "pending"
+              ],
+              "description": "Defaults to 'paid'."
+            }
+          },
+          "required": [
+            "type",
+            "amount",
+            "date",
+            "description",
+            "categoryId"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "monthly_summary",
+        "title": "Monthly summary",
+        "description": "Summarize the signed-in user's income, expenses, balance and totals per category for one month.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "month": {
+              "type": "string",
+              "description": "Month to summarize, format YYYY-MM (e.g. 2026-08)."
+            }
+          },
+          "required": [
+            "month"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

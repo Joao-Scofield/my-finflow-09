@@ -211,6 +211,12 @@ function Dashboard() {
                     Frota
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/lista">
+                    <ShoppingBag className="mr-2 h-4 w-4" />
+                    Lista de compras
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => handleSignOut()}>
                   <LogOut className="mr-2 h-4 w-4" />

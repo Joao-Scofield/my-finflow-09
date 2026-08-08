@@ -1,47 +1,35 @@
-## Objetivo
+# Corrigir cálculos da Frota + criar a Lista de Compras
 
-Nova aba **Lista de compras / desejos** (`/lista`), no mesmo estilo das abas Saldos e Frota, para cadastrar itens que você quer comprar.
+## 1. Frota: km/l e custo por km com um único abastecimento
 
-## O que a página terá
+Hoje os cálculos ignoram o odômetro inicial cadastrado no veículo:
 
-**Cadastro de item**
-- Nome do item
-- Valor estimado
-- Link de compra (abre em nova aba)
-- Loja
-- Quantidade
-- Prioridade: alta / média / baixa
-- Categoria (usa as mesmas categorias de despesa do financeiro)
-- Observações
+- `fuelStats` (src/lib/fleet-data.ts) mede a distância apenas entre o primeiro e o último abastecimento e descarta os litros do último. Com 1 abastecimento, distância = 0 e litros usados = 0, então **km/l fica 0**.
+- `kmInMonth` (src/lib/fleet-metrics.ts) usa como base o abastecimento anterior ao mês; se não existir, usa o próprio abastecimento do mês. Com 1 abastecimento, km do mês = 0, e como custo/km = custo ÷ km, o **gráfico de custo por km fica zerado**.
 
-**Lista única com filtros**
-- Filtro por prioridade, categoria e por status (pendentes / comprados)
-- Ordenação por prioridade, valor ou data de criação
-- Agrupamento visual por categoria
-- Busca por nome
+Correções:
 
-**Cards de resumo**
-- Total estimado dos itens pendentes
-- Total já comprado
-- Quantidade de itens por prioridade
+- Usar o odômetro inicial do veículo como base quando não há abastecimento anterior, tanto em `fuelStats` quanto em `kmInMonth` (passar o veículo/odômetro inicial para as funções e para os gráficos).
+- Em `fuelStats`, calcular km/l como distância percorrida ÷ litros abastecidos no período. Quando houver 2 ou mais abastecimentos, manter a regra mais precisa (descartar o último tanque); com apenas um, usar distância desde o odômetro inicial ÷ litros do abastecimento.
+- Atualizar `CostPerKmChart`, `CostCompositionChart` e `VehicleComparisonChart` (src/components/fleet/FleetCharts.tsx) e o resumo em src/routes/frota.tsx para receberem o odômetro inicial e refletirem os novos valores.
+- Exibir "—" em vez de R$ 0,00 / 0 km/l quando ainda não houver dados suficientes, para não parecer erro.
 
-**Marcar como comprado**
-- Ao marcar, abre uma confirmação com a opção "lançar no financeiro" (igual à Frota): valor real pago, data, categoria/subcategoria, saldo (conta) e forma de pagamento.
-- Marcando a opção, cria automaticamente uma saída em Lançamentos vinculada ao item; desmarcando/desfazendo a compra, o lançamento vinculado é removido.
-- Sem marcar, o item só fica registrado como comprado na lista.
+## 2. Nova aba Lista de Compras (/lista)
 
-**Mobile**
-- Cartões no celular (em vez de tabela), com o mesmo padrão já usado na tabela de transações.
+Página no mesmo padrão de Frota e Saldos, com dados salvos na nuvem por usuário.
+
+Campos do item: nome, valor estimado, link de compra, loja, quantidade, prioridade (alta/média/baixa), categoria opcional, observações e status (desejado / comprado).
+
+Funcionalidades:
+- Cards de resumo: total estimado dos itens pendentes, total já comprado e quantidade de itens.
+- Filtros por status e prioridade, ordenação por prioridade/valor.
+- Formulário em modal para criar e editar, botão de excluir.
+- Ao marcar como comprado: opção de lançar automaticamente a despesa no financeiro, escolhendo conta (saldo), categoria e valor realmente pago.
+- Layout em cards no celular e tabela no desktop, com skeletons de carregamento.
+- Link "Lista" na navegação das páginas Painel, Saldos e Frota.
 
 ## Detalhes técnicos
 
-- Migração criando `shopping_items` com `user_id`, RLS por dono e GRANTs, seguindo o padrão das tabelas atuais. Campos: nome, valor estimado, valor pago, link, loja, quantidade, prioridade, `category_id`/`subcategory_id`, notas, `purchased` + `purchased_at`, `transaction_id` (vínculo com `finance_transactions`), `position`.
-- Store própria `src/lib/shopping-store.tsx` no padrão do `fleet-store`, incluindo criação/remoção da transação vinculada.
-- Componentes em `src/components/shopping/`; rota `src/routes/lista.tsx` com head() próprio de SEO e skeleton de carregamento.
-- Link "Lista" adicionado à navegação dos cabeçalhos de `/`, `/saldos` e `/frota`.
-- Cores e prioridade usando tokens do tema (legível em claro e escuro).
-
-## Fora do escopo agora
-
-- Várias listas separadas (fica uma lista única com filtros).
-- Comparação de preços automática ou leitura de preço pelo link.
+- Migração: tabela `shopping_items` (user_id, name, estimated_amount, url, store, quantity, priority, category_id, notes, status, purchased_at, transaction_id) com GRANTs, RLS por `auth.uid()` e trigger de `updated_at`.
+- Store `src/lib/shopping-store.tsx` seguindo o padrão de `fleet-store.tsx`; rota `src/routes/lista.tsx` com `head()` próprio; componentes em `src/components/shopping/`.
+- Ao comprar com lançamento, criar a transação via store de finanças e guardar `transaction_id` para remover o lançamento se o item for desfeito/excluído.

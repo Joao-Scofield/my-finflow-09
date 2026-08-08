@@ -26,7 +26,7 @@ import {
   type Vehicle,
 } from "@/lib/fleet-data";
 import { monthNamesPt } from "@/lib/finance-data";
-import { costInMonth, kmInMonth } from "@/lib/fleet-metrics";
+import { costInMonth, kmInMonth, kmInMonthForVehicles } from "@/lib/fleet-metrics";
 
 const tooltipStyle = {
   background: "var(--popover)",

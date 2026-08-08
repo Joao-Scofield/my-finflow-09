@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SaldosRouteImport } from './routes/saldos'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as ListaRouteImport } from './routes/lista'
 import { Route as FrotaRouteImport } from './routes/frota'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -27,6 +28,11 @@ const SaldosRoute = SaldosRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListaRoute = ListaRouteImport.update({
+  id: '/lista',
+  path: '/lista',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FrotaRoute = FrotaRouteImport.update({
@@ -71,6 +77,7 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/frota': typeof FrotaRoute
+  '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
   '/saldos': typeof SaldosRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/frota': typeof FrotaRoute
+  '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
   '/saldos': typeof SaldosRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/frota': typeof FrotaRoute
+  '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
   '/saldos': typeof SaldosRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/frota'
+    | '/lista'
     | '/mcp'
     | '/saldos'
     | '/.mcp/list-tools'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/frota'
+    | '/lista'
     | '/mcp'
     | '/saldos'
     | '/.mcp/list-tools'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/frota'
+    | '/lista'
     | '/mcp'
     | '/saldos'
     | '/.mcp/list-tools'
@@ -141,6 +153,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FrotaRoute: typeof FrotaRoute
+  ListaRoute: typeof ListaRoute
   McpRoute: typeof McpRoute
   SaldosRoute: typeof SaldosRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -164,6 +177,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lista': {
+      id: '/lista'
+      path: '/lista'
+      fullPath: '/lista'
+      preLoaderRoute: typeof ListaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/frota': {
@@ -221,6 +241,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FrotaRoute: FrotaRoute,
+  ListaRoute: ListaRoute,
   McpRoute: McpRoute,
   SaldosRoute: SaldosRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,

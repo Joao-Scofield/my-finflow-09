@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarClock, Car, ChevronDown, KeyRound, Landmark, Loader2, LogOut, Menu, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
+import { CalendarClock, Car, ChevronDown, KeyRound, Landmark, Loader2, LogOut, Menu, Plus, Settings2, ShoppingBag, Sparkles, Upload, Wallet } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

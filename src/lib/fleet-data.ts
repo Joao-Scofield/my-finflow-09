@@ -147,9 +147,17 @@ export function fuelStats(fuelings: Fueling[], initialOdometer: number) {
   const last = sorted[sorted.length - 1];
   const baseOdometer = Math.min(initialOdometer || first.odometer, first.odometer);
   const km = Math.max(0, last.odometer - baseOdometer);
-  // litros usados para rodar: desconsidera o último abastecimento (tanque ainda não consumido)
-  const litersUsed = sorted.slice(0, -1).reduce((s, f) => s + f.liters, 0);
-  const kmBetween = Math.max(0, last.odometer - first.odometer);
-  const kmPerLiter = litersUsed > 0 && kmBetween > 0 ? kmBetween / litersUsed : 0;
+
+  let kmPerLiter = 0;
+  if (sorted.length >= 2) {
+    // litros usados para rodar: desconsidera o último abastecimento (tanque ainda não consumido)
+    const litersUsed = sorted.slice(0, -1).reduce((s, f) => s + f.liters, 0);
+    const kmBetween = Math.max(0, last.odometer - first.odometer);
+    if (litersUsed > 0 && kmBetween > 0) kmPerLiter = kmBetween / litersUsed;
+  }
+  // com um único abastecimento (ou dados insuficientes), usa o odômetro inicial do veículo
+  if (kmPerLiter === 0 && liters > 0 && km > 0) kmPerLiter = km / liters;
+
   return { km, liters, spent, kmPerLiter, lastOdometer: last.odometer };
 }
+

@@ -165,7 +165,7 @@ export function VehicleComparisonChart({ month, year }: { month: number; year: n
         const f = fuelings.filter((x) => x.vehicleId === v.id);
         const m = maintenances.filter((x) => x.vehicleId === v.id);
         const c = fixedCosts.filter((x) => x.vehicleId === v.id);
-        const km = kmInMonth(f, year, month);
+        const km = kmInMonth(f, year, month, v.initialOdometer);
         const { total } = costInMonth(f, m, c, year, month);
         return {
           name: v.name,

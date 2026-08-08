@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarClock, Car, ChevronDown, KeyRound, Landmark, Loader2, LogOut, Menu, Plus, Settings2, Sparkles, Upload, Wallet } from "lucide-react";
+import { CalendarClock, Car, ChevronDown, KeyRound, Landmark, Loader2, LogOut, Menu, Plus, Settings2, ShoppingBag, Sparkles, Upload, Wallet } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -209,6 +209,12 @@ function Dashboard() {
                   <Link to="/frota">
                     <Car className="mr-2 h-4 w-4" />
                     Frota
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/lista">
+                    <ShoppingBag className="mr-2 h-4 w-4" />
+                    Lista de compras
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

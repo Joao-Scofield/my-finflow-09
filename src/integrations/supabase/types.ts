@@ -628,6 +628,78 @@ export type Database = {
         }
         Relationships: []
       }
+      shopping_items: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          estimated_amount: number
+          id: string
+          name: string
+          notes: string
+          position: number
+          priority: string
+          purchased_at: string | null
+          quantity: number
+          status: string
+          store: string
+          transaction_id: string | null
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          estimated_amount?: number
+          id?: string
+          name: string
+          notes?: string
+          position?: number
+          priority?: string
+          purchased_at?: string | null
+          quantity?: number
+          status?: string
+          store?: string
+          transaction_id?: string | null
+          updated_at?: string
+          url?: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          estimated_amount?: number
+          id?: string
+          name?: string
+          notes?: string
+          position?: number
+          priority?: string
+          purchased_at?: string | null
+          quantity?: number
+          status?: string
+          store?: string
+          transaction_id?: string | null
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "finance_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shopping_items_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "finance_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

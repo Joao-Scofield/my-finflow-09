@@ -23,7 +23,7 @@ import {
   LazyCostPerKmChart,
   LazyVehicleComparisonChart,
 } from "@/components/fleet/LazyFleetCharts";
-import { costInMonth, kmInMonth } from "@/lib/fleet-metrics";
+import { costInMonth, kmInMonth, kmInMonthForVehicles } from "@/lib/fleet-metrics";
 import { DashboardSkeleton } from "@/components/finance/Skeletons";
 import {
   FixedCostDialog,
@@ -153,7 +153,9 @@ function FleetPage() {
   const scopedCosts = selected ? fixedCosts.filter((c) => c.vehicleId === selected.id) : fixedCosts;
 
   const stats = useMemo(() => {
-    const km = kmInMonth(scopedFuelings, year, month);
+    const km = selected
+      ? kmInMonth(scopedFuelings, year, month, selected.initialOdometer)
+      : kmInMonthForVehicles(vehicles, fuelings, year, month);
     const { fuel, maint, fixed, total } = costInMonth(
       scopedFuelings,
       scopedMaint,
@@ -163,13 +165,18 @@ function FleetPage() {
     );
     const consumption = selected
       ? fuelStats(scopedFuelings, selected.initialOdometer).kmPerLiter
-      : vehicles.reduce((acc, v) => {
-          const s = fuelStats(
-            fuelings.filter((f) => f.vehicleId === v.id),
-            v.initialOdometer,
-          );
-          return acc + s.kmPerLiter;
-        }, 0) / Math.max(1, vehicles.length);
+      : (() => {
+          const values = vehicles
+            .map(
+              (v) =>
+                fuelStats(
+                  fuelings.filter((f) => f.vehicleId === v.id),
+                  v.initialOdometer,
+                ).kmPerLiter,
+            )
+            .filter((x) => x > 0);
+          return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+        })();
     return { km, fuel, maint, fixed, total, costPerKm: km > 0 ? total / km : 0, consumption };
   }, [scopedFuelings, scopedMaint, scopedCosts, month, year, selected, vehicles, fuelings]);
 
@@ -194,6 +201,9 @@ function FleetPage() {
               </Button>
               <Button variant="secondary" size="sm" asChild>
                 <Link to="/frota">Frota</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/lista">Lista</Link>
               </Button>
             </nav>
           </div>

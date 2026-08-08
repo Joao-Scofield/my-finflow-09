@@ -23,7 +23,7 @@ import {
   LazyCostPerKmChart,
   LazyVehicleComparisonChart,
 } from "@/components/fleet/LazyFleetCharts";
-import { costInMonth, kmInMonth } from "@/lib/fleet-metrics";
+import { costInMonth, kmInMonth, kmInMonthForVehicles } from "@/lib/fleet-metrics";
 import { DashboardSkeleton } from "@/components/finance/Skeletons";
 import {
   FixedCostDialog,

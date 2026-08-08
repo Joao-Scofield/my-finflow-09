@@ -26,7 +26,7 @@ import {
   type Vehicle,
 } from "@/lib/fleet-data";
 import { monthNamesPt } from "@/lib/finance-data";
-import { costInMonth, kmInMonth } from "@/lib/fleet-metrics";
+import { costInMonth, kmInMonth, kmInMonthForVehicles } from "@/lib/fleet-metrics";
 
 const tooltipStyle = {
   background: "var(--popover)",
@@ -46,7 +46,7 @@ export function CostPerKmChart({
   year: number;
   vehicle: Vehicle | null;
 }) {
-  const { fuelings, maintenances, fixedCosts } = useFleet();
+  const { vehicles, fuelings, maintenances, fixedCosts } = useFleet();
 
   const data = useMemo(() => {
     const f = vehicle ? fuelings.filter((x) => x.vehicleId === vehicle.id) : fuelings;
@@ -57,7 +57,9 @@ export function CostPerKmChart({
       const dt = new Date(year, month - 1 - i, 1);
       const y = dt.getFullYear();
       const mm = dt.getMonth() + 1;
-      const km = kmInMonth(f, y, mm);
+      const km = vehicle
+        ? kmInMonth(f, y, mm, vehicle.initialOdometer)
+        : kmInMonthForVehicles(vehicles, fuelings, y, mm);
       const { total } = costInMonth(f, m, c, y, mm);
       arr.push({
         name: `${monthNamesPt[mm - 1].slice(0, 3)}/${String(y).slice(2)}`,
@@ -66,7 +68,7 @@ export function CostPerKmChart({
       });
     }
     return arr;
-  }, [fuelings, maintenances, fixedCosts, month, year, vehicle]);
+  }, [vehicles, fuelings, maintenances, fixedCosts, month, year, vehicle]);
 
   return (
     <Card className="h-full">
@@ -163,7 +165,7 @@ export function VehicleComparisonChart({ month, year }: { month: number; year: n
         const f = fuelings.filter((x) => x.vehicleId === v.id);
         const m = maintenances.filter((x) => x.vehicleId === v.id);
         const c = fixedCosts.filter((x) => x.vehicleId === v.id);
-        const km = kmInMonth(f, year, month);
+        const km = kmInMonth(f, year, month, v.initialOdometer);
         const { total } = costInMonth(f, m, c, year, month);
         return {
           name: v.name,

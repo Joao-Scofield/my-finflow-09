@@ -144,6 +144,9 @@ function BalancesPage() {
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/frota">Frota</Link>
               </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/lista">Lista</Link>
+              </Button>
             </nav>
           </div>
           <div className="flex items-center gap-2">

@@ -4,7 +4,6 @@ import {
   Check,
   ExternalLink,
   Loader2,
-  LogOut,
   Pencil,
   Plus,
   ShoppingBag,

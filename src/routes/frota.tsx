@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Car, Fuel, Loader2, LogOut, Plus, Receipt, Trash2, Wrench } from "lucide-react";
+import { Car, Fuel, Loader2, Plus, Receipt, Trash2, Wrench } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

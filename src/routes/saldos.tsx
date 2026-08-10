@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Landmark, Loader2, LogOut, Settings2, TrendingDown, TrendingUp } from "lucide-react";
+import { Landmark, Loader2, Settings2, TrendingDown, TrendingUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeToggle } from "@/components/finance/ThemeToggle";
+import { AppHeader } from "@/components/layout/AppHeader";
 import { Login } from "@/components/finance/Login";
 import { AccountsManager } from "@/components/finance/AccountsManager";
 import { LazyBalanceHistoryChart } from "@/components/finance/LazyCharts";

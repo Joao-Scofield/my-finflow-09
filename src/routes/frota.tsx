@@ -16,7 +16,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toaster } from "@/components/ui/sonner";
 import { PeriodSelector } from "@/components/finance/PeriodSelector";
-import { ThemeToggle } from "@/components/finance/ThemeToggle";
+import { AppHeader } from "@/components/layout/AppHeader";
 import { Login } from "@/components/finance/Login";
 import {
   LazyCostCompositionChart,
@@ -180,41 +180,9 @@ function FleetPage() {
     return { km, fuel, maint, fixed, total, costPerKm: km > 0 ? total / km : 0, consumption };
   }, [scopedFuelings, scopedMaint, scopedCosts, month, year, selected, vehicles, fuelings]);
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-  }
-
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <Car className="h-5 w-5" />
-            </div>
-            <nav className="flex items-center gap-0.5 overflow-x-auto">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/">Painel</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/saldos">Saldos</Link>
-              </Button>
-              <Button variant="secondary" size="sm" asChild>
-                <Link to="/frota">Frota</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/lista">Lista</Link>
-              </Button>
-            </nav>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader icon={Car} active="/frota" />
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-5 sm:px-6 sm:py-6">
         {loading ? (

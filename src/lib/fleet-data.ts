@@ -11,7 +11,14 @@ export const fuelTypes: { value: FuelType; label: string }[] = [
 
 export const fuelTypeLabel = (v: string) => fuelTypes.find((f) => f.value === v)?.label ?? "Outro";
 
-export type MaintenanceKind = "revisao" | "oleo" | "pneus" | "freios" | "eletrica" | "funilaria" | "outro";
+export type MaintenanceKind =
+  | "revisao"
+  | "oleo"
+  | "pneus"
+  | "freios"
+  | "eletrica"
+  | "funilaria"
+  | "outro";
 
 export const maintenanceKinds: { value: MaintenanceKind; label: string }[] = [
   { value: "revisao", label: "Revisão" },
@@ -26,7 +33,13 @@ export const maintenanceKinds: { value: MaintenanceKind; label: string }[] = [
 export const maintenanceKindLabel = (v: string) =>
   maintenanceKinds.find((m) => m.value === v)?.label ?? "Outro";
 
-export type FixedCostKind = "ipva" | "seguro" | "licenciamento" | "financiamento" | "estacionamento" | "outro";
+export type FixedCostKind =
+  | "ipva"
+  | "seguro"
+  | "licenciamento"
+  | "financiamento"
+  | "estacionamento"
+  | "outro";
 
 export const fixedCostKinds: { value: FixedCostKind; label: string }[] = [
   { value: "ipva", label: "IPVA" },
@@ -160,4 +173,3 @@ export function fuelStats(fuelings: Fueling[], initialOdometer: number) {
 
   return { km, liters, spent, kmPerLiter, lastOdometer: last.odometer };
 }
-

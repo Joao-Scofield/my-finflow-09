@@ -1,6 +1,21 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarClock, Car, ChevronDown, KeyRound, Landmark, Loader2, LogOut, Menu, Plus, Settings2, ShoppingBag, Sparkles, Upload, Wallet } from "lucide-react";
+import {
+  CalendarClock,
+  Car,
+  ChevronDown,
+  KeyRound,
+  Landmark,
+  Loader2,
+  LogOut,
+  Menu,
+  Plus,
+  Settings2,
+  ShoppingBag,
+  Sparkles,
+  Upload,
+  Wallet,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +24,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -141,12 +155,8 @@ function Dashboard() {
   const monthKey = `${year}-${String(month).padStart(2, "0")}`;
   const monthTx = useMemo(() => txByMonth.get(monthKey) ?? [], [txByMonth, monthKey]);
 
-  const income = monthTx
-    .filter((t) => t.type === "income")
-    .reduce((s, t) => s + t.amount, 0);
-  const expense = monthTx
-    .filter((t) => t.type === "expense")
-    .reduce((s, t) => s + t.amount, 0);
+  const income = monthTx.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const expense = monthTx.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const accountsTotal = accounts.reduce((s, a) => s + a.balance, 0);
 
   return (
@@ -232,7 +242,6 @@ function Dashboard() {
             </DropdownMenu>
             <ThemeToggle />
           </div>
-
         </div>
       </header>
 
@@ -241,67 +250,66 @@ function Dashboard() {
           <DashboardSkeleton />
         ) : (
           <>
-        <section className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Período</p>
-            <h2 className="gold-rule truncate text-lg font-semibold tracking-tight sm:text-xl">
-              {monthNamesPt[month - 1]} / {year}
-            </h2>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <PeriodSelector
-              month={month}
-              year={year}
-              onChange={(m, y) => {
-                setMonth(m);
-                setYear(y);
-              }}
-            />
-            <Button
-              className="w-full sm:w-auto"
-              onClick={() => {
-                setEditing(null);
-                setModalOpen(true);
-              }}
-            >
-              <Plus className="mr-1 h-4 w-4" />
-              Nova transação
-            </Button>
-          </div>
-        </section>
+            <section className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-sm text-muted-foreground">Período</p>
+                <h2 className="gold-rule truncate text-lg font-semibold tracking-tight sm:text-xl">
+                  {monthNamesPt[month - 1]} / {year}
+                </h2>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <PeriodSelector
+                  month={month}
+                  year={year}
+                  onChange={(m, y) => {
+                    setMonth(m);
+                    setYear(y);
+                  }}
+                />
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={() => {
+                    setEditing(null);
+                    setModalOpen(true);
+                  }}
+                >
+                  <Plus className="mr-1 h-4 w-4" />
+                  Nova transação
+                </Button>
+              </div>
+            </section>
 
-        <SummaryCards income={income} expense={expense} accountsTotal={accountsTotal} />
+            <SummaryCards income={income} expense={expense} accountsTotal={accountsTotal} />
 
-        <div className="grid gap-4 lg:grid-cols-6">
-          <div className="lg:col-span-4">
-            <LazyExpenseBreakdownChart monthTransactions={monthTx} />
-          </div>
-          <div className="lg:col-span-2">
-            <LazyIncomeBreakdownChart monthTransactions={monthTx} />
-          </div>
-          <div className="lg:col-span-2">
-            <LazyPaymentMethodChart monthTransactions={monthTx} />
-          </div>
-          <div className="lg:col-span-4">
-            <LazyMonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
-          </div>
-        </div>
+            <div className="grid gap-4 lg:grid-cols-6">
+              <div className="lg:col-span-4">
+                <LazyExpenseBreakdownChart monthTransactions={monthTx} />
+              </div>
+              <div className="lg:col-span-2">
+                <LazyIncomeBreakdownChart monthTransactions={monthTx} />
+              </div>
+              <div className="lg:col-span-2">
+                <LazyPaymentMethodChart monthTransactions={monthTx} />
+              </div>
+              <div className="lg:col-span-4">
+                <LazyMonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
+              </div>
+            </div>
 
-        <Card className="bento-card">
-          <CardHeader>
-            <CardTitle className="gold-rule text-base">Transações do mês</CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6">
-            <TransactionsTable
-              transactions={monthTx}
-              onEdit={(t) => {
-                setEditing(t);
-                setModalOpen(true);
-              }}
-            />
-          </CardContent>
-        </Card>
-
+            <Card className="bento-card">
+              <CardHeader>
+                <CardTitle className="gold-rule text-base">Transações do mês</CardTitle>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6">
+                <TransactionsTable
+                  transactions={monthTx}
+                  onEdit={(t) => {
+                    setEditing(t);
+                    setModalOpen(true);
+                  }}
+                />
+              </CardContent>
+            </Card>
           </>
         )}
       </main>

@@ -244,7 +244,9 @@ export function PurchaseDialog({
         categoryId: categoryId === NONE ? undefined : categoryId,
         paymentMethod: method,
       });
-      toast.success(post ? "Item comprado e lançado no financeiro." : "Item marcado como comprado.");
+      toast.success(
+        post ? "Item comprado e lançado no financeiro." : "Item marcado como comprado.",
+      );
       onOpenChange(false);
     } catch (error) {
       console.error(error);
@@ -263,11 +265,7 @@ export function PurchaseDialog({
         <div className="grid gap-3">
           <p className="text-sm text-muted-foreground">{item?.name}</p>
           <div className="flex items-center gap-2">
-            <Checkbox
-              id="pd-post"
-              checked={post}
-              onCheckedChange={(v) => setPost(Boolean(v))}
-            />
+            <Checkbox id="pd-post" checked={post} onCheckedChange={(v) => setPost(Boolean(v))} />
             <Label htmlFor="pd-post" className="text-sm font-normal">
               Lançar despesa no financeiro
             </Label>

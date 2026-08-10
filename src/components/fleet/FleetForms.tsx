@@ -179,7 +179,11 @@ export function VehicleDialog({
         </DialogHeader>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Nome / apelido">
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Onix branco" />
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Onix branco"
+            />
           </Field>
           <Field label="Placa">
             <Input value={plate} onChange={(e) => setPlate(e.target.value)} placeholder="ABC1D23" />
@@ -214,11 +218,7 @@ export function VehicleDialog({
             </Select>
           </Field>
           <Field label="Odômetro inicial (km)">
-            <Input
-              type="number"
-              value={odometer}
-              onChange={(e) => setOdometer(e.target.value)}
-            />
+            <Input type="number" value={odometer} onChange={(e) => setOdometer(e.target.value)} />
           </Field>
           <div className="sm:col-span-2">
             <Field label="Cor">
@@ -252,13 +252,7 @@ export function VehicleDialog({
   );
 }
 
-function VehicleSelect({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
+function VehicleSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const { vehicles } = useFleet();
   return (
     <Field label="Veículo">
@@ -327,7 +321,8 @@ export function FuelingDialog({
     if (!(l > 0)) return toast.error("Informe os litros.");
     if (!(t > 0)) return toast.error("Informe o valor total.");
     if (!(od > 0)) return toast.error("Informe o odômetro.");
-    if (posting.post && !posting.accountId) return toast.error("Escolha o saldo para o lançamento.");
+    if (posting.post && !posting.accountId)
+      return toast.error("Escolha o saldo para o lançamento.");
 
     setSaving(true);
     try {
@@ -368,7 +363,11 @@ export function FuelingDialog({
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </Field>
           <Field label="Odômetro (km)">
-            <Input value={odometer} onChange={(e) => setOdometer(e.target.value)} inputMode="decimal" />
+            <Input
+              value={odometer}
+              onChange={(e) => setOdometer(e.target.value)}
+              inputMode="decimal"
+            />
           </Field>
           <Field label="Litros">
             <Input
@@ -408,7 +407,11 @@ export function FuelingDialog({
             </Select>
           </Field>
           <Field label="Posto">
-            <Input value={station} onChange={(e) => setStation(e.target.value)} placeholder="Posto Ipiranga" />
+            <Input
+              value={station}
+              onChange={(e) => setStation(e.target.value)}
+              placeholder="Posto Ipiranga"
+            />
           </Field>
           <label className="flex items-center gap-2 text-sm sm:col-span-2">
             <Checkbox checked={fullTank} onCheckedChange={(v) => setFullTank(Boolean(v))} />
@@ -467,7 +470,8 @@ export function MaintenanceDialog({
     const value = Number(amount.replace(",", "."));
     if (!vehicleId) return toast.error("Selecione o veículo.");
     if (!(value > 0)) return toast.error("Informe o valor.");
-    if (posting.post && !posting.accountId) return toast.error("Escolha o saldo para o lançamento.");
+    if (posting.post && !posting.accountId)
+      return toast.error("Escolha o saldo para o lançamento.");
     setSaving(true);
     try {
       await addMaintenance(
@@ -522,7 +526,11 @@ export function MaintenanceDialog({
             <Input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" />
           </Field>
           <Field label="Odômetro (km)">
-            <Input value={odometer} onChange={(e) => setOdometer(e.target.value)} inputMode="decimal" />
+            <Input
+              value={odometer}
+              onChange={(e) => setOdometer(e.target.value)}
+              inputMode="decimal"
+            />
           </Field>
           <Field label="Próxima revisão em (km)">
             <Input
@@ -595,7 +603,8 @@ export function FixedCostDialog({
     if (!vehicleId) return toast.error("Selecione o veículo.");
     if (!name.trim()) return toast.error("Informe o nome do custo.");
     if (!(value > 0)) return toast.error("Informe o valor.");
-    if (posting.post && !posting.accountId) return toast.error("Escolha o saldo para o lançamento.");
+    if (posting.post && !posting.accountId)
+      return toast.error("Escolha o saldo para o lançamento.");
     setSaving(true);
     try {
       await addFixedCost(

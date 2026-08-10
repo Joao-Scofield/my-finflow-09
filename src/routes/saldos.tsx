@@ -135,7 +135,6 @@ function BalancesPage() {
         }
       />
 
-
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-5 sm:px-6 sm:py-6">
         {loading ? (
           <BalancesSkeleton />
@@ -213,8 +212,8 @@ function BalancesPage() {
                       )}
                       {change >= 0 ? "+" : "−"}
                       {formatBRL(Math.abs(change))}
-                      {pct !== null && ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct).toFixed(1)}%)`}{" "}
-                      no mês
+                      {pct !== null && ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct).toFixed(1)}%)`} no
+                      mês
                     </p>
                   </CardContent>
                 </Card>
@@ -232,44 +231,44 @@ function BalancesPage() {
                   </p>
                 ) : (
                   <div className="-mx-3 overflow-x-auto px-3 sm:mx-0 sm:px-0">
-                  <Table className="min-w-[720px]">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Saldo</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead className="text-right">Inicial</TableHead>
-                        <TableHead className="text-right">Mês anterior</TableHead>
-                        <TableHead className="text-right">Entradas</TableHead>
-                        <TableHead className="text-right">Saídas</TableHead>
-                        <TableHead className="text-right">Atual</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {rows.map(({ account, prev, income, expense }) => (
-                        <TableRow key={account.id}>
-                          <TableCell className="font-medium">{account.name}</TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {accountKindLabel(account.kind)}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums">
-                            {formatBRL(account.initialBalance)}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums">
-                            {formatBRL(prev)}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums text-income">
-                            {formatBRL(income)}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums text-expense">
-                            {formatBRL(expense)}
-                          </TableCell>
-                          <TableCell className="text-right font-semibold tabular-nums">
-                            {formatBRL(account.balance)}
-                          </TableCell>
+                    <Table className="min-w-[720px]">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Saldo</TableHead>
+                          <TableHead>Tipo</TableHead>
+                          <TableHead className="text-right">Inicial</TableHead>
+                          <TableHead className="text-right">Mês anterior</TableHead>
+                          <TableHead className="text-right">Entradas</TableHead>
+                          <TableHead className="text-right">Saídas</TableHead>
+                          <TableHead className="text-right">Atual</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {rows.map(({ account, prev, income, expense }) => (
+                          <TableRow key={account.id}>
+                            <TableCell className="font-medium">{account.name}</TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {accountKindLabel(account.kind)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums">
+                              {formatBRL(account.initialBalance)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums">
+                              {formatBRL(prev)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums text-income">
+                              {formatBRL(income)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums text-expense">
+                              {formatBRL(expense)}
+                            </TableCell>
+                            <TableCell className="text-right font-semibold tabular-nums">
+                              {formatBRL(account.balance)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 )}
               </CardContent>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Car, Fuel, Loader2, Plus, Receipt, Trash2, Wrench } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -114,7 +114,7 @@ function AuthShell() {
 
 function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <Card>
+    <Card className="bento-card">
       <CardContent className="p-4">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
@@ -223,7 +223,7 @@ function FleetPage() {
             </section>
 
             {vehicles.length === 0 ? (
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="grid place-items-center gap-3 p-10 text-center">
                   <Car className="h-10 w-10 text-muted-foreground" />
                   <div>
@@ -295,7 +295,7 @@ function FleetPage() {
 
                 <LazyVehicleComparisonChart month={month} year={year} />
 
-                <Card>
+                <Card className="bento-card">
                   <CardHeader>
                     <CardTitle className="text-base">Veículos</CardTitle>
                   </CardHeader>
@@ -389,7 +389,7 @@ function FleetPage() {
                   </TabsList>
 
                   <TabsContent value="fuel">
-                    <Card>
+                    <Card className="bento-card">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0">
                         <CardTitle className="text-base">Abastecimentos</CardTitle>
                         <Button size="sm" onClick={() => setFuelOpen(true)}>
@@ -457,7 +457,7 @@ function FleetPage() {
                   </TabsContent>
 
                   <TabsContent value="maint">
-                    <Card>
+                    <Card className="bento-card">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0">
                         <CardTitle className="text-base">Manutenções e pneus</CardTitle>
                         <Button size="sm" onClick={() => setMaintOpen(true)}>
@@ -523,7 +523,7 @@ function FleetPage() {
                   </TabsContent>
 
                   <TabsContent value="fixed">
-                    <Card>
+                    <Card className="bento-card">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0">
                         <CardTitle className="text-base">Custos fixos</CardTitle>
                         <Button size="sm" onClick={() => setCostOpen(true)}>

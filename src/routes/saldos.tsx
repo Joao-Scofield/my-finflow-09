@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Landmark, Loader2, Settings2, TrendingDown, TrendingUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -147,13 +147,13 @@ function BalancesPage() {
             </section>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="p-4">
                   <p className="text-xs text-muted-foreground">Patrimônio total</p>
                   <p className="mt-1 text-2xl font-semibold tabular-nums">{formatBRL(total)}</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="p-4">
                   <p className="text-xs text-muted-foreground">Variação no mês</p>
                   <p
@@ -167,13 +167,13 @@ function BalancesPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="p-4">
                   <p className="text-xs text-muted-foreground">Contas cadastradas</p>
                   <p className="mt-1 text-2xl font-semibold tabular-nums">{accounts.length}</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="p-4">
                   <p className="text-xs text-muted-foreground">Mês anterior</p>
                   <p className="mt-1 text-2xl font-semibold tabular-nums">{formatBRL(totalPrev)}</p>
@@ -221,7 +221,7 @@ function BalancesPage() {
               ))}
             </div>
 
-            <Card>
+            <Card className="bento-card">
               <CardHeader>
                 <CardTitle className="text-base">Detalhamento por saldo</CardTitle>
               </CardHeader>

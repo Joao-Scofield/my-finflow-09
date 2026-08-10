@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   Check,
   ExternalLink,
@@ -107,7 +107,7 @@ function AuthShell() {
 
 function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <Card>
+    <Card className="bento-card">
       <CardContent className="p-4">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
@@ -245,7 +245,7 @@ function ShoppingPage() {
             </div>
 
             {visible.length === 0 ? (
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="grid place-items-center gap-3 p-10 text-center">
                   <ShoppingBag className="h-10 w-10 text-muted-foreground" />
                   <div>

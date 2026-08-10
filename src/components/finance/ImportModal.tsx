@@ -10,7 +10,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -44,7 +50,17 @@ const COLUMN_LABELS: Record<ColumnKey, string> = {
 
 const HEADER_HINTS: Record<ColumnKey, string[]> = {
   date: ["data", "date", "dt", "vencimento", "pagamento"],
-  description: ["descrição", "descricao", "description", "desc", "obs", "observação", "observacao", "histórico", "historico"],
+  description: [
+    "descrição",
+    "descricao",
+    "description",
+    "desc",
+    "obs",
+    "observação",
+    "observacao",
+    "histórico",
+    "historico",
+  ],
   amount: ["valor", "amount", "value", "preço", "preco", "total"],
   type: ["tipo", "type", "operação", "operacao"],
   category: ["categoria", "category", "cat"],
@@ -105,7 +121,9 @@ function parseDate(v: unknown): string | null {
 function parseAmount(v: unknown): number | null {
   if (v == null || v === "") return null;
   if (typeof v === "number") return v;
-  let s = String(v).trim().replace(/[R$\s]/gi, "");
+  let s = String(v)
+    .trim()
+    .replace(/[R$\s]/gi, "");
   // 1.234,56 -> 1234.56
   if (s.includes(",") && s.includes(".")) s = s.replace(/\./g, "").replace(",", ".");
   else if (s.includes(",")) s = s.replace(",", ".");
@@ -195,7 +213,11 @@ export function ImportModal({ open, onOpenChange }: Props) {
       const category = String(raw[mapping.category!] ?? "").trim();
       const subcategory = mapping.subcategory ? String(raw[mapping.subcategory] ?? "").trim() : "";
       const description = mapping.description ? String(raw[mapping.description] ?? "").trim() : "";
-      const type = mapping.type ? parseType(raw[mapping.type], amountRaw ?? 0) : (amountRaw ?? 0) < 0 ? "expense" : "expense";
+      const type = mapping.type
+        ? parseType(raw[mapping.type], amountRaw ?? 0)
+        : (amountRaw ?? 0) < 0
+          ? "expense"
+          : "expense";
       const status = mapping.status ? parseStatus(raw[mapping.status]) : "paid";
 
       if (!date) return { raw, row: null, error: "Data inválida" };
@@ -315,11 +337,7 @@ export function ImportModal({ open, onOpenChange }: Props) {
                 nomes das colunas são detectados automaticamente e você pode ajustar o mapeamento
                 depois. Categorias e subcategorias novas serão criadas automaticamente.
               </p>
-              <Button
-                variant="link"
-                className="mt-2 h-auto p-0"
-                onClick={downloadTemplate}
-              >
+              <Button variant="link" className="mt-2 h-auto p-0" onClick={downloadTemplate}>
                 <Download className="mr-1 h-4 w-4" />
                 Baixar planilha modelo
               </Button>
@@ -421,10 +439,7 @@ export function ImportModal({ open, onOpenChange }: Props) {
                     </TableHeader>
                     <TableBody>
                       {parsed.slice(0, 100).map((p, i) => (
-                        <TableRow
-                          key={i}
-                          className={cn(!p.row && "bg-expense/5")}
-                        >
+                        <TableRow key={i} className={cn(!p.row && "bg-expense/5")}>
                           <TableCell>
                             {p.row ? (
                               <CheckCircle2 className="h-4 w-4 text-income" />
@@ -438,13 +453,15 @@ export function ImportModal({ open, onOpenChange }: Props) {
                             {p.row?.date ?? String(p.raw[mapping.date ?? ""] ?? "")}
                           </TableCell>
                           <TableCell className="max-w-[200px] truncate text-xs">
-                            {p.row?.description ??
-                              String(p.raw[mapping.description ?? ""] ?? "")}
+                            {p.row?.description ?? String(p.raw[mapping.description ?? ""] ?? "")}
                           </TableCell>
                           <TableCell className="text-xs">
                             {p.row?.categoryName}
                             {p.row?.subcategoryName && (
-                              <span className="text-muted-foreground"> / {p.row.subcategoryName}</span>
+                              <span className="text-muted-foreground">
+                                {" "}
+                                / {p.row.subcategoryName}
+                              </span>
                             )}
                           </TableCell>
                           <TableCell className="text-xs">

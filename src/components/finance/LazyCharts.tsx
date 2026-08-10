@@ -42,7 +42,14 @@ export const LazyMonthlyComparisonChart = withSuspense<{
   month: number;
   year: number;
   monthTransactions?: Transaction[];
-}>(MonthlyComparison as ComponentType<{ month: number; year: number; monthTransactions?: Transaction[] }>, 260);
+}>(
+  MonthlyComparison as ComponentType<{
+    month: number;
+    year: number;
+    monthTransactions?: Transaction[];
+  }>,
+  260,
+);
 export const LazyBalanceHistoryChart = withSuspense<Record<string, never>>(
   BalanceHistory as ComponentType<Record<string, never>>,
   300,

@@ -280,7 +280,10 @@ function ShoppingPage() {
                       </div>
                       <Badge
                         variant="outline"
-                        style={{ borderColor: priorityColor(i.priority), color: priorityColor(i.priority) }}
+                        style={{
+                          borderColor: priorityColor(i.priority),
+                          color: priorityColor(i.priority),
+                        }}
                       >
                         {priorityLabel(i.priority)}
                       </Badge>

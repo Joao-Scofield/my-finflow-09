@@ -149,7 +149,9 @@ function FleetPage() {
 
   const selected = vehicles.find((v) => v.id === vehicleId) ?? null;
   const scopedFuelings = selected ? fuelings.filter((f) => f.vehicleId === selected.id) : fuelings;
-  const scopedMaint = selected ? maintenances.filter((m) => m.vehicleId === selected.id) : maintenances;
+  const scopedMaint = selected
+    ? maintenances.filter((m) => m.vehicleId === selected.id)
+    : maintenances;
   const scopedCosts = selected ? fixedCosts.filter((c) => c.vehicleId === selected.id) : fixedCosts;
 
   const stats = useMemo(() => {
@@ -313,7 +315,8 @@ function FleetPage() {
                         .filter((m) => m.vehicleId === v.id && m.nextOdometer)
                         .sort((a, b) => (b.nextOdometer ?? 0) - (a.nextOdometer ?? 0))[0];
                       const due =
-                        nextService?.nextOdometer && s.lastOdometer >= nextService.nextOdometer - 500;
+                        nextService?.nextOdometer &&
+                        s.lastOdometer >= nextService.nextOdometer - 500;
                       return (
                         <div key={v.id} className="rounded-xl border p-4">
                           <div className="flex items-start justify-between gap-2">
@@ -414,7 +417,10 @@ function FleetPage() {
                           <TableBody>
                             {scopedFuelings.length === 0 && (
                               <TableRow>
-                                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                                <TableCell
+                                  colSpan={8}
+                                  className="text-center text-muted-foreground"
+                                >
                                   Nenhum abastecimento registrado.
                                 </TableCell>
                               </TableRow>
@@ -482,7 +488,10 @@ function FleetPage() {
                           <TableBody>
                             {scopedMaint.length === 0 && (
                               <TableRow>
-                                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                                <TableCell
+                                  colSpan={8}
+                                  className="text-center text-muted-foreground"
+                                >
                                   Nenhuma manutenção registrada.
                                 </TableCell>
                               </TableRow>
@@ -494,7 +503,9 @@ function FleetPage() {
                                   {vehicles.find((v) => v.id === m.vehicleId)?.name ?? "—"}
                                 </TableCell>
                                 <TableCell>{maintenanceKindLabel(m.kind)}</TableCell>
-                                <TableCell className="max-w-56 truncate">{m.description || "—"}</TableCell>
+                                <TableCell className="max-w-56 truncate">
+                                  {m.description || "—"}
+                                </TableCell>
                                 <TableCell className="text-right tabular-nums">
                                   {formatKm(m.odometer)}
                                 </TableCell>
@@ -547,7 +558,10 @@ function FleetPage() {
                           <TableBody>
                             {scopedCosts.length === 0 && (
                               <TableRow>
-                                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                                <TableCell
+                                  colSpan={7}
+                                  className="text-center text-muted-foreground"
+                                >
                                   Nenhum custo fixo cadastrado.
                                 </TableCell>
                               </TableRow>
@@ -589,21 +603,13 @@ function FleetPage() {
       </main>
 
       <VehicleDialog open={vehicleOpen} onOpenChange={setVehicleOpen} editing={editingVehicle} />
-      <FuelingDialog
-        open={fuelOpen}
-        onOpenChange={setFuelOpen}
-        defaultVehicleId={selected?.id}
-      />
+      <FuelingDialog open={fuelOpen} onOpenChange={setFuelOpen} defaultVehicleId={selected?.id} />
       <MaintenanceDialog
         open={maintOpen}
         onOpenChange={setMaintOpen}
         defaultVehicleId={selected?.id}
       />
-      <FixedCostDialog
-        open={costOpen}
-        onOpenChange={setCostOpen}
-        defaultVehicleId={selected?.id}
-      />
+      <FixedCostDialog open={costOpen} onOpenChange={setCostOpen} defaultVehicleId={selected?.id} />
       <Toaster richColors position="top-right" />
     </div>
   );

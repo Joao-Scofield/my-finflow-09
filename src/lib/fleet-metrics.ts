@@ -10,12 +10,7 @@ import {
  * Km rodados no mês. Usa como base o último odômetro anterior ao mês; se não
  * houver abastecimento anterior, cai para o odômetro inicial do veículo.
  */
-export function kmInMonth(
-  fuelings: Fueling[],
-  year: number,
-  month: number,
-  initialOdometer = 0,
-) {
+export function kmInMonth(fuelings: Fueling[], year: number, month: number, initialOdometer = 0) {
   const inMonth = fuelings
     .filter((f) => {
       const [y, m] = f.date.split("-").map(Number);

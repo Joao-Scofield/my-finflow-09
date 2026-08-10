@@ -107,7 +107,6 @@ export interface Recurring {
 }
 
 export interface Rule {
-
   id: string;
   name: string;
   keywords: string[]; // matches if any keyword is a case-insensitive substring of description

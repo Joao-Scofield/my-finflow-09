@@ -66,7 +66,6 @@ function BreakdownChart({
 
   const expenses = monthTransactions.filter((t) => t.type === type);
 
-
   const catData = useMemo(() => {
     const map = new Map<string, number>();
     expenses.forEach((t) => {
@@ -121,7 +120,6 @@ function BreakdownChart({
         {active.length === 0 ? (
           <div className="grid h-[280px] place-items-center text-sm text-muted-foreground">
             {emptyLabel}
-
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-[1fr_1fr] md:items-center">
@@ -180,9 +178,7 @@ function BreakdownChart({
                     </span>
                     <span className="shrink-0 text-right tabular-nums">
                       <span className="font-medium">{formatBRL(d.value)}</span>
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {pct.toFixed(1)}%
-                      </span>
+                      <span className="ml-2 text-xs text-muted-foreground">{pct.toFixed(1)}%</span>
                     </span>
                   </button>
                 );
@@ -242,9 +238,7 @@ export function MonthlyComparisonChart({ month, year }: Props) {
                 stroke="var(--muted-foreground)"
                 fontSize={12}
                 tick={{ fill: "var(--muted-foreground)" }}
-                tickFormatter={(v: number) =>
-                  v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)
-                }
+                tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
               />
               <Tooltip
                 formatter={(value: number) => formatBRL(Number(value))}
@@ -257,9 +251,12 @@ export function MonthlyComparisonChart({ month, year }: Props) {
                 itemStyle={{ color: "var(--popover-foreground)" }}
                 labelStyle={{ color: "var(--popover-foreground)" }}
               />
-              <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value: string) => (
-                <span style={{ color: "var(--foreground)" }}>{value}</span>
-              )} />
+              <Legend
+                wrapperStyle={{ fontSize: 12 }}
+                formatter={(value: string) => (
+                  <span style={{ color: "var(--foreground)" }}>{value}</span>
+                )}
+              />
               <Bar dataKey="Receitas" fill="var(--income)" radius={[6, 6, 0, 0]} />
               <Bar dataKey="Despesas" fill="var(--expense)" radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -310,7 +307,9 @@ export function PaymentMethodChart({ monthTransactions }: { monthTransactions: T
                   stroke="var(--muted-foreground)"
                   fontSize={12}
                   tick={{ fill: "var(--muted-foreground)" }}
-                  tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
+                  tickFormatter={(v: number) =>
+                    v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)
+                  }
                 />
                 <Tooltip
                   formatter={(value: number) => formatBRL(Number(value))}
@@ -323,9 +322,12 @@ export function PaymentMethodChart({ monthTransactions }: { monthTransactions: T
                   itemStyle={{ color: "var(--popover-foreground)" }}
                   labelStyle={{ color: "var(--popover-foreground)" }}
                 />
-                <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value: string) => (
-                <span style={{ color: "var(--foreground)" }}>{value}</span>
-              )} />
+                <Legend
+                  wrapperStyle={{ fontSize: 12 }}
+                  formatter={(value: string) => (
+                    <span style={{ color: "var(--foreground)" }}>{value}</span>
+                  )}
+                />
                 <Bar dataKey="Receitas" fill="var(--income)" radius={[6, 6, 0, 0]} />
                 <Bar dataKey="Despesas" fill="var(--expense)" radius={[6, 6, 0, 0]} />
               </BarChart>

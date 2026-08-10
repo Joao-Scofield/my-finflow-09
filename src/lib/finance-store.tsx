@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -51,7 +59,10 @@ interface Ctx {
   updateTransaction: (id: string, t: Omit<Transaction, "id">) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   addCategory: (c: Omit<Category, "id" | "subcategories">) => Promise<void>;
-  updateCategory: (id: string, patch: Partial<Omit<Category, "id" | "subcategories">>) => Promise<void>;
+  updateCategory: (
+    id: string,
+    patch: Partial<Omit<Category, "id" | "subcategories">>,
+  ) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   addSubcategory: (categoryId: string, name: string) => Promise<void>;
   updateSubcategory: (categoryId: string, subId: string, name: string) => Promise<void>;
@@ -236,7 +247,6 @@ function withComputedBalances(accounts: Account[], transactions: Transaction[]):
   }));
 }
 
-
 function mapRecurrings(rows: RecurringRow[]): Recurring[] {
   return rows.map((row) => ({
     id: row.id,
@@ -381,25 +391,34 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         rulesResult,
         accountsResult,
         recurringsResult,
-      ] =
-        await Promise.all([
-          supabase.from("profiles").select("username, display_name").eq("user_id", userId).maybeSingle(),
-          supabase.from("finance_categories").select("id,name,color,icon,type,position").order("position"),
-          supabase.from("finance_subcategories").select("id,category_id,name,position").order("position"),
-          supabase
-            .from("finance_transactions")
-            .select(TRANSACTION_SELECT)
-            .order("transaction_date", { ascending: false }),
-          supabase
-            .from("finance_rules")
-            .select("id,name,keywords,category_id,subcategory_id,priority,enabled")
-            .order("priority", { ascending: false }),
-          supabase
-            .from("finance_accounts")
-            .select("id,name,kind,balance,color,position")
-            .order("position"),
-          supabase.from("finance_recurrings").select(RECURRING_SELECT).order("created_at"),
-        ]);
+      ] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("username, display_name")
+          .eq("user_id", userId)
+          .maybeSingle(),
+        supabase
+          .from("finance_categories")
+          .select("id,name,color,icon,type,position")
+          .order("position"),
+        supabase
+          .from("finance_subcategories")
+          .select("id,category_id,name,position")
+          .order("position"),
+        supabase
+          .from("finance_transactions")
+          .select(TRANSACTION_SELECT)
+          .order("transaction_date", { ascending: false }),
+        supabase
+          .from("finance_rules")
+          .select("id,name,keywords,category_id,subcategory_id,priority,enabled")
+          .order("priority", { ascending: false }),
+        supabase
+          .from("finance_accounts")
+          .select("id,name,kind,balance,color,position")
+          .order("position"),
+        supabase.from("finance_recurrings").select(RECURRING_SELECT).order("created_at"),
+      ]);
 
       if (profileResult.error) throw profileResult.error;
       if (categoriesResult.error) throw categoriesResult.error;
@@ -418,7 +437,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           : null,
       );
       setCategories(
-        mapCategories(categoriesResult.data as CategoryRow[], subcategoriesResult.data as SubcategoryRow[]),
+        mapCategories(
+          categoriesResult.data as CategoryRow[],
+          subcategoriesResult.data as SubcategoryRow[],
+        ),
       );
       const recurringList = mapRecurrings(recurringsResult.data as RecurringRow[]);
       setRecurrings(recurringList);
@@ -427,7 +449,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       const generated = await generateRecurringTransactions(
         userId,
         recurringList,
-        transactionsResult.data as { recurring_id: string | null; recurring_month: string | null }[],
+        transactionsResult.data as {
+          recurring_id: string | null;
+          recurring_month: string | null;
+        }[],
       );
       if (generated > 0) {
         const { data: refreshed } = await supabase
@@ -481,7 +506,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const categoryIdMap = new Map<string, string>();
     const subcategoryIdMap = new Map<string, string>();
 
-
     for (const [index, category] of defaultCategories.entries()) {
       const { data: insertedCategory, error: categoryError } = await supabase
         .from("finance_categories")
@@ -530,7 +554,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             name: rule.name,
             keywords: rule.keywords,
             category_id: categoryId,
-            subcategory_id: rule.subcategoryId ? subcategoryIdMap.get(rule.subcategoryId) ?? null : null,
+            subcategory_id: rule.subcategoryId
+              ? (subcategoryIdMap.get(rule.subcategoryId) ?? null)
+              : null,
             priority: rule.priority,
             enabled: rule.enabled,
           };
@@ -638,7 +664,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         await refresh();
       },
       updateSubcategory: async (_categoryId, subId, name) => {
-        const { error } = await supabase.from("finance_subcategories").update({ name }).eq("id", subId);
+        const { error } = await supabase
+          .from("finance_subcategories")
+          .update({ name })
+          .eq("id", subId);
         if (error) throw error;
         await refresh();
       },
@@ -651,7 +680,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         const userId = await getCurrentUserId();
         const stats = { added: 0, categoriesCreated: 0, subcategoriesCreated: 0 };
         const norm = (s: string) => s.trim().toLowerCase();
-        const workingCategories = categories.map((c) => ({ ...c, subcategories: [...c.subcategories] }));
+        const workingCategories = categories.map((c) => ({
+          ...c,
+          subcategories: [...c.subcategories],
+        }));
         const newTransactions: Array<{
           user_id: string;
           type: "income" | "expense";
@@ -665,7 +697,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         }> = [];
 
         if (opts?.replace) {
-          const { error } = await supabase.from("finance_transactions").delete().eq("user_id", userId);
+          const { error } = await supabase
+            .from("finance_transactions")
+            .delete()
+            .eq("user_id", userId);
           if (error) throw error;
         }
 
@@ -697,7 +732,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           }
 
           if (row.subcategoryName && row.subcategoryName.trim()) {
-            let sub = cat.subcategories.find((sc) => norm(sc.name) === norm(row.subcategoryName ?? ""));
+            let sub = cat.subcategories.find(
+              (sc) => norm(sc.name) === norm(row.subcategoryName ?? ""),
+            );
             if (!sub) {
               const { data, error } = await supabase
                 .from("finance_subcategories")
@@ -795,7 +832,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           ...(patch.name !== undefined ? { name: patch.name } : {}),
           ...(patch.keywords !== undefined ? { keywords: patch.keywords } : {}),
           ...(patch.categoryId !== undefined ? { category_id: patch.categoryId } : {}),
-          ...(patch.subcategoryId !== undefined ? { subcategory_id: patch.subcategoryId ?? null } : {}),
+          ...(patch.subcategoryId !== undefined
+            ? { subcategory_id: patch.subcategoryId ?? null }
+            : {}),
           ...(patch.priority !== undefined ? { priority: patch.priority } : {}),
           ...(patch.enabled !== undefined ? { enabled: patch.enabled } : {}),
         };
@@ -833,7 +872,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           ...(patch.amount !== undefined ? { amount: patch.amount } : {}),
           ...(patch.description !== undefined ? { description: patch.description } : {}),
           ...(patch.categoryId !== undefined ? { category_id: patch.categoryId } : {}),
-          ...(patch.subcategoryId !== undefined ? { subcategory_id: patch.subcategoryId ?? null } : {}),
+          ...(patch.subcategoryId !== undefined
+            ? { subcategory_id: patch.subcategoryId ?? null }
+            : {}),
           ...(patch.accountId !== undefined ? { account_id: patch.accountId ?? null } : {}),
           ...(patch.paymentMethod !== undefined ? { payment_method: patch.paymentMethod } : {}),
           ...(patch.dayOfMonth !== undefined ? { day_of_month: patch.dayOfMonth } : {}),

@@ -80,12 +80,25 @@ export function CostPerKmChart({
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} tick={axisTick} />
+              <XAxis
+                dataKey="name"
+                stroke="var(--muted-foreground)"
+                fontSize={12}
+                tick={axisTick}
+              />
               <YAxis stroke="var(--muted-foreground)" fontSize={12} tick={axisTick} />
-              <Tooltip formatter={(v: number) => formatBRL(Number(v))} contentStyle={tooltipStyle} itemStyle={{ color: "var(--popover-foreground)" }} labelStyle={{ color: "var(--popover-foreground)" }} />
-              <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value: string) => (
-                <span style={{ color: "var(--foreground)" }}>{value}</span>
-              )} />
+              <Tooltip
+                formatter={(v: number) => formatBRL(Number(v))}
+                contentStyle={tooltipStyle}
+                itemStyle={{ color: "var(--popover-foreground)" }}
+                labelStyle={{ color: "var(--popover-foreground)" }}
+              />
+              <Legend
+                wrapperStyle={{ fontSize: 12 }}
+                formatter={(value: string) => (
+                  <span style={{ color: "var(--foreground)" }}>{value}</span>
+                )}
+              />
               <Line
                 type="monotone"
                 dataKey="Custo/km"
@@ -138,15 +151,30 @@ export function CostCompositionChart({
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={data} dataKey="value" nameKey="name" innerRadius={60} outerRadius={95} paddingAngle={2}>
+                <Pie
+                  data={data}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={60}
+                  outerRadius={95}
+                  paddingAngle={2}
+                >
                   {data.map((d) => (
                     <Cell key={d.name} fill={d.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: number) => formatBRL(Number(v))} contentStyle={tooltipStyle} itemStyle={{ color: "var(--popover-foreground)" }} labelStyle={{ color: "var(--popover-foreground)" }} />
-                <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value: string) => (
-                <span style={{ color: "var(--foreground)" }}>{value}</span>
-              )} />
+                <Tooltip
+                  formatter={(v: number) => formatBRL(Number(v))}
+                  contentStyle={tooltipStyle}
+                  itemStyle={{ color: "var(--popover-foreground)" }}
+                  labelStyle={{ color: "var(--popover-foreground)" }}
+                />
+                <Legend
+                  wrapperStyle={{ fontSize: 12 }}
+                  formatter={(value: string) => (
+                    <span style={{ color: "var(--foreground)" }}>{value}</span>
+                  )}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -188,12 +216,25 @@ export function VehicleComparisonChart({ month, year }: { month: number; year: n
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} tick={axisTick} />
+              <XAxis
+                dataKey="name"
+                stroke="var(--muted-foreground)"
+                fontSize={12}
+                tick={axisTick}
+              />
               <YAxis stroke="var(--muted-foreground)" fontSize={12} tick={axisTick} />
-              <Tooltip formatter={(v: number) => formatBRL(Number(v))} contentStyle={tooltipStyle} itemStyle={{ color: "var(--popover-foreground)" }} labelStyle={{ color: "var(--popover-foreground)" }} />
-              <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value: string) => (
-                <span style={{ color: "var(--foreground)" }}>{value}</span>
-              )} />
+              <Tooltip
+                formatter={(v: number) => formatBRL(Number(v))}
+                contentStyle={tooltipStyle}
+                itemStyle={{ color: "var(--popover-foreground)" }}
+                labelStyle={{ color: "var(--popover-foreground)" }}
+              />
+              <Legend
+                wrapperStyle={{ fontSize: 12 }}
+                formatter={(value: string) => (
+                  <span style={{ color: "var(--foreground)" }}>{value}</span>
+                )}
+              />
               <Bar dataKey="Custo total" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
               <Bar dataKey="Custo/km" fill="var(--chart-3)" radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -203,4 +244,3 @@ export function VehicleComparisonChart({ month, year }: { month: number; year: n
     </Card>
   );
 }
-

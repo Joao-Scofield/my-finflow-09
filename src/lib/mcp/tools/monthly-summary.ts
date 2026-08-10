@@ -15,7 +15,10 @@ export default defineTool({
     if (!ctx.isAuthenticated())
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     if (!/^\d{4}-\d{2}$/.test(month))
-      return { content: [{ type: "text", text: "month must use the YYYY-MM format" }], isError: true };
+      return {
+        content: [{ type: "text", text: "month must use the YYYY-MM format" }],
+        isError: true,
+      };
 
     const [yearText, monthText] = month.split("-");
     const year = Number(yearText);

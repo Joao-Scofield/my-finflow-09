@@ -126,14 +126,20 @@ function Dashboard() {
     await supabase.auth.signOut();
   }
 
-  const monthTx = useMemo(
-    () =>
-      transactions.filter((t) => {
-        const [ty, tm] = t.date.split("-").map(Number);
-        return ty === year && tm === month;
-      }),
-    [transactions, month, year],
-  );
+  // Índice mês -> transações calculado uma vez; trocar de mês vira lookup O(1).
+  const txByMonth = useMemo(() => {
+    const map = new Map<string, Transaction[]>();
+    for (const t of transactions) {
+      const key = t.date.slice(0, 7);
+      const list = map.get(key);
+      if (list) list.push(t);
+      else map.set(key, [t]);
+    }
+    return map;
+  }, [transactions]);
+
+  const monthKey = `${year}-${String(month).padStart(2, "0")}`;
+  const monthTx = useMemo(() => txByMonth.get(monthKey) ?? [], [txByMonth, monthKey]);
 
   const income = monthTx
     .filter((t) => t.type === "income")
@@ -148,7 +154,7 @@ function Dashboard() {
       <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
+            <div className="surface-emerald grid h-9 w-9 shrink-0 place-items-center rounded-xl shadow-sm">
               <Wallet className="h-5 w-5" />
             </div>
             <div className="min-w-0">
@@ -200,19 +206,19 @@ function Dashboard() {
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Módulos</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
-                  <Link to="/saldos">
+                  <Link to="/saldos" preload="intent">
                     <Landmark className="mr-2 h-4 w-4" />
                     Saldos
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/frota">
+                  <Link to="/frota" preload="intent">
                     <Car className="mr-2 h-4 w-4" />
                     Frota
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/lista">
+                  <Link to="/lista" preload="intent">
                     <ShoppingBag className="mr-2 h-4 w-4" />
                     Lista de compras
                   </Link>

@@ -238,7 +238,7 @@ function Dashboard() {
         <section className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="text-sm text-muted-foreground">Período</p>
-            <h2 className="truncate text-lg font-semibold tracking-tight sm:text-xl">
+            <h2 className="gold-rule truncate text-lg font-semibold tracking-tight sm:text-xl">
               {monthNamesPt[month - 1]} / {year}
             </h2>
           </div>
@@ -266,19 +266,24 @@ function Dashboard() {
 
         <SummaryCards income={income} expense={expense} accountsTotal={accountsTotal} />
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          <LazyExpenseBreakdownChart monthTransactions={monthTx} />
-          <LazyIncomeBreakdownChart monthTransactions={monthTx} />
+        <div className="grid gap-4 lg:grid-cols-6">
+          <div className="lg:col-span-4">
+            <LazyExpenseBreakdownChart monthTransactions={monthTx} />
+          </div>
+          <div className="lg:col-span-2">
+            <LazyIncomeBreakdownChart monthTransactions={monthTx} />
+          </div>
+          <div className="lg:col-span-2">
+            <LazyPaymentMethodChart monthTransactions={monthTx} />
+          </div>
+          <div className="lg:col-span-4">
+            <LazyMonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
+          </div>
         </div>
 
-        <LazyPaymentMethodChart monthTransactions={monthTx} />
-
-        <LazyMonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
-
-
-        <Card>
+        <Card className="bento-card">
           <CardHeader>
-            <CardTitle className="text-base">Transações do mês</CardTitle>
+            <CardTitle className="gold-rule text-base">Transações do mês</CardTitle>
           </CardHeader>
           <CardContent className="px-3 sm:px-6">
             <TransactionsTable
@@ -290,6 +295,7 @@ function Dashboard() {
             />
           </CardContent>
         </Card>
+
           </>
         )}
       </main>

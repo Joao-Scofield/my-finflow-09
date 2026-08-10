@@ -2,7 +2,13 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-export function ChartSkeleton({ className, height = 260 }: { className?: string; height?: number }) {
+export function ChartSkeleton({
+  className,
+  height = 260,
+}: {
+  className?: string;
+  height?: number;
+}) {
   return (
     <Card className={className}>
       <CardHeader>

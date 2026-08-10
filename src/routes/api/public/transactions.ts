@@ -68,9 +68,7 @@ function normalize(s: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-type AdminClient = Awaited<
-  typeof import("@/integrations/supabase/client.server")
->["supabaseAdmin"];
+type AdminClient = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
 
 async function authenticate(request: Request) {
   const header = request.headers.get("authorization") ?? "";
@@ -124,8 +122,7 @@ async function resolveCategory(
     if (found) return found.id as string;
   }
 
-  const fallbackName =
-    wanted || (input.type === "income" ? "Outras Receitas" : "Outras Despesas");
+  const fallbackName = wanted || (input.type === "income" ? "Outras Receitas" : "Outras Despesas");
   const existing = (categories ?? []).find((c) => normalize(c.name) === normalize(fallbackName));
   if (existing) return existing.id as string;
 

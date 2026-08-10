@@ -27,7 +27,9 @@ interface Ctx {
   items: ShoppingItem[];
   loading: boolean;
   refresh: () => Promise<void>;
-  addItem: (i: Omit<ShoppingItem, "id" | "transactionId" | "status" | "purchasedAt">) => Promise<void>;
+  addItem: (
+    i: Omit<ShoppingItem, "id" | "transactionId" | "status" | "purchasedAt">,
+  ) => Promise<void>;
   updateItem: (
     id: string,
     patch: Partial<Omit<ShoppingItem, "id" | "transactionId">>,

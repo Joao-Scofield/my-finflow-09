@@ -9,12 +9,23 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { useFinance } from "@/lib/finance-store";
-import { paymentMethods, type PaymentMethod, type Transaction, type TxType } from "@/lib/finance-data";
+import {
+  paymentMethods,
+  type PaymentMethod,
+  type Transaction,
+  type TxType,
+} from "@/lib/finance-data";
 
 interface Props {
   open: boolean;
@@ -207,7 +218,10 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
 
           <div>
             <Label>Forma de pagamento</Label>
-            <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
+            <Select
+              value={paymentMethod}
+              onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>

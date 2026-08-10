@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Landmark, Loader2, LogOut, Settings2, TrendingDown, TrendingUp } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Landmark, Loader2, Settings2, TrendingDown, TrendingUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeToggle } from "@/components/finance/ThemeToggle";
+import { AppHeader } from "@/components/layout/AppHeader";
 import { Login } from "@/components/finance/Login";
 import { AccountsManager } from "@/components/finance/AccountsManager";
 import { LazyBalanceHistoryChart } from "@/components/finance/LazyCharts";
@@ -122,45 +122,18 @@ function BalancesPage() {
   const totalPrev = rows.reduce((s, r) => s + r.prev, 0);
   const totalChange = total - totalPrev;
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-  }
-
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <Landmark className="h-5 w-5" />
-            </div>
-            <nav className="flex items-center gap-0.5 overflow-x-auto">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/">Painel</Link>
-              </Button>
-              <Button variant="secondary" size="sm" asChild>
-                <Link to="/saldos">Saldos</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/frota">Frota</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/lista">Lista</Link>
-              </Button>
-            </nav>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setManagerOpen(true)}>
-              <Settings2 className="h-4 w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Gerenciar</span>
-            </Button>
-            <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        icon={Landmark}
+        active="/saldos"
+        actions={
+          <Button variant="outline" size="sm" onClick={() => setManagerOpen(true)}>
+            <Settings2 className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Gerenciar</span>
+          </Button>
+        }
+      />
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-5 sm:px-6 sm:py-6">
         {loading ? (
@@ -173,13 +146,13 @@ function BalancesPage() {
             </section>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="p-4">
                   <p className="text-xs text-muted-foreground">Patrimônio total</p>
                   <p className="mt-1 text-2xl font-semibold tabular-nums">{formatBRL(total)}</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="p-4">
                   <p className="text-xs text-muted-foreground">Variação no mês</p>
                   <p
@@ -193,13 +166,13 @@ function BalancesPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="p-4">
                   <p className="text-xs text-muted-foreground">Contas cadastradas</p>
                   <p className="mt-1 text-2xl font-semibold tabular-nums">{accounts.length}</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="p-4">
                   <p className="text-xs text-muted-foreground">Mês anterior</p>
                   <p className="mt-1 text-2xl font-semibold tabular-nums">{formatBRL(totalPrev)}</p>
@@ -239,15 +212,15 @@ function BalancesPage() {
                       )}
                       {change >= 0 ? "+" : "−"}
                       {formatBRL(Math.abs(change))}
-                      {pct !== null && ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct).toFixed(1)}%)`}{" "}
-                      no mês
+                      {pct !== null && ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct).toFixed(1)}%)`} no
+                      mês
                     </p>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            <Card>
+            <Card className="bento-card">
               <CardHeader>
                 <CardTitle className="text-base">Detalhamento por saldo</CardTitle>
               </CardHeader>
@@ -258,44 +231,44 @@ function BalancesPage() {
                   </p>
                 ) : (
                   <div className="-mx-3 overflow-x-auto px-3 sm:mx-0 sm:px-0">
-                  <Table className="min-w-[720px]">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Saldo</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead className="text-right">Inicial</TableHead>
-                        <TableHead className="text-right">Mês anterior</TableHead>
-                        <TableHead className="text-right">Entradas</TableHead>
-                        <TableHead className="text-right">Saídas</TableHead>
-                        <TableHead className="text-right">Atual</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {rows.map(({ account, prev, income, expense }) => (
-                        <TableRow key={account.id}>
-                          <TableCell className="font-medium">{account.name}</TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {accountKindLabel(account.kind)}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums">
-                            {formatBRL(account.initialBalance)}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums">
-                            {formatBRL(prev)}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums text-income">
-                            {formatBRL(income)}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums text-expense">
-                            {formatBRL(expense)}
-                          </TableCell>
-                          <TableCell className="text-right font-semibold tabular-nums">
-                            {formatBRL(account.balance)}
-                          </TableCell>
+                    <Table className="min-w-[720px]">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Saldo</TableHead>
+                          <TableHead>Tipo</TableHead>
+                          <TableHead className="text-right">Inicial</TableHead>
+                          <TableHead className="text-right">Mês anterior</TableHead>
+                          <TableHead className="text-right">Entradas</TableHead>
+                          <TableHead className="text-right">Saídas</TableHead>
+                          <TableHead className="text-right">Atual</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {rows.map(({ account, prev, income, expense }) => (
+                          <TableRow key={account.id}>
+                            <TableCell className="font-medium">{account.name}</TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {accountKindLabel(account.kind)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums">
+                              {formatBRL(account.initialBalance)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums">
+                              {formatBRL(prev)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums text-income">
+                              {formatBRL(income)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums text-expense">
+                              {formatBRL(expense)}
+                            </TableCell>
+                            <TableCell className="text-right font-semibold tabular-nums">
+                              {formatBRL(account.balance)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 )}
               </CardContent>

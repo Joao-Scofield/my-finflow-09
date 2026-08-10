@@ -53,9 +53,11 @@ export function CategoriesManager({ open, onOpenChange }: Props) {
   const [editingCatId, setEditingCatId] = useState<string | null>(null);
   const [editingCatName, setEditingCatName] = useState("");
   const [newSubByCat, setNewSubByCat] = useState<Record<string, string>>({});
-  const [editingSub, setEditingSub] = useState<{ catId: string; subId: string; name: string } | null>(
-    null,
-  );
+  const [editingSub, setEditingSub] = useState<{
+    catId: string;
+    subId: string;
+    name: string;
+  } | null>(null);
 
   function commitEditCat(c: Category) {
     if (editingCatName.trim()) {
@@ -191,9 +193,7 @@ export function CategoriesManager({ open, onOpenChange }: Props) {
                       <div key={s.id} className="flex items-center gap-1 rounded-md border p-1">
                         <Input
                           value={editingSub.name}
-                          onChange={(e) =>
-                            setEditingSub({ ...editingSub, name: e.target.value })
-                          }
+                          onChange={(e) => setEditingSub({ ...editingSub, name: e.target.value })}
                           className="h-7 w-32"
                           autoFocus
                         />
@@ -240,9 +240,7 @@ export function CategoriesManager({ open, onOpenChange }: Props) {
                   <Input
                     placeholder="Nova subcategoria"
                     value={newSubByCat[cat.id] ?? ""}
-                    onChange={(e) =>
-                      setNewSubByCat({ ...newSubByCat, [cat.id]: e.target.value })
-                    }
+                    onChange={(e) => setNewSubByCat({ ...newSubByCat, [cat.id]: e.target.value })}
                     className="h-9"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {

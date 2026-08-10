@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Car, Fuel, Loader2, LogOut, Plus, Receipt, Trash2, Wrench } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Car, Fuel, Loader2, Plus, Receipt, Trash2, Wrench } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +16,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toaster } from "@/components/ui/sonner";
 import { PeriodSelector } from "@/components/finance/PeriodSelector";
-import { ThemeToggle } from "@/components/finance/ThemeToggle";
+import { AppHeader } from "@/components/layout/AppHeader";
 import { Login } from "@/components/finance/Login";
 import {
   LazyCostCompositionChart,
@@ -114,7 +114,7 @@ function AuthShell() {
 
 function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <Card>
+    <Card className="bento-card">
       <CardContent className="p-4">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
@@ -149,7 +149,9 @@ function FleetPage() {
 
   const selected = vehicles.find((v) => v.id === vehicleId) ?? null;
   const scopedFuelings = selected ? fuelings.filter((f) => f.vehicleId === selected.id) : fuelings;
-  const scopedMaint = selected ? maintenances.filter((m) => m.vehicleId === selected.id) : maintenances;
+  const scopedMaint = selected
+    ? maintenances.filter((m) => m.vehicleId === selected.id)
+    : maintenances;
   const scopedCosts = selected ? fixedCosts.filter((c) => c.vehicleId === selected.id) : fixedCosts;
 
   const stats = useMemo(() => {
@@ -180,41 +182,9 @@ function FleetPage() {
     return { km, fuel, maint, fixed, total, costPerKm: km > 0 ? total / km : 0, consumption };
   }, [scopedFuelings, scopedMaint, scopedCosts, month, year, selected, vehicles, fuelings]);
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-  }
-
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <Car className="h-5 w-5" />
-            </div>
-            <nav className="flex items-center gap-0.5 overflow-x-auto">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/">Painel</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/saldos">Saldos</Link>
-              </Button>
-              <Button variant="secondary" size="sm" asChild>
-                <Link to="/frota">Frota</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/lista">Lista</Link>
-              </Button>
-            </nav>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader icon={Car} active="/frota" />
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-5 sm:px-6 sm:py-6">
         {loading ? (
@@ -255,7 +225,7 @@ function FleetPage() {
             </section>
 
             {vehicles.length === 0 ? (
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="grid place-items-center gap-3 p-10 text-center">
                   <Car className="h-10 w-10 text-muted-foreground" />
                   <div>
@@ -327,7 +297,7 @@ function FleetPage() {
 
                 <LazyVehicleComparisonChart month={month} year={year} />
 
-                <Card>
+                <Card className="bento-card">
                   <CardHeader>
                     <CardTitle className="text-base">Veículos</CardTitle>
                   </CardHeader>
@@ -345,7 +315,8 @@ function FleetPage() {
                         .filter((m) => m.vehicleId === v.id && m.nextOdometer)
                         .sort((a, b) => (b.nextOdometer ?? 0) - (a.nextOdometer ?? 0))[0];
                       const due =
-                        nextService?.nextOdometer && s.lastOdometer >= nextService.nextOdometer - 500;
+                        nextService?.nextOdometer &&
+                        s.lastOdometer >= nextService.nextOdometer - 500;
                       return (
                         <div key={v.id} className="rounded-xl border p-4">
                           <div className="flex items-start justify-between gap-2">
@@ -421,7 +392,7 @@ function FleetPage() {
                   </TabsList>
 
                   <TabsContent value="fuel">
-                    <Card>
+                    <Card className="bento-card">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0">
                         <CardTitle className="text-base">Abastecimentos</CardTitle>
                         <Button size="sm" onClick={() => setFuelOpen(true)}>
@@ -446,7 +417,10 @@ function FleetPage() {
                           <TableBody>
                             {scopedFuelings.length === 0 && (
                               <TableRow>
-                                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                                <TableCell
+                                  colSpan={8}
+                                  className="text-center text-muted-foreground"
+                                >
                                   Nenhum abastecimento registrado.
                                 </TableCell>
                               </TableRow>
@@ -489,7 +463,7 @@ function FleetPage() {
                   </TabsContent>
 
                   <TabsContent value="maint">
-                    <Card>
+                    <Card className="bento-card">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0">
                         <CardTitle className="text-base">Manutenções e pneus</CardTitle>
                         <Button size="sm" onClick={() => setMaintOpen(true)}>
@@ -514,7 +488,10 @@ function FleetPage() {
                           <TableBody>
                             {scopedMaint.length === 0 && (
                               <TableRow>
-                                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                                <TableCell
+                                  colSpan={8}
+                                  className="text-center text-muted-foreground"
+                                >
                                   Nenhuma manutenção registrada.
                                 </TableCell>
                               </TableRow>
@@ -526,7 +503,9 @@ function FleetPage() {
                                   {vehicles.find((v) => v.id === m.vehicleId)?.name ?? "—"}
                                 </TableCell>
                                 <TableCell>{maintenanceKindLabel(m.kind)}</TableCell>
-                                <TableCell className="max-w-56 truncate">{m.description || "—"}</TableCell>
+                                <TableCell className="max-w-56 truncate">
+                                  {m.description || "—"}
+                                </TableCell>
                                 <TableCell className="text-right tabular-nums">
                                   {formatKm(m.odometer)}
                                 </TableCell>
@@ -555,7 +534,7 @@ function FleetPage() {
                   </TabsContent>
 
                   <TabsContent value="fixed">
-                    <Card>
+                    <Card className="bento-card">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0">
                         <CardTitle className="text-base">Custos fixos</CardTitle>
                         <Button size="sm" onClick={() => setCostOpen(true)}>
@@ -579,7 +558,10 @@ function FleetPage() {
                           <TableBody>
                             {scopedCosts.length === 0 && (
                               <TableRow>
-                                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                                <TableCell
+                                  colSpan={7}
+                                  className="text-center text-muted-foreground"
+                                >
                                   Nenhum custo fixo cadastrado.
                                 </TableCell>
                               </TableRow>
@@ -621,21 +603,13 @@ function FleetPage() {
       </main>
 
       <VehicleDialog open={vehicleOpen} onOpenChange={setVehicleOpen} editing={editingVehicle} />
-      <FuelingDialog
-        open={fuelOpen}
-        onOpenChange={setFuelOpen}
-        defaultVehicleId={selected?.id}
-      />
+      <FuelingDialog open={fuelOpen} onOpenChange={setFuelOpen} defaultVehicleId={selected?.id} />
       <MaintenanceDialog
         open={maintOpen}
         onOpenChange={setMaintOpen}
         defaultVehicleId={selected?.id}
       />
-      <FixedCostDialog
-        open={costOpen}
-        onOpenChange={setCostOpen}
-        defaultVehicleId={selected?.id}
-      />
+      <FixedCostDialog open={costOpen} onOpenChange={setCostOpen} defaultVehicleId={selected?.id} />
       <Toaster richColors position="top-right" />
     </div>
   );

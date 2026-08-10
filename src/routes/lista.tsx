@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   Check,
   ExternalLink,
   Loader2,
-  LogOut,
   Pencil,
   Plus,
   ShoppingBag,
@@ -24,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeToggle } from "@/components/finance/ThemeToggle";
+import { AppHeader } from "@/components/layout/AppHeader";
 import { Login } from "@/components/finance/Login";
 import { BalancesSkeleton } from "@/components/finance/Skeletons";
 import { PurchaseDialog, ShoppingItemDialog } from "@/components/shopping/ShoppingForms";
@@ -108,7 +107,7 @@ function AuthShell() {
 
 function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <Card>
+    <Card className="bento-card">
       <CardContent className="p-4">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
@@ -151,10 +150,6 @@ function ShoppingPage() {
     );
   }, [items, status, priority, sort]);
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-  }
-
   async function remove(id: string) {
     try {
       await deleteItem(id);
@@ -177,35 +172,7 @@ function ShoppingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <ShoppingBag className="h-5 w-5" />
-            </div>
-            <nav className="flex items-center gap-0.5 overflow-x-auto">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/">Painel</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/saldos">Saldos</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/frota">Frota</Link>
-              </Button>
-              <Button variant="secondary" size="sm" asChild>
-                <Link to="/lista">Lista</Link>
-              </Button>
-            </nav>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader icon={ShoppingBag} active="/lista" />
 
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-6 sm:px-6">
         {loading ? (
@@ -278,7 +245,7 @@ function ShoppingPage() {
             </div>
 
             {visible.length === 0 ? (
-              <Card>
+              <Card className="bento-card">
                 <CardContent className="grid place-items-center gap-3 p-10 text-center">
                   <ShoppingBag className="h-10 w-10 text-muted-foreground" />
                   <div>
@@ -313,7 +280,10 @@ function ShoppingPage() {
                       </div>
                       <Badge
                         variant="outline"
-                        style={{ borderColor: priorityColor(i.priority), color: priorityColor(i.priority) }}
+                        style={{
+                          borderColor: priorityColor(i.priority),
+                          color: priorityColor(i.priority),
+                        }}
                       >
                         {priorityLabel(i.priority)}
                       </Badge>

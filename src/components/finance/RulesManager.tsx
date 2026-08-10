@@ -113,16 +113,14 @@ export function RulesManager({ open, onOpenChange }: Props) {
           </DialogTitle>
           <DialogDescription>
             Quando a descrição de uma transação contiver alguma palavra-chave, a categoria e
-            subcategoria da regra serão aplicadas automaticamente. Regras de maior prioridade
-            vencem em caso de conflito.
+            subcategoria da regra serão aplicadas automaticamente. Regras de maior prioridade vencem
+            em caso de conflito.
           </DialogDescription>
         </DialogHeader>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">
-              {draft.id ? "Editar regra" : "Nova regra"}
-            </CardTitle>
+            <CardTitle className="text-sm">{draft.id ? "Editar regra" : "Nova regra"}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
@@ -141,17 +139,13 @@ export function RulesManager({ open, onOpenChange }: Props) {
                   id="rule-priority"
                   type="number"
                   value={draft.priority}
-                  onChange={(e) =>
-                    setDraft({ ...draft, priority: Number(e.target.value) })
-                  }
+                  onChange={(e) => setDraft({ ...draft, priority: Number(e.target.value) })}
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="rule-keywords">
-                Palavras-chave (separadas por vírgula)
-              </Label>
+              <Label htmlFor="rule-keywords">Palavras-chave (separadas por vírgula)</Label>
               <Input
                 id="rule-keywords"
                 value={draft.keywordsText}

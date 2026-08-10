@@ -3,7 +3,13 @@ import { Pencil, Search, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -96,11 +102,7 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
             ))}
           </SelectContent>
         </Select>
-        <Select
-          value={subFilter}
-          onValueChange={setSubFilter}
-          disabled={subOptions.length === 0}
-        >
+        <Select value={subFilter} onValueChange={setSubFilter} disabled={subOptions.length === 0}>
           <SelectTrigger className="w-full sm:w-[170px]">
             <SelectValue placeholder="Subcategoria" />
           </SelectTrigger>
@@ -233,9 +235,7 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
                   </TableCell>
                   <TableCell className="max-w-[260px]">
                     <div className="truncate font-medium">{t.description || "—"}</div>
-                    {sub && (
-                      <div className="text-xs text-muted-foreground">{sub.name}</div>
-                    )}
+                    {sub && <div className="text-xs text-muted-foreground">{sub.name}</div>}
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center gap-2 text-sm">
@@ -280,11 +280,7 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
                       <Button size="icon" variant="ghost" onClick={() => onEdit(t)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => deleteTransaction(t.id)}
-                      >
+                      <Button size="icon" variant="ghost" onClick={() => deleteTransaction(t.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

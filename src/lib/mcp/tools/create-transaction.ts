@@ -39,7 +39,10 @@ export default defineTool({
     if (!ctx.isAuthenticated())
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     if (!(input.amount > 0))
-      return { content: [{ type: "text", text: "amount must be greater than zero" }], isError: true };
+      return {
+        content: [{ type: "text", text: "amount must be greater than zero" }],
+        isError: true,
+      };
 
     const supabase = supabaseForUser(ctx);
     const { data, error } = await supabase

@@ -68,18 +68,11 @@ const emptyDraft: Draft = {
   active: true,
 };
 
-const brl = (v: number) =>
-  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export function RecurringsManager({ open, onOpenChange }: Props) {
-  const {
-    recurrings,
-    categories,
-    accounts,
-    addRecurring,
-    updateRecurring,
-    deleteRecurring,
-  } = useFinance();
+  const { recurrings, categories, accounts, addRecurring, updateRecurring, deleteRecurring } =
+    useFinance();
   const [draft, setDraft] = useState<Draft>(emptyDraft);
 
   const typeCategories = categories.filter((c) => c.type === draft.type);
@@ -278,7 +271,9 @@ export function RecurringsManager({ open, onOpenChange }: Props) {
               <Label>Forma de pagamento</Label>
               <Select
                 value={draft.paymentMethod}
-                onValueChange={(v) => setDraft((d) => ({ ...d, paymentMethod: v as PaymentMethod }))}
+                onValueChange={(v) =>
+                  setDraft((d) => ({ ...d, paymentMethod: v as PaymentMethod }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -348,9 +343,7 @@ export function RecurringsManager({ open, onOpenChange }: Props) {
 
         <div className="space-y-2">
           {recurrings.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              Nenhuma recorrência cadastrada ainda.
-            </p>
+            <p className="text-sm text-muted-foreground">Nenhuma recorrência cadastrada ainda.</p>
           )}
           {recurrings.map((r) => {
             const cat = categories.find((c) => c.id === r.categoryId);

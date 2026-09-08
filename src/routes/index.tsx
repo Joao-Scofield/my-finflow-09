@@ -281,20 +281,15 @@ function Dashboard() {
 
             <SummaryCards income={income} expense={expense} accountsTotal={accountsTotal} />
 
-            <div className="grid gap-4 lg:grid-cols-6">
-              <div className="lg:col-span-4">
-                <LazyExpenseBreakdownChart monthTransactions={monthTx} />
-              </div>
-              <div className="lg:col-span-2">
-                <LazyIncomeBreakdownChart monthTransactions={monthTx} />
-              </div>
-              <div className="lg:col-span-2">
-                <LazyPaymentMethodChart monthTransactions={monthTx} />
-              </div>
-              <div className="lg:col-span-4">
-                <LazyMonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
-              </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <LazyExpenseBreakdownChart monthTransactions={monthTx} />
+              <LazyIncomeBreakdownChart monthTransactions={monthTx} />
             </div>
+
+            <LazyPaymentMethodChart monthTransactions={monthTx} />
+
+            <LazyMonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
+
 
             <Card className="bento-card">
               <CardHeader>

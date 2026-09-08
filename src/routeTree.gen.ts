@@ -13,6 +13,7 @@ import { Route as SaldosRouteImport } from './routes/saldos'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ListaRouteImport } from './routes/lista'
 import { Route as FrotaRouteImport } from './routes/frota'
+import { Route as ComprovanteRouteImport } from './routes/comprovante'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -38,6 +39,11 @@ const ListaRoute = ListaRouteImport.update({
 const FrotaRoute = FrotaRouteImport.update({
   id: '/frota',
   path: '/frota',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComprovanteRoute = ComprovanteRouteImport.update({
+  id: '/comprovante',
+  path: '/comprovante',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -76,6 +82,7 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/comprovante': typeof ComprovanteRoute
   '/frota': typeof FrotaRoute
   '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/comprovante': typeof ComprovanteRoute
   '/frota': typeof FrotaRoute
   '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
@@ -101,6 +109,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/comprovante': typeof ComprovanteRoute
   '/frota': typeof FrotaRoute
   '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/comprovante'
     | '/frota'
     | '/lista'
     | '/mcp'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/comprovante'
     | '/frota'
     | '/lista'
     | '/mcp'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/comprovante'
     | '/frota'
     | '/lista'
     | '/mcp'
@@ -152,6 +164,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ComprovanteRoute: typeof ComprovanteRoute
   FrotaRoute: typeof FrotaRoute
   ListaRoute: typeof ListaRoute
   McpRoute: typeof McpRoute
@@ -191,6 +204,13 @@ declare module '@tanstack/react-router' {
       path: '/frota'
       fullPath: '/frota'
       preLoaderRoute: typeof FrotaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comprovante': {
+      id: '/comprovante'
+      path: '/comprovante'
+      fullPath: '/comprovante'
+      preLoaderRoute: typeof ComprovanteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -240,6 +260,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ComprovanteRoute: ComprovanteRoute,
   FrotaRoute: FrotaRoute,
   ListaRoute: ListaRoute,
   McpRoute: McpRoute,

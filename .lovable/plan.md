@@ -20,3 +20,16 @@ Hoje, para investir, você lança uma saída na conta e uma entrada no investime
 - `TransactionModal.tsx`: terceira opção de tipo, com seletores "De" e "Para" (contas distintas obrigatórias) e ocultação de categoria/status.
 - `Charts.tsx`, `SummaryCards.tsx`, `index.tsx`, `saldos.tsx`, endpoint público e ferramentas MCP: excluir transferências dos agregados de receita/despesa.
 - `TransactionsTable.tsx`: linha/cartão específico para transferência com origem e destino e filtro por tipo.
+
+# Saldos: visão mensal e trimestral
+
+- O gráfico de evolução de saldos ganha um seletor de agrupamento: **Mensal** (como hoje) e **Trimestral** (T1/T2/T3/T4, usando o saldo do fim de cada trimestre).
+- Os períodos disponíveis (6/12/24 meses) continuam, adaptados ao agrupamento escolhido (ex.: 4, 8 ou 12 trimestres).
+- Técnico: em `BalanceHistoryChart.tsx`, manter o cálculo O(n) de deltas mensais e agregar em buckets trimestrais antes de montar as séries; rótulos "T1/2026".
+
+# Tela principal: selecionar vários meses
+
+- O seletor de período passa a permitir escolher **um intervalo de meses** (ex.: Janeiro a Março) em vez de apenas um mês.
+- Todos os números da tela (cards de resumo, tabela e gráficos) passam a considerar o intervalo inteiro somado.
+- Um atalho "Mês atual" mantém o uso rápido de um único mês, e o comparativo mensal continua mostrando cada mês separadamente.
+- Técnico: `PeriodSelector.tsx` passa a emitir `{ startMonth, startYear, endMonth, endYear }`; `index.tsx` filtra transações pelo intervalo e passa a lista agregada para cards, tabela e gráficos; ao criar lançamento, a data padrão usa o último mês do intervalo.

@@ -12,6 +12,7 @@ const navItems = [
   { to: "/saldos", label: "Saldos" },
   { to: "/frota", label: "Frota" },
   { to: "/lista", label: "Lista" },
+  { to: "/comprovante", label: "Comprovante" },
 ] as const;
 
 interface Props {

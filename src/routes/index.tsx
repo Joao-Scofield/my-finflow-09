@@ -10,6 +10,7 @@ import {
   LogOut,
   Menu,
   Plus,
+  Receipt,
   Settings2,
   ShoppingBag,
   Sparkles,
@@ -231,6 +232,12 @@ function Dashboard() {
                   <Link to="/lista" preload="intent">
                     <ShoppingBag className="mr-2 h-4 w-4" />
                     Lista de compras
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/comprovante" preload="intent">
+                    <Receipt className="mr-2 h-4 w-4" />
+                    Importar comprovante
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

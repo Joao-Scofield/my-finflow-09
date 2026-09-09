@@ -233,6 +233,12 @@ function Dashboard() {
                     Lista de compras
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/comprovante" preload="intent">
+                    <Receipt className="mr-2 h-4 w-4" />
+                    Importar comprovante
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => handleSignOut()}>
                   <LogOut className="mr-2 h-4 w-4" />

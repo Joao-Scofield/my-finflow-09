@@ -10,6 +10,7 @@ import {
   LogOut,
   Menu,
   Plus,
+  Receipt,
   Settings2,
   ShoppingBag,
   Sparkles,

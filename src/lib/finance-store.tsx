@@ -214,12 +214,13 @@ function mapTransactions(rows: TransactionRow[]): Transaction[] {
     type: row.type as TxType,
     amount: Number(row.amount),
     date: row.transaction_date,
-    categoryId: row.category_id,
+    categoryId: row.category_id ?? "",
     subcategoryId: row.subcategory_id ?? undefined,
     description: row.description,
     status: row.status as "paid" | "pending",
     paymentMethod: (row.payment_method ?? "outro") as PaymentMethod,
     accountId: row.account_id ?? undefined,
+    transferAccountId: row.transfer_account_id ?? undefined,
   }));
 }
 

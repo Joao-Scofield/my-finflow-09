@@ -238,10 +238,15 @@ function mapAccounts(rows: AccountRow[]): Account[] {
 /** saldo atual = saldo inicial + entradas - saídas lançadas naquela conta */
 function withComputedBalances(accounts: Account[], transactions: Transaction[]): Account[] {
   const delta = new Map<string, number>();
+  const bump = (id: string, v: number) => delta.set(id, (delta.get(id) ?? 0) + v);
   for (const t of transactions) {
+    if (t.type === "transfer") {
+      if (t.accountId) bump(t.accountId, -t.amount);
+      if (t.transferAccountId) bump(t.transferAccountId, t.amount);
+      continue;
+    }
     if (!t.accountId) continue;
-    const current = delta.get(t.accountId) ?? 0;
-    delta.set(t.accountId, current + (t.type === "income" ? t.amount : -t.amount));
+    bump(t.accountId, t.type === "income" ? t.amount : -t.amount);
   }
   return accounts.map((a) => ({
     ...a,

@@ -590,41 +590,47 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       addTransaction: async (t) => {
         const userId = await getCurrentUserId();
         let tx = t;
-        const match = matchRuleFor(t.description, rules, categories);
-        if (match) {
-          const matchedCat = categories.find((c) => c.id === match.categoryId);
-          if (matchedCat && matchedCat.type === t.type) {
-            tx = { ...tx, categoryId: match.categoryId, subcategoryId: match.subcategoryId };
+        if (t.type !== "transfer") {
+          const match = matchRuleFor(t.description, rules, categories);
+          if (match) {
+            const matchedCat = categories.find((c) => c.id === match.categoryId);
+            if (matchedCat && matchedCat.type === t.type) {
+              tx = { ...tx, categoryId: match.categoryId, subcategoryId: match.subcategoryId };
+            }
           }
         }
+        const isTransfer = tx.type === "transfer";
         const { error } = await supabase.from("finance_transactions").insert({
           user_id: userId,
           type: tx.type,
           amount: tx.amount,
           transaction_date: tx.date,
-          category_id: tx.categoryId,
-          subcategory_id: tx.subcategoryId ?? null,
+          category_id: isTransfer ? null : tx.categoryId,
+          subcategory_id: isTransfer ? null : (tx.subcategoryId ?? null),
           description: tx.description,
-          status: tx.status,
+          status: isTransfer ? "paid" : tx.status,
           payment_method: tx.paymentMethod,
           account_id: tx.accountId ?? null,
+          transfer_account_id: isTransfer ? (tx.transferAccountId ?? null) : null,
         });
         if (error) throw error;
         await refresh();
       },
       updateTransaction: async (id, t) => {
+        const isTransfer = t.type === "transfer";
         const { error } = await supabase
           .from("finance_transactions")
           .update({
             type: t.type,
             amount: t.amount,
             transaction_date: t.date,
-            category_id: t.categoryId,
-            subcategory_id: t.subcategoryId ?? null,
+            category_id: isTransfer ? null : t.categoryId,
+            subcategory_id: isTransfer ? null : (t.subcategoryId ?? null),
             description: t.description,
-            status: t.status,
+            status: isTransfer ? "paid" : t.status,
             payment_method: t.paymentMethod,
             account_id: t.accountId ?? null,
+            transfer_account_id: isTransfer ? (t.transferAccountId ?? null) : null,
           })
           .eq("id", id);
         if (error) throw error;

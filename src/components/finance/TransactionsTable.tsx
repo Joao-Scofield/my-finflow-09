@@ -42,6 +42,9 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
   const [methodFilter, setMethodFilter] = useState<string>("all");
 
   const catMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+  const accMap = useMemo(() => new Map(accounts.map((a) => [a.id, a])), [accounts]);
+  const transferLabel = (t: Transaction) =>
+    `${accMap.get(t.accountId ?? "")?.name ?? "—"} → ${accMap.get(t.transferAccountId ?? "")?.name ?? "—"}`;
 
   const subOptions = useMemo(() => {
     if (catFilter === "all") return [];

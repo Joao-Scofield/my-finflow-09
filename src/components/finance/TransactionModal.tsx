@@ -46,6 +46,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
   const [paid, setPaid] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [accountId, setAccountId] = useState("");
+  const [transferAccountId, setTransferAccountId] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -59,6 +60,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       setPaid(editing.status === "paid");
       setPaymentMethod(editing.paymentMethod ?? "outro");
       setAccountId(editing.accountId ?? "");
+      setTransferAccountId(editing.transferAccountId ?? "");
     } else {
       setType("expense");
       setAmount("");
@@ -69,8 +71,11 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       setPaid(true);
       setPaymentMethod("pix");
       setAccountId(accounts.length === 1 ? accounts[0].id : "");
+      setTransferAccountId("");
     }
   }, [open, editing, defaultDate, accounts]);
+
+  const isTransfer = type === "transfer";
 
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.type === type),
@@ -87,8 +92,18 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
     }
   }, [type, categoryId, currentCategory]);
 
-  const canSave =
-    amount && Number(amount) > 0 && date && categoryId && (accounts.length === 0 || accountId);
+  const canSave = isTransfer
+    ? Boolean(
+        amount &&
+          Number(amount) > 0 &&
+          date &&
+          accountId &&
+          transferAccountId &&
+          accountId !== transferAccountId,
+      )
+    : Boolean(
+        amount && Number(amount) > 0 && date && categoryId && (accounts.length === 0 || accountId),
+      );
 
   function save() {
     if (!canSave) return;
@@ -96,12 +111,13 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       type,
       amount: Number(amount),
       date,
-      categoryId,
-      subcategoryId: subcategoryId || undefined,
+      categoryId: isTransfer ? "" : categoryId,
+      subcategoryId: isTransfer ? undefined : subcategoryId || undefined,
       description,
-      status: paid ? ("paid" as const) : ("pending" as const),
+      status: isTransfer ? ("paid" as const) : paid ? ("paid" as const) : ("pending" as const),
       paymentMethod,
       accountId: accountId || undefined,
+      transferAccountId: isTransfer ? transferAccountId : undefined,
     };
     if (editing) updateTransaction(editing.id, payload);
     else addTransaction(payload);
@@ -121,7 +137,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
             <RadioGroup
               value={type}
               onValueChange={(v) => setType(v as TxType)}
-              className="grid grid-cols-2 gap-2"
+              className="grid grid-cols-3 gap-2"
             >
               <label
                 className={`flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm ${
@@ -139,7 +155,21 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
                 <RadioGroupItem value="expense" />
                 Despesa
               </label>
+              <label
+                className={`flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm ${
+                  type === "transfer" ? "border-primary bg-primary/10 text-primary" : ""
+                }`}
+              >
+                <RadioGroupItem value="transfer" />
+                Transfer.
+              </label>
             </RadioGroup>
+            {isTransfer && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Movimenta dinheiro entre seus saldos (ex.: investimento) sem entrar no fluxo de
+                caixa.
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -161,109 +191,156 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          {!isTransfer && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Categoria</Label>
+                <Select
+                  value={categoryId}
+                  onValueChange={(v) => {
+                    setCategoryId(v);
+                    setSubcategoryId("");
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredCategories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        <span className="flex items-center gap-2">
+                          <span
+                            className="h-3 w-3 rounded-full"
+                            style={{ backgroundColor: c.color }}
+                          />
+                          {c.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Subcategoria</Label>
+                <Select
+                  value={subcategoryId}
+                  onValueChange={setSubcategoryId}
+                  disabled={!currentCategory || currentCategory.subcategories.length === 0}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        currentCategory && currentCategory.subcategories.length > 0
+                          ? "Selecione"
+                          : "—"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currentCategory?.subcategories.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
+          {!isTransfer && (
             <div>
-              <Label>Categoria</Label>
+              <Label>Forma de pagamento</Label>
               <Select
-                value={categoryId}
-                onValueChange={(v) => {
-                  setCategoryId(v);
-                  setSubcategoryId("");
-                }}
+                value={paymentMethod}
+                onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {filteredCategories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
+                  {paymentMethods.map((m) => (
+                    <SelectItem key={m.value} value={m.value}>
                       <span className="flex items-center gap-2">
                         <span
                           className="h-3 w-3 rounded-full"
-                          style={{ backgroundColor: c.color }}
+                          style={{ backgroundColor: m.color }}
                         />
-                        {c.name}
+                        {m.label}
                       </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+          )}
+
+          <div className={isTransfer ? "grid grid-cols-2 gap-3" : ""}>
             <div>
-              <Label>Subcategoria</Label>
+              <Label>{isTransfer ? "De (saldo de origem)" : "Saldo (conta)"}</Label>
               <Select
-                value={subcategoryId}
-                onValueChange={setSubcategoryId}
-                disabled={!currentCategory || currentCategory.subcategories.length === 0}
+                value={accountId}
+                onValueChange={setAccountId}
+                disabled={accounts.length === 0}
               >
                 <SelectTrigger>
                   <SelectValue
                     placeholder={
-                      currentCategory && currentCategory.subcategories.length > 0
-                        ? "Selecione"
-                        : "—"
+                      accounts.length === 0 ? "Cadastre um saldo primeiro" : "Selecione o saldo"
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {currentCategory?.subcategories.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.name}
+                  {accounts.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="h-3 w-3 rounded-full"
+                          style={{ backgroundColor: a.color }}
+                        />
+                        {a.name}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {!isTransfer && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {type === "income"
+                    ? "O valor entra nesse saldo automaticamente."
+                    : "O valor sai desse saldo automaticamente."}
+                </p>
+              )}
             </div>
-          </div>
-
-          <div>
-            <Label>Forma de pagamento</Label>
-            <Select
-              value={paymentMethod}
-              onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentMethods.map((m) => (
-                  <SelectItem key={m.value} value={m.value}>
-                    <span className="flex items-center gap-2">
-                      <span className="h-3 w-3 rounded-full" style={{ backgroundColor: m.color }} />
-                      {m.label}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label>Saldo (conta)</Label>
-            <Select value={accountId} onValueChange={setAccountId} disabled={accounts.length === 0}>
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    accounts.length === 0 ? "Cadastre um saldo primeiro" : "Selecione o saldo"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {accounts.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>
-                    <span className="flex items-center gap-2">
-                      <span className="h-3 w-3 rounded-full" style={{ backgroundColor: a.color }} />
-                      {a.name}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {type === "income"
-                ? "O valor entra nesse saldo automaticamente."
-                : "O valor sai desse saldo automaticamente."}
-            </p>
+            {isTransfer && (
+              <div>
+                <Label>Para (saldo de destino)</Label>
+                <Select
+                  value={transferAccountId}
+                  onValueChange={setTransferAccountId}
+                  disabled={accounts.length === 0}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o saldo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accounts
+                      .filter((a) => a.id !== accountId)
+                      .map((a) => (
+                        <SelectItem key={a.id} value={a.id}>
+                          <span className="flex items-center gap-2">
+                            <span
+                              className="h-3 w-3 rounded-full"
+                              style={{ backgroundColor: a.color }}
+                            />
+                            {a.name}
+                          </span>
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <div>

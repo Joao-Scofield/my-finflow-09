@@ -102,7 +102,7 @@ type SubcategoryRow = {
 
 type TransactionRow = {
   amount: number;
-  category_id: string;
+  category_id: string | null;
   description: string;
   id: string;
   status: string;
@@ -111,6 +111,7 @@ type TransactionRow = {
   type: string;
   payment_method: string;
   account_id: string | null;
+  transfer_account_id?: string | null;
 };
 
 type AccountRow = {
@@ -213,12 +214,13 @@ function mapTransactions(rows: TransactionRow[]): Transaction[] {
     type: row.type as TxType,
     amount: Number(row.amount),
     date: row.transaction_date,
-    categoryId: row.category_id,
+    categoryId: row.category_id ?? "",
     subcategoryId: row.subcategory_id ?? undefined,
     description: row.description,
     status: row.status as "paid" | "pending",
     paymentMethod: (row.payment_method ?? "outro") as PaymentMethod,
     accountId: row.account_id ?? undefined,
+    transferAccountId: row.transfer_account_id ?? undefined,
   }));
 }
 
@@ -236,10 +238,15 @@ function mapAccounts(rows: AccountRow[]): Account[] {
 /** saldo atual = saldo inicial + entradas - saídas lançadas naquela conta */
 function withComputedBalances(accounts: Account[], transactions: Transaction[]): Account[] {
   const delta = new Map<string, number>();
+  const bump = (id: string, v: number) => delta.set(id, (delta.get(id) ?? 0) + v);
   for (const t of transactions) {
+    if (t.type === "transfer") {
+      if (t.accountId) bump(t.accountId, -t.amount);
+      if (t.transferAccountId) bump(t.transferAccountId, t.amount);
+      continue;
+    }
     if (!t.accountId) continue;
-    const current = delta.get(t.accountId) ?? 0;
-    delta.set(t.accountId, current + (t.type === "income" ? t.amount : -t.amount));
+    bump(t.accountId, t.type === "income" ? t.amount : -t.amount);
   }
   return accounts.map((a) => ({
     ...a,
@@ -268,7 +275,7 @@ const RECURRING_SELECT =
   "id,type,amount,description,category_id,subcategory_id,account_id,payment_method,day_of_month,start_date,end_date,active";
 
 const TRANSACTION_SELECT =
-  "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id,recurring_id,recurring_month";
+  "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id,transfer_account_id,recurring_id,recurring_month";
 
 function monthKey(year: number, month: number) {
   return `${year}-${String(month).padStart(2, "0")}`;
@@ -583,41 +590,47 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       addTransaction: async (t) => {
         const userId = await getCurrentUserId();
         let tx = t;
-        const match = matchRuleFor(t.description, rules, categories);
-        if (match) {
-          const matchedCat = categories.find((c) => c.id === match.categoryId);
-          if (matchedCat && matchedCat.type === t.type) {
-            tx = { ...tx, categoryId: match.categoryId, subcategoryId: match.subcategoryId };
+        if (t.type !== "transfer") {
+          const match = matchRuleFor(t.description, rules, categories);
+          if (match) {
+            const matchedCat = categories.find((c) => c.id === match.categoryId);
+            if (matchedCat && matchedCat.type === t.type) {
+              tx = { ...tx, categoryId: match.categoryId, subcategoryId: match.subcategoryId };
+            }
           }
         }
+        const isTransfer = tx.type === "transfer";
         const { error } = await supabase.from("finance_transactions").insert({
           user_id: userId,
           type: tx.type,
           amount: tx.amount,
           transaction_date: tx.date,
-          category_id: tx.categoryId,
-          subcategory_id: tx.subcategoryId ?? null,
+          category_id: isTransfer ? null : tx.categoryId,
+          subcategory_id: isTransfer ? null : (tx.subcategoryId ?? null),
           description: tx.description,
-          status: tx.status,
+          status: isTransfer ? "paid" : tx.status,
           payment_method: tx.paymentMethod,
           account_id: tx.accountId ?? null,
+          transfer_account_id: isTransfer ? (tx.transferAccountId ?? null) : null,
         });
         if (error) throw error;
         await refresh();
       },
       updateTransaction: async (id, t) => {
+        const isTransfer = t.type === "transfer";
         const { error } = await supabase
           .from("finance_transactions")
           .update({
             type: t.type,
             amount: t.amount,
             transaction_date: t.date,
-            category_id: t.categoryId,
-            subcategory_id: t.subcategoryId ?? null,
+            category_id: isTransfer ? null : t.categoryId,
+            subcategory_id: isTransfer ? null : (t.subcategoryId ?? null),
             description: t.description,
-            status: t.status,
+            status: isTransfer ? "paid" : t.status,
             payment_method: t.paymentMethod,
             account_id: t.accountId ?? null,
+            transfer_account_id: isTransfer ? (t.transferAccountId ?? null) : null,
           })
           .eq("id", id);
         if (error) throw error;

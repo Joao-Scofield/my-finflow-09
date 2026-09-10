@@ -84,6 +84,7 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
             <SelectItem value="all">Todos os tipos</SelectItem>
             <SelectItem value="income">Receitas</SelectItem>
             <SelectItem value="expense">Despesas</SelectItem>
+            <SelectItem value="transfer">Transferências</SelectItem>
           </SelectContent>
         </Select>
         <Select

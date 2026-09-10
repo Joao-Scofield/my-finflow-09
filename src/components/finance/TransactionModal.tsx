@@ -46,6 +46,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
   const [paid, setPaid] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [accountId, setAccountId] = useState("");
+  const [transferAccountId, setTransferAccountId] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -59,6 +60,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       setPaid(editing.status === "paid");
       setPaymentMethod(editing.paymentMethod ?? "outro");
       setAccountId(editing.accountId ?? "");
+      setTransferAccountId(editing.transferAccountId ?? "");
     } else {
       setType("expense");
       setAmount("");
@@ -69,8 +71,11 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       setPaid(true);
       setPaymentMethod("pix");
       setAccountId(accounts.length === 1 ? accounts[0].id : "");
+      setTransferAccountId("");
     }
   }, [open, editing, defaultDate, accounts]);
+
+  const isTransfer = type === "transfer";
 
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.type === type),

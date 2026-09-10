@@ -291,7 +291,7 @@ export type Database = {
         Row: {
           account_id: string | null
           amount: number
-          category_id: string
+          category_id: string | null
           created_at: string
           description: string
           id: string
@@ -301,6 +301,7 @@ export type Database = {
           status: string
           subcategory_id: string | null
           transaction_date: string
+          transfer_account_id: string | null
           type: string
           updated_at: string
           user_id: string
@@ -308,7 +309,7 @@ export type Database = {
         Insert: {
           account_id?: string | null
           amount: number
-          category_id: string
+          category_id?: string | null
           created_at?: string
           description?: string
           id?: string
@@ -318,6 +319,7 @@ export type Database = {
           status: string
           subcategory_id?: string | null
           transaction_date: string
+          transfer_account_id?: string | null
           type: string
           updated_at?: string
           user_id: string
@@ -325,7 +327,7 @@ export type Database = {
         Update: {
           account_id?: string | null
           amount?: number
-          category_id?: string
+          category_id?: string | null
           created_at?: string
           description?: string
           id?: string
@@ -335,6 +337,7 @@ export type Database = {
           status?: string
           subcategory_id?: string | null
           transaction_date?: string
+          transfer_account_id?: string | null
           type?: string
           updated_at?: string
           user_id?: string
@@ -366,6 +369,13 @@ export type Database = {
             columns: ["subcategory_id"]
             isOneToOne: false
             referencedRelation: "finance_subcategories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_transactions_transfer_account_id_fkey"
+            columns: ["transfer_account_id"]
+            isOneToOne: false
+            referencedRelation: "finance_accounts"
             referencedColumns: ["id"]
           },
         ]

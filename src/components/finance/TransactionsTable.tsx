@@ -34,7 +34,7 @@ interface Props {
 }
 
 export function TransactionsTable({ transactions, onEdit }: Props) {
-  const { categories, deleteTransaction } = useFinance();
+  const { categories, accounts, deleteTransaction } = useFinance();
   const [q, setQ] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [catFilter, setCatFilter] = useState<string>("all");
@@ -42,6 +42,9 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
   const [methodFilter, setMethodFilter] = useState<string>("all");
 
   const catMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+  const accMap = useMemo(() => new Map(accounts.map((a) => [a.id, a])), [accounts]);
+  const transferLabel = (t: Transaction) =>
+    `${accMap.get(t.accountId ?? "")?.name ?? "—"} → ${accMap.get(t.transferAccountId ?? "")?.name ?? "—"}`;
 
   const subOptions = useMemo(() => {
     if (catFilter === "all") return [];
@@ -81,6 +84,7 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
             <SelectItem value="all">Todos os tipos</SelectItem>
             <SelectItem value="income">Receitas</SelectItem>
             <SelectItem value="expense">Despesas</SelectItem>
+            <SelectItem value="transfer">Transferências</SelectItem>
           </SelectContent>
         </Select>
         <Select
@@ -153,19 +157,30 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
                 <p
                   className={cn(
                     "shrink-0 whitespace-nowrap text-right font-semibold tabular-nums",
-                    t.type === "income" ? "text-income" : "text-expense",
+                    t.type === "transfer"
+                      ? "text-muted-foreground"
+                      : t.type === "income"
+                        ? "text-income"
+                        : "text-expense",
                   )}
                 >
-                  {t.type === "income" ? "+" : "-"} {formatBRL(t.amount)}
+                  {t.type === "transfer" ? "↔" : t.type === "income" ? "+" : "-"}{" "}
+                  {formatBRL(t.amount)}
                 </p>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs">
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: cat?.color ?? "#888" }}
-                  />
-                  {cat?.name ?? "—"}
+                  {t.type === "transfer" ? (
+                    transferLabel(t)
+                  ) : (
+                    <>
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: cat?.color ?? "#888" }}
+                      />
+                      {cat?.name ?? "—"}
+                    </>
+                  )}
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs">
                   <span
@@ -178,12 +193,18 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
                   variant="outline"
                   className={cn(
                     "text-xs",
-                    t.status === "paid"
-                      ? "border-income/40 bg-income/10 text-income"
-                      : "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                    t.type === "transfer"
+                      ? "border-border bg-muted text-muted-foreground"
+                      : t.status === "paid"
+                        ? "border-income/40 bg-income/10 text-income"
+                        : "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
                   )}
                 >
-                  {t.status === "paid" ? "Pago" : "Pendente"}
+                  {t.type === "transfer"
+                    ? "Transferência"
+                    : t.status === "paid"
+                      ? "Pago"
+                      : "Pendente"}
                 </Badge>
                 <div className="ml-auto flex gap-1">
                   <Button size="icon" variant="ghost" onClick={() => onEdit(t)} aria-label="Editar">
@@ -238,13 +259,19 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
                     {sub && <div className="text-xs text-muted-foreground">{sub.name}</div>}
                   </TableCell>
                   <TableCell>
-                    <span className="inline-flex items-center gap-2 text-sm">
-                      <span
-                        className="h-2.5 w-2.5 rounded-full"
-                        style={{ backgroundColor: cat?.color ?? "#888" }}
-                      />
-                      {cat?.name ?? "—"}
-                    </span>
+                    {t.type === "transfer" ? (
+                      <span className="whitespace-nowrap text-sm text-muted-foreground">
+                        {transferLabel(t)}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-2 text-sm">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ backgroundColor: cat?.color ?? "#888" }}
+                        />
+                        {cat?.name ?? "—"}
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center gap-2 whitespace-nowrap text-sm">
@@ -259,21 +286,32 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
                     <Badge
                       variant="outline"
                       className={cn(
-                        t.status === "paid"
-                          ? "border-income/40 bg-income/10 text-income"
-                          : "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                        t.type === "transfer"
+                          ? "border-border bg-muted text-muted-foreground"
+                          : t.status === "paid"
+                            ? "border-income/40 bg-income/10 text-income"
+                            : "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
                       )}
                     >
-                      {t.status === "paid" ? "Pago" : "Pendente"}
+                      {t.type === "transfer"
+                        ? "Transferência"
+                        : t.status === "paid"
+                          ? "Pago"
+                          : "Pendente"}
                     </Badge>
                   </TableCell>
                   <TableCell
                     className={cn(
                       "whitespace-nowrap text-right font-semibold tabular-nums",
-                      t.type === "income" ? "text-income" : "text-expense",
+                      t.type === "transfer"
+                        ? "text-muted-foreground"
+                        : t.type === "income"
+                          ? "text-income"
+                          : "text-expense",
                     )}
                   >
-                    {t.type === "income" ? "+" : "-"} {formatBRL(t.amount)}
+                    {t.type === "transfer" ? "↔" : t.type === "income" ? "+" : "-"}{" "}
+                    {formatBRL(t.amount)}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">

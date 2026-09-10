@@ -1,4 +1,4 @@
-export type TxType = "income" | "expense";
+export type TxType = "income" | "expense" | "transfer";
 export type TxStatus = "paid" | "pending";
 
 export interface Subcategory {
@@ -88,8 +88,14 @@ export interface Transaction {
   description: string;
   status: TxStatus;
   paymentMethod: PaymentMethod;
+  /** conta de origem (na transferência) ou conta do lançamento */
   accountId?: string;
+  /** conta de destino — usado apenas quando type === "transfer" */
+  transferAccountId?: string;
 }
+
+/** transferências entre saldos não entram no fluxo de caixa */
+export const isCashflow = (t: { type: TxType }) => t.type !== "transfer";
 
 export interface Recurring {
   id: string;

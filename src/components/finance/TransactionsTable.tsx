@@ -259,13 +259,19 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
                     {sub && <div className="text-xs text-muted-foreground">{sub.name}</div>}
                   </TableCell>
                   <TableCell>
-                    <span className="inline-flex items-center gap-2 text-sm">
-                      <span
-                        className="h-2.5 w-2.5 rounded-full"
-                        style={{ backgroundColor: cat?.color ?? "#888" }}
-                      />
-                      {cat?.name ?? "—"}
-                    </span>
+                    {t.type === "transfer" ? (
+                      <span className="whitespace-nowrap text-sm text-muted-foreground">
+                        {transferLabel(t)}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-2 text-sm">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ backgroundColor: cat?.color ?? "#888" }}
+                        />
+                        {cat?.name ?? "—"}
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center gap-2 whitespace-nowrap text-sm">

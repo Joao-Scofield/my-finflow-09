@@ -34,7 +34,7 @@ interface Props {
 }
 
 export function TransactionsTable({ transactions, onEdit }: Props) {
-  const { categories, deleteTransaction } = useFinance();
+  const { categories, accounts, deleteTransaction } = useFinance();
   const [q, setQ] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [catFilter, setCatFilter] = useState<string>("all");

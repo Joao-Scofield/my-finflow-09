@@ -102,7 +102,7 @@ type SubcategoryRow = {
 
 type TransactionRow = {
   amount: number;
-  category_id: string;
+  category_id: string | null;
   description: string;
   id: string;
   status: string;
@@ -111,6 +111,7 @@ type TransactionRow = {
   type: string;
   payment_method: string;
   account_id: string | null;
+  transfer_account_id?: string | null;
 };
 
 type AccountRow = {

@@ -286,21 +286,32 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
                     <Badge
                       variant="outline"
                       className={cn(
-                        t.status === "paid"
-                          ? "border-income/40 bg-income/10 text-income"
-                          : "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                        t.type === "transfer"
+                          ? "border-border bg-muted text-muted-foreground"
+                          : t.status === "paid"
+                            ? "border-income/40 bg-income/10 text-income"
+                            : "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
                       )}
                     >
-                      {t.status === "paid" ? "Pago" : "Pendente"}
+                      {t.type === "transfer"
+                        ? "Transferência"
+                        : t.status === "paid"
+                          ? "Pago"
+                          : "Pendente"}
                     </Badge>
                   </TableCell>
                   <TableCell
                     className={cn(
                       "whitespace-nowrap text-right font-semibold tabular-nums",
-                      t.type === "income" ? "text-income" : "text-expense",
+                      t.type === "transfer"
+                        ? "text-muted-foreground"
+                        : t.type === "income"
+                          ? "text-income"
+                          : "text-expense",
                     )}
                   >
-                    {t.type === "income" ? "+" : "-"} {formatBRL(t.amount)}
+                    {t.type === "transfer" ? "↔" : t.type === "income" ? "+" : "-"}{" "}
+                    {formatBRL(t.amount)}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">

@@ -157,19 +157,30 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
                 <p
                   className={cn(
                     "shrink-0 whitespace-nowrap text-right font-semibold tabular-nums",
-                    t.type === "income" ? "text-income" : "text-expense",
+                    t.type === "transfer"
+                      ? "text-muted-foreground"
+                      : t.type === "income"
+                        ? "text-income"
+                        : "text-expense",
                   )}
                 >
-                  {t.type === "income" ? "+" : "-"} {formatBRL(t.amount)}
+                  {t.type === "transfer" ? "↔" : t.type === "income" ? "+" : "-"}{" "}
+                  {formatBRL(t.amount)}
                 </p>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs">
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: cat?.color ?? "#888" }}
-                  />
-                  {cat?.name ?? "—"}
+                  {t.type === "transfer" ? (
+                    transferLabel(t)
+                  ) : (
+                    <>
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: cat?.color ?? "#888" }}
+                      />
+                      {cat?.name ?? "—"}
+                    </>
+                  )}
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs">
                   <span

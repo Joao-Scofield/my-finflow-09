@@ -137,7 +137,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
             <RadioGroup
               value={type}
               onValueChange={(v) => setType(v as TxType)}
-              className="grid grid-cols-2 gap-2"
+              className="grid grid-cols-3 gap-2"
             >
               <label
                 className={`flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm ${
@@ -155,7 +155,21 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
                 <RadioGroupItem value="expense" />
                 Despesa
               </label>
+              <label
+                className={`flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm ${
+                  type === "transfer" ? "border-primary bg-primary/10 text-primary" : ""
+                }`}
+              >
+                <RadioGroupItem value="transfer" />
+                Transfer.
+              </label>
             </RadioGroup>
+            {isTransfer && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Movimenta dinheiro entre seus saldos (ex.: investimento) sem entrar no fluxo de
+                caixa.
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">

@@ -92,8 +92,18 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
     }
   }, [type, categoryId, currentCategory]);
 
-  const canSave =
-    amount && Number(amount) > 0 && date && categoryId && (accounts.length === 0 || accountId);
+  const canSave = isTransfer
+    ? Boolean(
+        amount &&
+          Number(amount) > 0 &&
+          date &&
+          accountId &&
+          transferAccountId &&
+          accountId !== transferAccountId,
+      )
+    : Boolean(
+        amount && Number(amount) > 0 && date && categoryId && (accounts.length === 0 || accountId),
+      );
 
   function save() {
     if (!canSave) return;
@@ -101,12 +111,13 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       type,
       amount: Number(amount),
       date,
-      categoryId,
-      subcategoryId: subcategoryId || undefined,
+      categoryId: isTransfer ? "" : categoryId,
+      subcategoryId: isTransfer ? undefined : subcategoryId || undefined,
       description,
-      status: paid ? ("paid" as const) : ("pending" as const),
+      status: isTransfer ? ("paid" as const) : paid ? ("paid" as const) : ("pending" as const),
       paymentMethod,
       accountId: accountId || undefined,
+      transferAccountId: isTransfer ? transferAccountId : undefined,
     };
     if (editing) updateTransaction(editing.id, payload);
     else addTransaction(payload);

@@ -275,7 +275,7 @@ const RECURRING_SELECT =
   "id,type,amount,description,category_id,subcategory_id,account_id,payment_method,day_of_month,start_date,end_date,active";
 
 const TRANSACTION_SELECT =
-  "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id,recurring_id,recurring_month";
+  "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id,transfer_account_id,recurring_id,recurring_month";
 
 function monthKey(year: number, month: number) {
   return `${year}-${String(month).padStart(2, "0")}`;

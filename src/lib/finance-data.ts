@@ -1,4 +1,4 @@
-export type TxType = "income" | "expense";
+export type TxType = "income" | "expense" | "transfer";
 export type TxStatus = "paid" | "pending";
 
 export interface Subcategory {

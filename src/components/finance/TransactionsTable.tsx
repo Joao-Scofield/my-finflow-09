@@ -193,12 +193,18 @@ export function TransactionsTable({ transactions, onEdit }: Props) {
                   variant="outline"
                   className={cn(
                     "text-xs",
-                    t.status === "paid"
-                      ? "border-income/40 bg-income/10 text-income"
-                      : "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                    t.type === "transfer"
+                      ? "border-border bg-muted text-muted-foreground"
+                      : t.status === "paid"
+                        ? "border-income/40 bg-income/10 text-income"
+                        : "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
                   )}
                 >
-                  {t.status === "paid" ? "Pago" : "Pendente"}
+                  {t.type === "transfer"
+                    ? "Transferência"
+                    : t.status === "paid"
+                      ? "Pago"
+                      : "Pendente"}
                 </Badge>
                 <div className="ml-auto flex gap-1">
                   <Button size="icon" variant="ghost" onClick={() => onEdit(t)} aria-label="Editar">

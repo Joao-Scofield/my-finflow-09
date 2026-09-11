@@ -284,7 +284,9 @@ function Dashboard() {
               <div className="min-w-0">
                 <p className="text-sm text-muted-foreground">Período</p>
                 <h2 className="gold-rule truncate text-lg font-semibold tracking-tight sm:text-xl">
-                  {monthNamesPt[month - 1]} / {year}
+                  {isRange
+                    ? `${monthNamesPt[period.startMonth - 1]}/${period.startYear} — ${monthNamesPt[period.endMonth - 1]}/${period.endYear}`
+                    : `${monthNamesPt[month - 1]} / ${year}`}
                 </h2>
               </div>
               <div className="flex flex-wrap items-center gap-2">

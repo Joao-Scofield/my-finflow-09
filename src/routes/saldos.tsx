@@ -100,12 +100,15 @@ function BalancesPage() {
   const rows = useMemo(() => {
     const prevCutoff = monthCutoff(1);
     return accounts.map((a) => {
-      const mine = transactions.filter((t) => t.accountId === a.id);
+      const mine = transactions.filter(
+        (t) => t.accountId === a.id || t.transferAccountId === a.id,
+      );
       const prev =
         a.initialBalance +
-        mine
-          .filter((t) => t.date <= prevCutoff)
-          .reduce((s, t) => s + (t.type === "income" ? t.amount : -t.amount), 0);
+        mine.filter((t) => t.date <= prevCutoff).reduce((s, t) => {
+          if (t.type === "transfer") return s + (t.transferAccountId === a.id ? t.amount : -t.amount);
+          return s + (t.type === "income" ? t.amount : -t.amount);
+        }, 0);
       const income = mine
         .filter((t) => t.type === "income" && t.date > prevCutoff)
         .reduce((s, t) => s + t.amount, 0);

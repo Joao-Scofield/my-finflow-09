@@ -124,8 +124,14 @@ function AuthShell() {
 
 function Dashboard() {
   const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear());
+  const [period, setPeriod] = useState({
+    startMonth: now.getMonth() + 1,
+    startYear: now.getFullYear(),
+    endMonth: now.getMonth() + 1,
+    endYear: now.getFullYear(),
+  });
+  const month = period.endMonth;
+  const year = period.endYear;
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [catOpen, setCatOpen] = useState(false);
@@ -153,11 +159,28 @@ function Dashboard() {
     return map;
   }, [transactions]);
 
-  const monthKey = `${year}-${String(month).padStart(2, "0")}`;
-  const monthTx = useMemo(() => txByMonth.get(monthKey) ?? [], [txByMonth, monthKey]);
+  const monthTx = useMemo(() => {
+    const start = period.startYear * 12 + (period.startMonth - 1);
+    const end = period.endYear * 12 + (period.endMonth - 1);
+    const out: Transaction[] = [];
+    for (let i = start; i <= end; i++) {
+      const y = Math.floor(i / 12);
+      const m = (i % 12) + 1;
+      const list = txByMonth.get(`${y}-${String(m).padStart(2, "0")}`);
+      if (list) out.push(...list);
+    }
+    return out.sort((a, b) => b.date.localeCompare(a.date));
+  }, [txByMonth, period]);
 
-  const income = monthTx.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
-  const expense = monthTx.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+  const isRange =
+    period.startMonth !== period.endMonth || period.startYear !== period.endYear;
+
+  const income = monthTx
+    .filter((t) => t.type === "income")
+    .reduce((s, t) => s + t.amount, 0);
+  const expense = monthTx
+    .filter((t) => t.type === "expense")
+    .reduce((s, t) => s + t.amount, 0);
   const accountsTotal = accounts.reduce((s, a) => s + a.balance, 0);
 
   return (
@@ -261,18 +284,13 @@ function Dashboard() {
               <div className="min-w-0">
                 <p className="text-sm text-muted-foreground">Período</p>
                 <h2 className="gold-rule truncate text-lg font-semibold tracking-tight sm:text-xl">
-                  {monthNamesPt[month - 1]} / {year}
+                  {isRange
+                    ? `${monthNamesPt[period.startMonth - 1]}/${period.startYear} — ${monthNamesPt[period.endMonth - 1]}/${period.endYear}`
+                    : `${monthNamesPt[month - 1]} / ${year}`}
                 </h2>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <PeriodSelector
-                  month={month}
-                  year={year}
-                  onChange={(m, y) => {
-                    setMonth(m);
-                    setYear(y);
-                  }}
-                />
+                <PeriodSelector value={period} onChange={setPeriod} />
                 <Button
                   className="w-full sm:w-auto"
                   onClick={() => {
@@ -300,7 +318,9 @@ function Dashboard() {
 
             <Card className="bento-card">
               <CardHeader>
-                <CardTitle className="gold-rule text-base">Transações do mês</CardTitle>
+                <CardTitle className="gold-rule text-base">
+                  {isRange ? "Transações do período" : "Transações do mês"}
+                </CardTitle>
               </CardHeader>
               <CardContent className="px-3 sm:px-6">
                 <TransactionsTable

@@ -45,6 +45,7 @@ export default defineTool({
     const byCategory = new Map<string, number>();
 
     for (const row of tx.data ?? []) {
+      if (row.type === "transfer") continue;
       const amount = Number(row.amount);
       if (row.type === "income") income += amount;
       else {

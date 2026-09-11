@@ -200,11 +200,15 @@ function FleetPage() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <PeriodSelector
-                  month={month}
-                  year={year}
-                  onChange={(m, y) => {
-                    setMonth(m);
-                    setYear(y);
+                  value={{
+                    startMonth: month,
+                    startYear: year,
+                    endMonth: month,
+                    endYear: year,
+                  }}
+                  onChange={(r) => {
+                    setMonth(r.endMonth);
+                    setYear(r.endYear);
                   }}
                 />
                 <Button

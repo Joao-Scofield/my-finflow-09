@@ -79,7 +79,7 @@ export function BalanceHistoryChart() {
     });
 
     return { data: points, hasData: accounts.length > 0 };
-  }, [accounts, transactions, months]);
+  }, [accounts, transactions, months, grouping]);
 
   return (
     <Card>

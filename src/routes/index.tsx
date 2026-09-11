@@ -290,14 +290,7 @@ function Dashboard() {
                 </h2>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <PeriodSelector
-                  month={month}
-                  year={year}
-                  onChange={(m, y) => {
-                    setMonth(m);
-                    setYear(y);
-                  }}
-                />
+                <PeriodSelector value={period} onChange={setPeriod} />
                 <Button
                   className="w-full sm:w-auto"
                   onClick={() => {

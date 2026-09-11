@@ -318,7 +318,9 @@ function Dashboard() {
 
             <Card className="bento-card">
               <CardHeader>
-                <CardTitle className="gold-rule text-base">Transações do mês</CardTitle>
+                <CardTitle className="gold-rule text-base">
+                  {isRange ? "Transações do período" : "Transações do mês"}
+                </CardTitle>
               </CardHeader>
               <CardContent className="px-3 sm:px-6">
                 <TransactionsTable

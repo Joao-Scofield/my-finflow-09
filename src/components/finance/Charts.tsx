@@ -271,6 +271,7 @@ export function PaymentMethodChart({ monthTransactions }: { monthTransactions: T
   const data = useMemo(() => {
     const map = new Map<string, { Receitas: number; Despesas: number }>();
     monthTransactions.forEach((t) => {
+      if (t.type === "transfer") return;
       const key = t.paymentMethod ?? "outro";
       const entry = map.get(key) ?? { Receitas: 0, Despesas: 0 };
       if (t.type === "income") entry.Receitas += t.amount;

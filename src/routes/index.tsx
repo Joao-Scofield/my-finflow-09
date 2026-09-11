@@ -159,11 +159,28 @@ function Dashboard() {
     return map;
   }, [transactions]);
 
-  const monthKey = `${year}-${String(month).padStart(2, "0")}`;
-  const monthTx = useMemo(() => txByMonth.get(monthKey) ?? [], [txByMonth, monthKey]);
+  const monthTx = useMemo(() => {
+    const start = period.startYear * 12 + (period.startMonth - 1);
+    const end = period.endYear * 12 + (period.endMonth - 1);
+    const out: Transaction[] = [];
+    for (let i = start; i <= end; i++) {
+      const y = Math.floor(i / 12);
+      const m = (i % 12) + 1;
+      const list = txByMonth.get(`${y}-${String(m).padStart(2, "0")}`);
+      if (list) out.push(...list);
+    }
+    return out.sort((a, b) => b.date.localeCompare(a.date));
+  }, [txByMonth, period]);
 
-  const income = monthTx.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
-  const expense = monthTx.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+  const isRange =
+    period.startMonth !== period.endMonth || period.startYear !== period.endYear;
+
+  const income = monthTx
+    .filter((t) => t.type === "income")
+    .reduce((s, t) => s + t.amount, 0);
+  const expense = monthTx
+    .filter((t) => t.type === "expense")
+    .reduce((s, t) => s + t.amount, 0);
   const accountsTotal = accounts.reduce((s, a) => s + a.balance, 0);
 
   return (

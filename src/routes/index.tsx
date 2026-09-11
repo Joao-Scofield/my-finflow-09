@@ -124,8 +124,14 @@ function AuthShell() {
 
 function Dashboard() {
   const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear());
+  const [period, setPeriod] = useState({
+    startMonth: now.getMonth() + 1,
+    startYear: now.getFullYear(),
+    endMonth: now.getMonth() + 1,
+    endYear: now.getFullYear(),
+  });
+  const month = period.endMonth;
+  const year = period.endYear;
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [catOpen, setCatOpen] = useState(false);

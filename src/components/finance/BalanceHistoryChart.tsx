@@ -16,10 +16,11 @@ import { formatBRL, monthNamesPt } from "@/lib/finance-data";
 
 const RANGES = [6, 12, 24];
 
-/** Saldo de cada conta ao final de cada mês (saldo inicial + entradas − saídas até o mês). */
+/** Saldo de cada conta ao final de cada mês/trimestre (saldo inicial + entradas − saídas). */
 export function BalanceHistoryChart() {
   const { accounts, transactions } = useFinance();
   const [months, setMonths] = useState(12);
+  const [grouping, setGrouping] = useState<"month" | "quarter">("month");
 
   const { data, hasData } = useMemo(() => {
     const now = new Date();
@@ -28,21 +29,39 @@ export function BalanceHistoryChart() {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = d.getFullYear();
       const month = d.getMonth() + 1;
+      if (grouping === "quarter") {
+        // só fecha o ponto no último mês de cada trimestre
+        if (month % 3 !== 0 && i !== 0) continue;
+        const quarter = Math.ceil(month / 3);
+        cutoffs.push({
+          label: `T${quarter}/${String(year).slice(2)}`,
+          cutoff: `${year}-${String(month).padStart(2, "0")}-31`,
+        });
+        continue;
+      }
       cutoffs.push({
         label: `${monthNamesPt[month - 1].slice(0, 3)}/${String(year).slice(2)}`,
         cutoff: `${year}-${String(month).padStart(2, "0")}-31`,
       });
     }
 
-    // Uma passada só: acumula o delta de cada conta no primeiro mês em que se aplica.
+    // Uma passada só: acumula o delta de cada conta no primeiro período em que se aplica.
     const deltas = new Map<string, number[]>();
     for (const account of accounts) deltas.set(account.id, new Array(cutoffs.length).fill(0));
+    const addDelta = (accountId: string | undefined, date: string, value: number) => {
+      const bucket = deltas.get(accountId ?? "");
+      if (!bucket) return;
+      const index = cutoffs.findIndex((c) => date <= c.cutoff);
+      if (index === -1) return;
+      bucket[index] += value;
+    };
     for (const t of transactions) {
-      const bucket = deltas.get(t.accountId ?? "");
-      if (!bucket) continue;
-      const index = cutoffs.findIndex((c) => t.date <= c.cutoff);
-      if (index === -1) continue;
-      bucket[index] += t.type === "income" ? t.amount : -t.amount;
+      if (t.type === "transfer") {
+        addDelta(t.accountId, t.date, -t.amount);
+        addDelta(t.transferAccountId, t.date, t.amount);
+        continue;
+      }
+      addDelta(t.accountId, t.date, t.type === "income" ? t.amount : -t.amount);
     }
 
     const points = cutoffs.map(({ label }, index) => {
@@ -60,13 +79,28 @@ export function BalanceHistoryChart() {
     });
 
     return { data: points, hasData: accounts.length > 0 };
-  }, [accounts, transactions, months]);
+  }, [accounts, transactions, months, grouping]);
 
   return (
     <Card>
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0">
         <CardTitle className="text-base">Evolução dos saldos</CardTitle>
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
+          <Button
+            size="sm"
+            variant={grouping === "month" ? "default" : "outline"}
+            onClick={() => setGrouping("month")}
+          >
+            Mensal
+          </Button>
+          <Button
+            size="sm"
+            variant={grouping === "quarter" ? "default" : "outline"}
+            onClick={() => setGrouping("quarter")}
+          >
+            Trimestral
+          </Button>
+          <span className="mx-1 w-px bg-border" />
           {RANGES.map((r) => (
             <Button
               key={r}

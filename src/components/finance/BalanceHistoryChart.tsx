@@ -85,7 +85,22 @@ export function BalanceHistoryChart() {
     <Card>
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0">
         <CardTitle className="text-base">Evolução dos saldos</CardTitle>
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
+          <Button
+            size="sm"
+            variant={grouping === "month" ? "default" : "outline"}
+            onClick={() => setGrouping("month")}
+          >
+            Mensal
+          </Button>
+          <Button
+            size="sm"
+            variant={grouping === "quarter" ? "default" : "outline"}
+            onClick={() => setGrouping("quarter")}
+          >
+            Trimestral
+          </Button>
+          <span className="mx-1 w-px bg-border" />
           {RANGES.map((r) => (
             <Button
               key={r}

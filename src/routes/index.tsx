@@ -316,7 +316,13 @@ function Dashboard() {
               </div>
             </section>
 
-            <SummaryCards income={income} expense={expense} accountsTotal={accountsTotal} />
+            <SummaryCards
+              income={income}
+              expense={expense}
+              accountsTotal={accountsTotal}
+              previousBalance={previousBalance}
+              hasAccounts={accounts.length > 0}
+            />
 
             <div className="grid gap-4 lg:grid-cols-2">
               <LazyExpenseBreakdownChart monthTransactions={monthTx} />

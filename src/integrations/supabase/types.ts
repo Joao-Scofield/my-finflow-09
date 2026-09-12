@@ -83,6 +83,88 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_bills: {
+        Row: {
+          account_id: string | null
+          amount: number
+          category_id: string | null
+          created_at: string
+          due_date: string
+          id: string
+          last_notified_for: string | null
+          name: string
+          notes: string
+          notify_days_before: number
+          paid_at: string | null
+          payment_method: string
+          recurring: boolean
+          status: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          due_date: string
+          id?: string
+          last_notified_for?: string | null
+          name: string
+          notes?: string
+          notify_days_before?: number
+          paid_at?: string | null
+          payment_method?: string
+          recurring?: boolean
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          due_date?: string
+          id?: string
+          last_notified_for?: string | null
+          name?: string
+          notes?: string
+          notify_days_before?: number
+          paid_at?: string | null
+          payment_method?: string
+          recurring?: boolean
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_bills_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "finance_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_bills_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "finance_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_bills_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "finance_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       finance_categories: {
         Row: {
           color: string

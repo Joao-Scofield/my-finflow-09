@@ -183,6 +183,18 @@ function Dashboard() {
     .reduce((s, t) => s + t.amount, 0);
   const accountsTotal = accounts.reduce((s, a) => s + a.balance, 0);
 
+  // Resultado acumulado de tudo que veio antes do período selecionado.
+  const previousBalance = useMemo(() => {
+    const firstDay = `${period.startYear}-${String(period.startMonth).padStart(2, "0")}-01`;
+    let total = 0;
+    for (const t of transactions) {
+      if (t.date >= firstDay) continue;
+      if (t.type === "income") total += t.amount;
+      else if (t.type === "expense") total -= t.amount;
+    }
+    return total;
+  }, [transactions, period.startMonth, period.startYear]);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">

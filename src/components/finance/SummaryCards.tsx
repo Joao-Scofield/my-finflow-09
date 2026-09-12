@@ -1,4 +1,4 @@
-import { ArrowDownRight, ArrowUpRight, Scale, Wallet } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, History, Scale, Sigma, Wallet } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatBRL } from "@/lib/finance-data";
 import { cn } from "@/lib/utils";
@@ -7,10 +7,19 @@ interface Props {
   income: number;
   expense: number;
   accountsTotal: number;
+  previousBalance: number;
+  hasAccounts?: boolean;
 }
 
-export function SummaryCards({ income, expense, accountsTotal }: Props) {
+export function SummaryCards({
+  income,
+  expense,
+  accountsTotal,
+  previousBalance,
+  hasAccounts = true,
+}: Props) {
   const balance = income - expense;
+  const cumulative = previousBalance + balance;
 
   const items = [
     {
@@ -34,11 +43,25 @@ export function SummaryCards({ income, expense, accountsTotal }: Props) {
       accent: balance >= 0 ? "text-income" : "text-expense",
       bg: balance >= 0 ? "bg-income/10" : "bg-expense/10",
     },
+    {
+      label: "Saldo anterior",
+      value: previousBalance,
+      icon: History,
+      accent: previousBalance >= 0 ? "text-income" : "text-expense",
+      bg: "bg-muted",
+    },
+    {
+      label: "Saldo acumulado",
+      value: cumulative,
+      icon: Sigma,
+      accent: cumulative >= 0 ? "text-income" : "text-expense",
+      bg: cumulative >= 0 ? "bg-income/10" : "bg-expense/10",
+    },
   ];
 
   return (
     <div className="grid gap-4 lg:grid-cols-6">
-      <Card className="bento-card surface-emerald overflow-hidden lg:col-span-3">
+      <Card className="bento-card surface-emerald overflow-hidden lg:col-span-2">
         <CardContent className="flex h-full flex-col justify-between gap-6 p-6">
           <div className="flex items-start justify-between gap-3">
             <p className="text-sm/6 opacity-80">Patrimônio (saldos)</p>
@@ -51,11 +74,16 @@ export function SummaryCards({ income, expense, accountsTotal }: Props) {
               {formatBRL(accountsTotal)}
             </p>
             <div className="mt-3 h-px w-16 bg-gold/70" />
+            {!hasAccounts && (
+              <p className="mt-3 text-xs opacity-80">
+                Cadastre seus saldos no menu “Gerenciar saldos” para acompanhar o patrimônio.
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 sm:grid-cols-3 lg:col-span-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:col-span-4 xl:grid-cols-3">
         {items.map(({ label, value, icon: Icon, accent, bg }) => (
           <Card key={label} className="bento-card overflow-hidden">
             <CardContent className="flex h-full flex-col justify-between gap-4 p-5">

@@ -12,6 +12,7 @@ const navItems = [
   { to: "/saldos", label: "Saldos" },
   { to: "/frota", label: "Frota" },
   { to: "/lista", label: "Lista" },
+  { to: "/contas", label: "Contas" },
   { to: "/comprovante", label: "Comprovante" },
 ] as const;
 

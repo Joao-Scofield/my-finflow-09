@@ -154,6 +154,8 @@ function FleetPage() {
     : maintenances;
   const scopedCosts = selected ? fixedCosts.filter((c) => c.vehicleId === selected.id) : fixedCosts;
 
+  const fuelingKmL = useMemo(() => perFuelingConsumption(fuelings), [fuelings]);
+
   const stats = useMemo(() => {
     const km = selected
       ? kmInMonth(scopedFuelings, year, month, selected.initialOdometer)
@@ -413,6 +415,7 @@ function FleetPage() {
                               <TableHead className="text-right">Odômetro</TableHead>
                               <TableHead className="text-right">Litros</TableHead>
                               <TableHead className="text-right">R$/l</TableHead>
+                              <TableHead className="text-right">km/l</TableHead>
                               <TableHead className="text-right">Total</TableHead>
                               <TableHead>Posto</TableHead>
                               <TableHead />
@@ -422,7 +425,7 @@ function FleetPage() {
                             {scopedFuelings.length === 0 && (
                               <TableRow>
                                 <TableCell
-                                  colSpan={8}
+                                  colSpan={9}
                                   className="text-center text-muted-foreground"
                                 >
                                   Nenhum abastecimento registrado.
@@ -443,6 +446,9 @@ function FleetPage() {
                                 </TableCell>
                                 <TableCell className="text-right tabular-nums">
                                   {formatBRL(f.liters > 0 ? f.totalAmount / f.liters : 0)}
+                                </TableCell>
+                                <TableCell className="text-right tabular-nums">
+                                  {fuelingKmL.get(f.id)?.toFixed(1) ?? "—"}
                                 </TableCell>
                                 <TableCell className="text-right tabular-nums">
                                   {formatBRL(f.totalAmount)}

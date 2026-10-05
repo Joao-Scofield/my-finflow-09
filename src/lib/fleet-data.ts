@@ -163,13 +163,34 @@ export function fuelStats(fuelings: Fueling[], initialOdometer: number) {
 
   let kmPerLiter = 0;
   if (sorted.length >= 2) {
-    // litros usados para rodar: desconsidera o último abastecimento (tanque ainda não consumido)
-    const litersUsed = sorted.slice(0, -1).reduce((s, f) => s + f.liters, 0);
+    // Média só entre abastecimentos: km desde o 1º abastecimento,
+    // dividido pelos litros colocados depois dele (o 1º apenas "zera" o tanque).
+    const litersUsed = sorted.slice(1).reduce((s, f) => s + f.liters, 0);
     const kmBetween = Math.max(0, last.odometer - first.odometer);
     if (litersUsed > 0 && kmBetween > 0) kmPerLiter = kmBetween / litersUsed;
+  } else if (first.odometer > initialOdometer && initialOdometer > 0 && first.liters > 0) {
+    // único abastecimento: usa o odômetro inicial do veículo como referência
+    kmPerLiter = (first.odometer - initialOdometer) / first.liters;
   }
-  // com um único abastecimento (ou dados insuficientes), usa o odômetro inicial do veículo
-  if (kmPerLiter === 0 && liters > 0 && km > 0) kmPerLiter = km / liters;
 
   return { km, liters, spent, kmPerLiter, lastOdometer: last.odometer };
+}
+
+/** km/l de cada abastecimento, comparando com o abastecimento anterior do mesmo veículo. */
+export function perFuelingConsumption(fuelings: Fueling[]): Map<string, number> {
+  const out = new Map<string, number>();
+  const byVehicle = new Map<string, Fueling[]>();
+  for (const f of fuelings) {
+    const list = byVehicle.get(f.vehicleId) ?? [];
+    list.push(f);
+    byVehicle.set(f.vehicleId, list);
+  }
+  for (const list of byVehicle.values()) {
+    const sorted = [...list].sort((a, b) => a.odometer - b.odometer);
+    for (let i = 1; i < sorted.length; i++) {
+      const km = sorted[i].odometer - sorted[i - 1].odometer;
+      if (km > 0 && sorted[i].liters > 0) out.set(sorted[i].id, km / sorted[i].liters);
+    }
+  }
+  return out;
 }

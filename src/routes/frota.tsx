@@ -40,6 +40,7 @@ import {
   formatBRL,
   formatKm,
   fuelStats,
+  perFuelingConsumption,
   maintenanceKindLabel,
   periodicityLabel,
   type Vehicle,

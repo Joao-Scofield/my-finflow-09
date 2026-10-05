@@ -331,6 +331,8 @@ async function generateRecurringTransactions(
       const key = monthKey(year, month);
       if (done.has(`${r.id}|${key}`)) continue;
       const day = Math.min(Math.max(r.dayOfMonth, 1), daysInMonth(year, month));
+      // só lança quando o dia já chegou — senão desconta do saldo antes da hora
+      if (index === lastIndex && day > now.getDate()) continue;
       rows.push({
         user_id: userId,
         type: r.type,

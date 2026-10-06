@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -119,8 +120,11 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       accountId: accountId || undefined,
       transferAccountId: isTransfer ? transferAccountId : undefined,
     };
-    if (editing) updateTransaction(editing.id, payload);
-    else addTransaction(payload);
+    const op = editing ? updateTransaction(editing.id, payload) : addTransaction(payload);
+    Promise.resolve(op).catch((e) => {
+      console.error(e);
+      toast.error("Não foi possível salvar o lançamento");
+    });
     onOpenChange(false);
   }
 

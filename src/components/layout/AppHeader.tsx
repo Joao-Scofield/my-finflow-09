@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { to: "/", label: "Painel" },
   { to: "/saldos", label: "Saldos" },
+  { to: "/projecao", label: "Projeção" },
   { to: "/frota", label: "Frota" },
   { to: "/lista", label: "Lista" },
   { to: "/contas", label: "Contas" },

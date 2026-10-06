@@ -15,6 +15,7 @@ import { Route as ContasRouteImport } from './routes/contas'
 import { Route as FrotaRouteImport } from './routes/frota'
 import { Route as ListaRouteImport } from './routes/lista'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as ProjecaoRouteImport } from './routes/projecao'
 import { Route as SaldosRouteImport } from './routes/saldos'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -50,6 +51,11 @@ const ListaRoute = ListaRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjecaoRoute = ProjecaoRouteImport.update({
+  id: '/projecao',
+  path: '/projecao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SaldosRoute = SaldosRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/frota': typeof FrotaRoute
   '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
+  '/projecao': typeof ProjecaoRoute
   '/saldos': typeof SaldosRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/frota': typeof FrotaRoute
   '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
+  '/projecao': typeof ProjecaoRoute
   '/saldos': typeof SaldosRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/frota': typeof FrotaRoute
   '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
+  '/projecao': typeof ProjecaoRoute
   '/saldos': typeof SaldosRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/frota'
     | '/lista'
     | '/mcp'
+    | '/projecao'
     | '/saldos'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/frota'
     | '/lista'
     | '/mcp'
+    | '/projecao'
     | '/saldos'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/frota'
     | '/lista'
     | '/mcp'
+    | '/projecao'
     | '/saldos'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   FrotaRoute: typeof FrotaRoute
   ListaRoute: typeof ListaRoute
   McpRoute: typeof McpRoute
+  ProjecaoRoute: typeof ProjecaoRoute
   SaldosRoute: typeof SaldosRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -231,6 +244,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projecao': {
+      id: '/projecao'
+      path: '/projecao'
+      fullPath: '/projecao'
+      preLoaderRoute: typeof ProjecaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/saldos': {
@@ -285,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   FrotaRoute: FrotaRoute,
   ListaRoute: ListaRoute,
   McpRoute: McpRoute,
+  ProjecaoRoute: ProjecaoRoute,
   SaldosRoute: SaldosRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:

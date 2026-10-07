@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep the theme provider at the root; route-level wrappers inherit it so navigation cannot reset or desynchronize the saved theme.

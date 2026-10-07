@@ -14,6 +14,7 @@ import {
   Settings2,
   ShoppingBag,
   Sparkles,
+  TrendingUp,
   Upload,
   Wallet,
 } from "lucide-react";
@@ -255,6 +256,18 @@ function Dashboard() {
                   <Link to="/saldos" preload="intent">
                     <Landmark className="mr-2 h-4 w-4" />
                     Saldos
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/projecao" preload="intent">
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Projeção
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/contas" preload="intent">
+                    <CalendarClock className="mr-2 h-4 w-4" />
+                    Contas a pagar
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

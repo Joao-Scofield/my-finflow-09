@@ -258,6 +258,18 @@ function Dashboard() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
+                  <Link to="/projecao" preload="intent">
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Projeção
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/contas" preload="intent">
+                    <CalendarClock className="mr-2 h-4 w-4" />
+                    Contas a pagar
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/frota" preload="intent">
                     <Car className="mr-2 h-4 w-4" />
                     Frota

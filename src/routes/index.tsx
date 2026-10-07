@@ -14,6 +14,7 @@ import {
   Settings2,
   ShoppingBag,
   Sparkles,
+  TrendingUp,
   Upload,
   Wallet,
 } from "lucide-react";

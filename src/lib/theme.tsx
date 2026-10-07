@@ -4,23 +4,37 @@ type Theme = "light" | "dark";
 const ThemeContext = createContext<{ theme: Theme; toggle: () => void } | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  const inheritedTheme = useContext(ThemeContext);
+  if (inheritedTheme) return <>{children}</>;
+  return <SharedThemeProvider>{children}</SharedThemeProvider>;
+}
+
+function SharedThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    const stored = (localStorage.getItem("theme") as Theme | null) ?? null;
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initial: Theme = stored ?? (prefersDark ? "dark" : "light");
+    let initial: Theme = prefersDark ? "dark" : "light";
+    try {
+      const stored = localStorage.getItem("theme");
+      if (stored === "light" || stored === "dark") initial = stored;
+    } catch {
+      // Use the device preference when browser storage is unavailable.
+    }
     setTheme(initial);
+    setInitialized(true);
   }, []);
 
   useEffect(() => {
+    if (!initialized) return;
     document.documentElement.classList.toggle("dark", theme === "dark");
     try {
       localStorage.setItem("theme", theme);
     } catch {
       // ignore
     }
-  }, [theme]);
+  }, [theme, initialized]);
 
   return (
     <ThemeContext.Provider

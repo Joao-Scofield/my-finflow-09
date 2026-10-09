@@ -58,6 +58,10 @@ interface Ctx {
   addTransaction: (t: Omit<Transaction, "id">) => Promise<void>;
   updateTransaction: (id: string, t: Omit<Transaction, "id">) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
+  setTransactionFlags: (
+    ids: string[],
+    patch: { status?: "paid" | "pending"; reconciled?: boolean },
+  ) => Promise<void>;
   addCategory: (c: Omit<Category, "id" | "subcategories">) => Promise<void>;
   updateCategory: (
     id: string,
@@ -112,6 +116,8 @@ type TransactionRow = {
   payment_method: string;
   account_id: string | null;
   transfer_account_id?: string | null;
+  recurring_id?: string | null;
+  reconciled?: boolean | null;
 };
 
 type AccountRow = {
@@ -221,6 +227,8 @@ function mapTransactions(rows: TransactionRow[]): Transaction[] {
     paymentMethod: (row.payment_method ?? "outro") as PaymentMethod,
     accountId: row.account_id ?? undefined,
     transferAccountId: row.transfer_account_id ?? undefined,
+    recurringId: row.recurring_id ?? undefined,
+    reconciled: Boolean(row.reconciled),
   }));
 }
 
@@ -275,7 +283,7 @@ const RECURRING_SELECT =
   "id,type,amount,description,category_id,subcategory_id,account_id,payment_method,day_of_month,start_date,end_date,active";
 
 const TRANSACTION_SELECT =
-  "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id,transfer_account_id,recurring_id,recurring_month";
+  "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id,transfer_account_id,recurring_id,recurring_month,reconciled";
 
 function monthKey(year: number, month: number) {
   return `${year}-${String(month).padStart(2, "0")}`;
@@ -635,6 +643,12 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             transfer_account_id: isTransfer ? (t.transferAccountId ?? null) : null,
           })
           .eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      setTransactionFlags: async (ids, patch) => {
+        if (ids.length === 0) return;
+        const { error } = await supabase.from("finance_transactions").update(patch).in("id", ids);
         if (error) throw error;
         await refresh();
       },

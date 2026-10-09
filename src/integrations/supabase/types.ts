@@ -378,6 +378,7 @@ export type Database = {
           description: string
           id: string
           payment_method: string
+          reconciled: boolean
           recurring_id: string | null
           recurring_month: string | null
           status: string
@@ -396,6 +397,7 @@ export type Database = {
           description?: string
           id?: string
           payment_method?: string
+          reconciled?: boolean
           recurring_id?: string | null
           recurring_month?: string | null
           status: string
@@ -414,6 +416,7 @@ export type Database = {
           description?: string
           id?: string
           payment_method?: string
+          reconciled?: boolean
           recurring_id?: string | null
           recurring_month?: string | null
           status?: string

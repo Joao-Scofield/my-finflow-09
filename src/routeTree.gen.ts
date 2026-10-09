@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ComprovanteRouteImport } from './routes/comprovante'
 import { Route as ContasRouteImport } from './routes/contas'
 import { Route as FrotaRouteImport } from './routes/frota'
+import { Route as LancamentosRouteImport } from './routes/lancamentos'
 import { Route as ListaRouteImport } from './routes/lista'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ProjecaoRouteImport } from './routes/projecao'
@@ -41,6 +42,11 @@ const ContasRoute = ContasRouteImport.update({
 const FrotaRoute = FrotaRouteImport.update({
   id: '/frota',
   path: '/frota',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LancamentosRoute = LancamentosRouteImport.update({
+  id: '/lancamentos',
+  path: '/lancamentos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListaRoute = ListaRouteImport.update({
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/comprovante': typeof ComprovanteRoute
   '/contas': typeof ContasRoute
   '/frota': typeof FrotaRoute
+  '/lancamentos': typeof LancamentosRoute
   '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
   '/projecao': typeof ProjecaoRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/comprovante': typeof ComprovanteRoute
   '/contas': typeof ContasRoute
   '/frota': typeof FrotaRoute
+  '/lancamentos': typeof LancamentosRoute
   '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
   '/projecao': typeof ProjecaoRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/comprovante': typeof ComprovanteRoute
   '/contas': typeof ContasRoute
   '/frota': typeof FrotaRoute
+  '/lancamentos': typeof LancamentosRoute
   '/lista': typeof ListaRoute
   '/mcp': typeof McpRoute
   '/projecao': typeof ProjecaoRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/comprovante'
     | '/contas'
     | '/frota'
+    | '/lancamentos'
     | '/lista'
     | '/mcp'
     | '/projecao'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/comprovante'
     | '/contas'
     | '/frota'
+    | '/lancamentos'
     | '/lista'
     | '/mcp'
     | '/projecao'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/comprovante'
     | '/contas'
     | '/frota'
+    | '/lancamentos'
     | '/lista'
     | '/mcp'
     | '/projecao'
@@ -191,6 +203,7 @@ export interface RootRouteChildren {
   ComprovanteRoute: typeof ComprovanteRoute
   ContasRoute: typeof ContasRoute
   FrotaRoute: typeof FrotaRoute
+  LancamentosRoute: typeof LancamentosRoute
   ListaRoute: typeof ListaRoute
   McpRoute: typeof McpRoute
   ProjecaoRoute: typeof ProjecaoRoute
@@ -230,6 +243,13 @@ declare module '@tanstack/react-router' {
       path: '/frota'
       fullPath: '/frota'
       preLoaderRoute: typeof FrotaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lancamentos': {
+      id: '/lancamentos'
+      path: '/lancamentos'
+      fullPath: '/lancamentos'
+      preLoaderRoute: typeof LancamentosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lista': {
@@ -303,6 +323,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComprovanteRoute: ComprovanteRoute,
   ContasRoute: ContasRoute,
   FrotaRoute: FrotaRoute,
+  LancamentosRoute: LancamentosRoute,
   ListaRoute: ListaRoute,
   McpRoute: McpRoute,
   ProjecaoRoute: ProjecaoRoute,

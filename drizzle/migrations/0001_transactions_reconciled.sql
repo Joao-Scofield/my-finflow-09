@@ -1,0 +1,2 @@
+ALTER TABLE public.finance_transactions ADD COLUMN IF NOT EXISTS reconciled boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS finance_transactions_user_date_idx ON public.finance_transactions (user_id, transaction_date DESC);

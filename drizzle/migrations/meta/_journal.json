@@ -8,6 +8,13 @@
       "when": 1791314180689,
       "tag": "0000_allow_transfers_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791559702999,
+      "tag": "0001_transactions_reconciled",
+      "breakpoints": true
     }
   ]
 }

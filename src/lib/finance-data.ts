@@ -92,6 +92,10 @@ export interface Transaction {
   accountId?: string;
   /** conta de destino — usado apenas quando type === "transfer" */
   transferAccountId?: string;
+  /** recorrência que gerou o lançamento, se houver */
+  recurringId?: string;
+  /** conferido com o extrato do banco */
+  reconciled?: boolean;
 }
 
 /** transferências entre saldos não entram no fluxo de caixa */

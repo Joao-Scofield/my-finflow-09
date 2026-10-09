@@ -6,6 +6,7 @@ import {
   ChevronDown,
   KeyRound,
   Landmark,
+  ListChecks,
   Loader2,
   LogOut,
   Menu,
@@ -252,6 +253,12 @@ function Dashboard() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Módulos</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to="/lancamentos" preload="intent">
+                    <ListChecks className="mr-2 h-4 w-4" />
+                    Lançamentos
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/saldos" preload="intent">
                     <Landmark className="mr-2 h-4 w-4" />

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", label: "Painel" },
+  { to: "/lancamentos", label: "Lançamentos" },
   { to: "/saldos", label: "Saldos" },
   { to: "/projecao", label: "Projeção" },
   { to: "/frota", label: "Frota" },

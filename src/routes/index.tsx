@@ -399,6 +399,7 @@ function Dashboard() {
       <RulesManager open={rulesOpen} onOpenChange={setRulesOpen} />
       <AccountsManager open={accountsOpen} onOpenChange={setAccountsOpen} />
       <ApiTokensManager open={apiOpen} onOpenChange={setApiOpen} />
+      <ProfileModal open={profileOpen} onOpenChange={setProfileOpen} />
       <Toaster richColors position="top-right" />
     </div>
   );

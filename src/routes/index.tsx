@@ -17,6 +17,7 @@ import {
   Sparkles,
   TrendingUp,
   Upload,
+  UserRound,
   Wallet,
 } from "lucide-react";
 import {
@@ -43,6 +44,7 @@ const ImportModal = lazy(() =>
 import { RecurringsManager } from "@/components/finance/RecurringsManager";
 import { RulesManager } from "@/components/finance/RulesManager";
 import { AccountsManager } from "@/components/finance/AccountsManager";
+import { ProfileModal } from "@/components/finance/ProfileModal";
 import { Login } from "@/components/finance/Login";
 import { DashboardSkeleton } from "@/components/finance/Skeletons";
 import {
@@ -142,6 +144,7 @@ function Dashboard() {
   const [accountsOpen, setAccountsOpen] = useState(false);
   const [apiOpen, setApiOpen] = useState(false);
   const [recurringOpen, setRecurringOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const { transactions, accounts, profile, loading } = useFinance();
 
@@ -296,6 +299,10 @@ function Dashboard() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => setProfileOpen(true)}>
+                  <UserRound className="mr-2 h-4 w-4" />
+                  Editar perfil
+                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => handleSignOut()}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sair
@@ -392,6 +399,7 @@ function Dashboard() {
       <RulesManager open={rulesOpen} onOpenChange={setRulesOpen} />
       <AccountsManager open={accountsOpen} onOpenChange={setAccountsOpen} />
       <ApiTokensManager open={apiOpen} onOpenChange={setApiOpen} />
+      <ProfileModal open={profileOpen} onOpenChange={setProfileOpen} />
       <Toaster richColors position="top-right" />
     </div>
   );

@@ -86,6 +86,7 @@ interface Ctx {
   deleteRecurring: (id: string) => Promise<void>;
   matchRule: (description: string) => RuleMatchResult | null;
   reapplyRulesAll: () => Promise<{ updated: number }>;
+  updateProfileName: (displayName: string) => Promise<void>;
 }
 
 type CategoryRow = {
@@ -674,6 +675,15 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.from("finance_categories").update(patch).eq("id", id);
         if (error) throw error;
         await refresh();
+      },
+      updateProfileName: async (displayName) => {
+        const userId = await getCurrentUserId();
+        const { error } = await supabase
+          .from("profiles")
+          .update({ display_name: displayName })
+          .eq("user_id", userId);
+        if (error) throw error;
+        setProfile((p) => (p ? { ...p, displayName } : p));
       },
       deleteCategory: async (id) => {
         const { error } = await supabase.from("finance_categories").delete().eq("id", id);

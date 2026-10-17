@@ -58,9 +58,16 @@ export function ProfileModal({ open, onOpenChange }: Props) {
       toast.success("Perfil atualizado!");
       onOpenChange(false);
     } catch (e) {
-      toast.error(
-        e instanceof Error ? e.message : "Não foi possível salvar o perfil.",
-      );
+      const raw = e instanceof Error ? e.message : "";
+      let msg = "Não foi possível salvar o perfil.";
+      if (/weak|easy to guess/i.test(raw))
+        msg = "Essa senha é considerada fraca. Tente uma senha diferente.";
+      else if (/same as the old|same password/i.test(raw))
+        msg = "A nova senha não pode ser igual à atual.";
+      else if (/at least 6/i.test(raw))
+        msg = "A senha precisa ter pelo menos 6 caracteres.";
+      else if (raw) msg = raw;
+      toast.error(msg);
     } finally {
       setSaving(false);
     }

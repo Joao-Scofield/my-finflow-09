@@ -91,8 +91,10 @@ export type Database = {
           created_at: string
           due_date: string
           id: string
+          last_notified_for: string | null
           name: string
           notes: string
+          notify_days_before: number
           paid_at: string | null
           payment_method: string
           recurring: boolean
@@ -108,8 +110,10 @@ export type Database = {
           created_at?: string
           due_date: string
           id?: string
+          last_notified_for?: string | null
           name: string
           notes?: string
+          notify_days_before?: number
           paid_at?: string | null
           payment_method?: string
           recurring?: boolean
@@ -125,8 +129,10 @@ export type Database = {
           created_at?: string
           due_date?: string
           id?: string
+          last_notified_for?: string | null
           name?: string
           notes?: string
+          notify_days_before?: number
           paid_at?: string | null
           payment_method?: string
           recurring?: boolean

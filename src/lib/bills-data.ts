@@ -8,6 +8,7 @@ export interface Bill {
   amount: number;
   dueDate: string; // yyyy-mm-dd
   recurring: boolean;
+  notifyDaysBefore: number;
   categoryId?: string;
   accountId?: string;
   paymentMethod: PaymentMethod;
@@ -15,6 +16,8 @@ export interface Bill {
   status: BillStatus;
   paidAt?: string;
 }
+
+export const notifyOptions = [0, 1, 2, 3, 5, 7, 10, 15, 30];
 
 export const todayISO = () => new Date().toISOString().slice(0, 10);
 

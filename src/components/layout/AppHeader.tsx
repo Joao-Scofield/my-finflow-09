@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { PrivacyToggle } from "@/components/finance/PrivacyToggle";
 import { ThemeToggle } from "@/components/finance/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -58,7 +57,6 @@ export function AppHeader({ icon: Icon, active, actions }: Props) {
         </div>
         <div className="flex items-center gap-2">
           {actions}
-          <PrivacyToggle />
           <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
             <LogOut className="h-4 w-4" />

@@ -257,11 +257,13 @@ function BillsPage() {
                       <p className="mt-3 text-xl font-semibold tabular-nums">
                         {formatBRL(b.amount)}
                       </p>
-                      {b.status === "paid" && (
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {`Paga em ${b.paidAt ? formatDateBR(b.paidAt) : "—"}`}
-                        </p>
-                      )}
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {b.status === "paid"
+                          ? `Paga em ${b.paidAt ? formatDateBR(b.paidAt) : "—"}`
+                          : b.notifyDaysBefore === 0
+                            ? "Aviso no dia do vencimento"
+                            : `Aviso ${b.notifyDaysBefore} dia(s) antes`}
+                      </p>
                       {b.notes && (
                         <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{b.notes}</p>
                       )}

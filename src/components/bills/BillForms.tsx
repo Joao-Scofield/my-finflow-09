@@ -22,7 +22,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useFinance } from "@/lib/finance-store";
 import { paymentMethods, type PaymentMethod } from "@/lib/finance-data";
-import { todayISO, type Bill } from "@/lib/bills-data";
+import { notifyOptions, todayISO, type Bill } from "@/lib/bills-data";
 import { useBills } from "@/lib/bills-store";
 
 const NONE = "none";
@@ -44,6 +44,7 @@ export function BillDialog({
   const [amount, setAmount] = useState("");
   const [dueDate, setDueDate] = useState(todayISO());
   const [recurring, setRecurring] = useState(true);
+  const [notifyDays, setNotifyDays] = useState("3");
   const [categoryId, setCategoryId] = useState<string>(NONE);
   const [accountId, setAccountId] = useState<string>(NONE);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("boleto");
@@ -56,6 +57,7 @@ export function BillDialog({
     setAmount(editing ? String(editing.amount) : "");
     setDueDate(editing?.dueDate ?? todayISO());
     setRecurring(editing?.recurring ?? true);
+    setNotifyDays(String(editing?.notifyDaysBefore ?? 3));
     setCategoryId(editing?.categoryId ?? NONE);
     setAccountId(editing?.accountId ?? NONE);
     setPaymentMethod(editing?.paymentMethod ?? "boleto");
@@ -74,6 +76,7 @@ export function BillDialog({
         amount: Number(amount.replace(",", ".")) || 0,
         dueDate,
         recurring,
+        notifyDaysBefore: Number(notifyDays) || 0,
         categoryId: categoryId === NONE ? undefined : categoryId,
         accountId: accountId === NONE ? undefined : accountId,
         paymentMethod,
@@ -130,23 +133,40 @@ export function BillDialog({
             </div>
           </div>
 
-          <div className="grid gap-1.5">
-            <Label>Forma de pagamento</Label>
-            <Select
-              value={paymentMethod}
-              onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentMethods.map((m) => (
-                  <SelectItem key={m.value} value={m.value}>
-                    {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-1.5">
+              <Label>Avisar por e-mail</Label>
+              <Select value={notifyDays} onValueChange={setNotifyDays}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {notifyOptions.map((d) => (
+                    <SelectItem key={d} value={String(d)}>
+                      {d === 0 ? "No dia do vencimento" : `${d} dia(s) antes`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-1.5">
+              <Label>Forma de pagamento</Label>
+              <Select
+                value={paymentMethod}
+                onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentMethods.map((m) => (
+                    <SelectItem key={m.value} value={m.value}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">

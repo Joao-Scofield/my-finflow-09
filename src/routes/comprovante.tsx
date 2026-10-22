@@ -23,6 +23,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { Login } from "@/components/finance/Login";
 import { FinanceProvider, useFinance } from "@/lib/finance-store";
 import { ThemeProvider } from "@/lib/theme";
+import { usePrivacy } from "@/lib/privacy";
 import { paymentMethods, type PaymentMethod, type TxType } from "@/lib/finance-data";
 import { readReceipt } from "@/lib/receipt.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,6 +58,7 @@ function ReceiptRoute() {
 }
 
 function AuthShell() {
+  usePrivacy();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {

@@ -40,6 +40,7 @@ import {
 } from "@/lib/finance-data";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { usePrivacy } from "@/lib/privacy";
 
 export const Route = createFileRoute("/lancamentos")({
   head: () => ({
@@ -63,6 +64,7 @@ export const Route = createFileRoute("/lancamentos")({
 });
 
 function AuthShell() {
+  usePrivacy();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   useEffect(() => {
     let mounted = true;

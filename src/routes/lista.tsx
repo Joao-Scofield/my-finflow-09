@@ -30,6 +30,7 @@ import { PurchaseDialog, ShoppingItemDialog } from "@/components/shopping/Shoppi
 import { FinanceProvider } from "@/lib/finance-store";
 import { ShoppingProvider, useShopping } from "@/lib/shopping-store";
 import { ThemeProvider } from "@/lib/theme";
+import { usePrivacy } from "@/lib/privacy";
 import { formatBRL } from "@/lib/finance-data";
 import {
   itemTotal,
@@ -70,6 +71,7 @@ function ShoppingRoute() {
 }
 
 function AuthShell() {
+  usePrivacy();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {

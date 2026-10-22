@@ -30,6 +30,7 @@ import { Login } from "@/components/finance/Login";
 import { BalancesSkeleton } from "@/components/finance/Skeletons";
 import { FinanceProvider, useFinance } from "@/lib/finance-store";
 import { ThemeProvider } from "@/lib/theme";
+import { usePrivacy } from "@/lib/privacy";
 import { formatBRL, monthNamesPt } from "@/lib/finance-data";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -119,6 +120,7 @@ function ProjectionRoute() {
 }
 
 function AuthShell() {
+  usePrivacy();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   useEffect(() => {
     let mounted = true;

@@ -21,6 +21,7 @@ import { BillDialog, PayBillDialog } from "@/components/bills/BillForms";
 import { FinanceProvider } from "@/lib/finance-store";
 import { BillsProvider, useBills } from "@/lib/bills-store";
 import { ThemeProvider } from "@/lib/theme";
+import { usePrivacy } from "@/lib/privacy";
 import { formatBRL } from "@/lib/finance-data";
 import { dueLabel, dueTone, formatDateBR, type Bill } from "@/lib/bills-data";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,6 +56,7 @@ function BillsRoute() {
 }
 
 function AuthShell() {
+  usePrivacy();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {

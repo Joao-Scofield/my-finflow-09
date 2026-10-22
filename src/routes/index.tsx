@@ -58,6 +58,7 @@ import {
 import { ThemeToggle } from "@/components/finance/ThemeToggle";
 import { FinanceProvider, useFinance } from "@/lib/finance-store";
 import { ThemeProvider } from "@/lib/theme";
+import { usePrivacy } from "@/lib/privacy";
 import { monthNamesPt, type Transaction } from "@/lib/finance-data";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -92,6 +93,7 @@ function IndexPage() {
 }
 
 function AuthShell() {
+  usePrivacy();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {

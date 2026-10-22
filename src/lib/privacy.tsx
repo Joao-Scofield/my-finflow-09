@@ -20,6 +20,8 @@ export function areValuesHidden() {
  * Oculta os valores monetários como nos apps de banco.
  * Começa sempre oculto e não guarda nada: ao reabrir o app, os valores voltam a ficar ocultos.
  * Só o botão de olho do cabeçalho exibe ou oculta os valores.
+ * Os formatadores leem o estado ao renderizar, então cada página precisa chamar `usePrivacy()`
+ * para re-renderizar quando o estado muda (o `Outlet` do router é memoizado e não propaga).
  */
 export function PrivacyProvider({ children }: { children: ReactNode }) {
   const [hidden, setHidden] = useState(true);

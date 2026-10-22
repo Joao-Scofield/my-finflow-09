@@ -34,6 +34,7 @@ import {
 import { FinanceProvider } from "@/lib/finance-store";
 import { FleetProvider, useFleet } from "@/lib/fleet-store";
 import { ThemeProvider } from "@/lib/theme";
+import { usePrivacy } from "@/lib/privacy";
 import { monthNamesPt } from "@/lib/finance-data";
 import {
   fixedCostKindLabel,
@@ -78,6 +79,7 @@ function FleetRoute() {
 }
 
 function AuthShell() {
+  usePrivacy();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {

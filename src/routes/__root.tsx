@@ -13,7 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "../lib/theme";
-import { PrivacyProvider, usePrivacy } from "../lib/privacy";
+import { PrivacyProvider } from "../lib/privacy";
 
 function NotFoundComponent() {
   return (
@@ -123,12 +123,6 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-// Assina o contexto de privacidade: ao alternar os valores, as rotas re-renderizam com os formatadores atualizados.
-function PrivacyOutlet() {
-  usePrivacy();
-  return <Outlet />;
-}
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -137,7 +131,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <ThemeProvider>
         <PrivacyProvider>
-          <PrivacyOutlet />
+          <Outlet />
         </PrivacyProvider>
       </ThemeProvider>
     </QueryClientProvider>

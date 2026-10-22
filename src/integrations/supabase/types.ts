@@ -363,10 +363,121 @@ export type Database = {
           },
         ]
       }
+      finance_card_invoices: {
+        Row: {
+          card_id: string
+          created_at: string
+          id: string
+          invoice_month: string
+          paid_at: string
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          id?: string
+          invoice_month: string
+          paid_at?: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          id?: string
+          invoice_month?: string
+          paid_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_card_invoices_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "finance_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_cards: {
+        Row: {
+          closing_day: number
+          color: string
+          created_at: string
+          due_day: number
+          id: string
+          name: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          closing_day: number
+          color?: string
+          created_at?: string
+          due_day: number
+          id?: string
+          name: string
+          position?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          closing_day?: number
+          color?: string
+          created_at?: string
+          due_day?: number
+          id?: string
+          name?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      finance_debts: {
+        Row: {
+          created_at: string
+          first_due_date: string
+          id: string
+          installment_amount: number
+          installments_paid: number
+          installments_total: number
+          name: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          first_due_date: string
+          id?: string
+          installment_amount: number
+          installments_paid?: number
+          installments_total: number
+          name: string
+          position?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          first_due_date?: string
+          id?: string
+          installment_amount?: number
+          installments_paid?: number
+          installments_total?: number
+          name?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       finance_transactions: {
         Row: {
           account_id: string | null
           amount: number
+          card_id: string | null
           category_id: string | null
           created_at: string
           description: string
@@ -386,6 +497,7 @@ export type Database = {
         Insert: {
           account_id?: string | null
           amount: number
+          card_id?: string | null
           category_id?: string | null
           created_at?: string
           description?: string
@@ -405,6 +517,7 @@ export type Database = {
         Update: {
           account_id?: string | null
           amount?: number
+          card_id?: string | null
           category_id?: string | null
           created_at?: string
           description?: string

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ComprovanteRouteImport } from './routes/comprovante'
 import { Route as ContasRouteImport } from './routes/contas'
+import { Route as DividasRouteImport } from './routes/dividas'
 import { Route as FrotaRouteImport } from './routes/frota'
 import { Route as LancamentosRouteImport } from './routes/lancamentos'
 import { Route as ListaRouteImport } from './routes/lista'
@@ -37,6 +38,11 @@ const ComprovanteRoute = ComprovanteRouteImport.update({
 const ContasRoute = ContasRouteImport.update({
   id: '/contas',
   path: '/contas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DividasRoute = DividasRouteImport.update({
+  id: '/dividas',
+  path: '/dividas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FrotaRoute = FrotaRouteImport.update({
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/comprovante': typeof ComprovanteRoute
   '/contas': typeof ContasRoute
+  '/dividas': typeof DividasRoute
   '/frota': typeof FrotaRoute
   '/lancamentos': typeof LancamentosRoute
   '/lista': typeof ListaRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/comprovante': typeof ComprovanteRoute
   '/contas': typeof ContasRoute
+  '/dividas': typeof DividasRoute
   '/frota': typeof FrotaRoute
   '/lancamentos': typeof LancamentosRoute
   '/lista': typeof ListaRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/comprovante': typeof ComprovanteRoute
   '/contas': typeof ContasRoute
+  '/dividas': typeof DividasRoute
   '/frota': typeof FrotaRoute
   '/lancamentos': typeof LancamentosRoute
   '/lista': typeof ListaRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/'
     | '/comprovante'
     | '/contas'
+    | '/dividas'
     | '/frota'
     | '/lancamentos'
     | '/lista'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/'
     | '/comprovante'
     | '/contas'
+    | '/dividas'
     | '/frota'
     | '/lancamentos'
     | '/lista'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/'
     | '/comprovante'
     | '/contas'
+    | '/dividas'
     | '/frota'
     | '/lancamentos'
     | '/lista'
@@ -202,6 +214,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ComprovanteRoute: typeof ComprovanteRoute
   ContasRoute: typeof ContasRoute
+  DividasRoute: typeof DividasRoute
   FrotaRoute: typeof FrotaRoute
   LancamentosRoute: typeof LancamentosRoute
   ListaRoute: typeof ListaRoute
@@ -236,6 +249,13 @@ declare module '@tanstack/react-router' {
       path: '/contas'
       fullPath: '/contas'
       preLoaderRoute: typeof ContasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dividas': {
+      id: '/dividas'
+      path: '/dividas'
+      fullPath: '/dividas'
+      preLoaderRoute: typeof DividasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/frota': {
@@ -322,6 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ComprovanteRoute: ComprovanteRoute,
   ContasRoute: ContasRoute,
+  DividasRoute: DividasRoute,
   FrotaRoute: FrotaRoute,
   LancamentosRoute: LancamentosRoute,
   ListaRoute: ListaRoute,

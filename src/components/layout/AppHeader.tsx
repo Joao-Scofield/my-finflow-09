@@ -12,6 +12,7 @@ const navItems = [
   { to: "/", label: "Painel" },
   { to: "/lancamentos", label: "Lançamentos" },
   { to: "/saldos", label: "Saldos" },
+  { to: "/dividas", label: "Dívidas" },
   { to: "/projecao", label: "Projeção" },
   { to: "/frota", label: "Frota" },
   { to: "/lista", label: "Lista" },

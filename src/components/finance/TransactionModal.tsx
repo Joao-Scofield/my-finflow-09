@@ -36,7 +36,7 @@ interface Props {
 }
 
 export function TransactionModal({ open, onOpenChange, editing, defaultDate }: Props) {
-  const { categories, accounts, addTransaction, updateTransaction } = useFinance();
+  const { categories, accounts, cards, addTransaction, updateTransaction } = useFinance();
 
   const [type, setType] = useState<TxType>("expense");
   const [amount, setAmount] = useState("");
@@ -48,6 +48,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [accountId, setAccountId] = useState("");
   const [transferAccountId, setTransferAccountId] = useState("");
+  const [cardId, setCardId] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -62,7 +63,9 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       setPaymentMethod(editing.paymentMethod ?? "outro");
       setAccountId(editing.accountId ?? "");
       setTransferAccountId(editing.transferAccountId ?? "");
+      setCardId(editing.cardId ?? "");
     } else {
+      setCardId("");
       setType("expense");
       setAmount("");
       setDate(defaultDate ?? new Date().toISOString().slice(0, 10));
@@ -96,11 +99,11 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
   const canSave = isTransfer
     ? Boolean(
         amount &&
-          Number(amount) > 0 &&
-          date &&
-          accountId &&
-          transferAccountId &&
-          accountId !== transferAccountId,
+        Number(amount) > 0 &&
+        date &&
+        accountId &&
+        transferAccountId &&
+        accountId !== transferAccountId,
       )
     : Boolean(
         amount && Number(amount) > 0 && date && categoryId && (accounts.length === 0 || accountId),
@@ -119,6 +122,7 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
       paymentMethod,
       accountId: accountId || undefined,
       transferAccountId: isTransfer ? transferAccountId : undefined,
+      cardId: !isTransfer && paymentMethod === "credito" ? cardId || undefined : undefined,
     };
     const op = editing ? updateTransaction(editing.id, payload) : addTransaction(payload);
     Promise.resolve(op).catch((e) => {
@@ -271,6 +275,30 @@ export function TransactionModal({ open, onOpenChange, editing, defaultDate }: P
                           style={{ backgroundColor: m.color }}
                         />
                         {m.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {!isTransfer && paymentMethod === "credito" && cards.length > 0 && (
+            <div>
+              <Label>Cartão</Label>
+              <Select value={cardId} onValueChange={setCardId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sem cartão cadastrado" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cards.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="h-3 w-3 rounded-full"
+                          style={{ backgroundColor: c.color }}
+                        />
+                        {c.name}
                       </span>
                     </SelectItem>
                   ))}

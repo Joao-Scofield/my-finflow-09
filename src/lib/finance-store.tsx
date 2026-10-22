@@ -15,7 +15,10 @@ import {
   defaultRules,
   type Account,
   type AccountKind,
+  type Card,
+  type CardInvoicePayment,
   type Category,
+  type Debt,
   type Recurring,
   type Rule,
   type Subcategory,
@@ -52,6 +55,9 @@ interface Ctx {
   transactions: Transaction[];
   rules: Rule[];
   accounts: Account[];
+  cards: Card[];
+  debts: Debt[];
+  cardInvoicePayments: CardInvoicePayment[];
   profile: Profile | null;
   loading: boolean;
   refresh: () => Promise<void>;
@@ -84,6 +90,15 @@ interface Ctx {
   addRecurring: (r: Omit<Recurring, "id">) => Promise<void>;
   updateRecurring: (id: string, patch: Partial<Omit<Recurring, "id">>) => Promise<void>;
   deleteRecurring: (id: string) => Promise<void>;
+  addCard: (c: Omit<Card, "id">) => Promise<void>;
+  updateCard: (id: string, patch: Partial<Omit<Card, "id">>) => Promise<void>;
+  deleteCard: (id: string) => Promise<void>;
+  setCardInvoicePaid: (cardId: string, invoiceMonth: string, paid: boolean) => Promise<void>;
+  addDebt: (d: Omit<Debt, "id" | "installmentsPaid">) => Promise<void>;
+  updateDebt: (id: string, patch: Partial<Omit<Debt, "id">>) => Promise<void>;
+  deleteDebt: (id: string) => Promise<void>;
+  /** marca a próxima parcela como paga (ou volta uma, se desfeito) */
+  payDebtInstallment: (id: string, paid: boolean) => Promise<void>;
   matchRule: (description: string) => RuleMatchResult | null;
   reapplyRulesAll: () => Promise<{ updated: number }>;
   updateProfileName: (displayName: string) => Promise<void>;
@@ -119,6 +134,29 @@ type TransactionRow = {
   transfer_account_id?: string | null;
   recurring_id?: string | null;
   reconciled?: boolean | null;
+  card_id?: string | null;
+};
+
+type CardRow = {
+  id: string;
+  name: string;
+  closing_day: number;
+  due_day: number;
+  color: string;
+};
+
+type DebtRow = {
+  id: string;
+  name: string;
+  installment_amount: number;
+  installments_total: number;
+  installments_paid: number;
+  first_due_date: string;
+};
+
+type InvoicePaymentRow = {
+  card_id: string;
+  invoice_month: string;
 };
 
 type AccountRow = {
@@ -230,6 +268,28 @@ function mapTransactions(rows: TransactionRow[]): Transaction[] {
     transferAccountId: row.transfer_account_id ?? undefined,
     recurringId: row.recurring_id ?? undefined,
     reconciled: Boolean(row.reconciled),
+    cardId: row.card_id ?? undefined,
+  }));
+}
+
+function mapCards(rows: CardRow[]): Card[] {
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    closingDay: row.closing_day,
+    dueDay: row.due_day,
+    color: row.color,
+  }));
+}
+
+function mapDebts(rows: DebtRow[]): Debt[] {
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    installmentAmount: Number(row.installment_amount),
+    installmentsTotal: row.installments_total,
+    installmentsPaid: row.installments_paid,
+    firstDueDate: row.first_due_date,
   }));
 }
 
@@ -284,7 +344,7 @@ const RECURRING_SELECT =
   "id,type,amount,description,category_id,subcategory_id,account_id,payment_method,day_of_month,start_date,end_date,active";
 
 const TRANSACTION_SELECT =
-  "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id,transfer_account_id,recurring_id,recurring_month,reconciled";
+  "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id,transfer_account_id,recurring_id,recurring_month,reconciled,card_id";
 
 function monthKey(year: number, month: number) {
   return `${year}-${String(month).padStart(2, "0")}`;
@@ -392,6 +452,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const [rules, setRules] = useState<Rule[]>([]);
   const [recurrings, setRecurrings] = useState<Recurring[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [debts, setDebts] = useState<Debt[]>([]);
+  const [cardInvoicePayments, setCardInvoicePayments] = useState<CardInvoicePayment[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -409,6 +472,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         rulesResult,
         accountsResult,
         recurringsResult,
+        cardsResult,
+        debtsResult,
+        invoicePaymentsResult,
       ] = await Promise.all([
         supabase
           .from("profiles")
@@ -436,9 +502,21 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           .select("id,name,kind,balance,color,position")
           .order("position"),
         supabase.from("finance_recurrings").select(RECURRING_SELECT).order("created_at"),
+        supabase
+          .from("finance_cards")
+          .select("id,name,closing_day,due_day,color")
+          .order("position"),
+        supabase
+          .from("finance_debts")
+          .select("id,name,installment_amount,installments_total,installments_paid,first_due_date")
+          .order("position"),
+        supabase.from("finance_card_invoices").select("card_id,invoice_month"),
       ]);
 
       if (profileResult.error) throw profileResult.error;
+      if (cardsResult.error) throw cardsResult.error;
+      if (debtsResult.error) throw debtsResult.error;
+      if (invoicePaymentsResult.error) throw invoicePaymentsResult.error;
       if (categoriesResult.error) throw categoriesResult.error;
       if (subcategoriesResult.error) throw subcategoriesResult.error;
       if (transactionsResult.error) throw transactionsResult.error;
@@ -446,6 +524,14 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       if (accountsResult.error) throw accountsResult.error;
       if (recurringsResult.error) throw recurringsResult.error;
 
+      setCards(mapCards(cardsResult.data as CardRow[]));
+      setDebts(mapDebts(debtsResult.data as DebtRow[]));
+      setCardInvoicePayments(
+        (invoicePaymentsResult.data as InvoicePaymentRow[]).map((row) => ({
+          cardId: row.card_id,
+          invoiceMonth: row.invoice_month,
+        })),
+      );
       setProfile(
         profileResult.data
           ? {
@@ -595,6 +681,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       rules,
       recurrings,
       accounts: withComputedBalances(accounts, transactions),
+      cards,
+      debts,
+      cardInvoicePayments,
       profile,
       refresh,
       loading,
@@ -623,6 +712,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           payment_method: tx.paymentMethod,
           account_id: tx.accountId ?? null,
           transfer_account_id: isTransfer ? (tx.transferAccountId ?? null) : null,
+          card_id: isTransfer ? null : (tx.cardId ?? null),
         });
         if (error) throw error;
         await refresh();
@@ -642,6 +732,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             payment_method: t.paymentMethod,
             account_id: t.accountId ?? null,
             transfer_account_id: isTransfer ? (t.transferAccountId ?? null) : null,
+            card_id: isTransfer ? null : (t.cardId ?? null),
           })
           .eq("id", id);
         if (error) throw error;
@@ -930,6 +1021,106 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
         await refresh();
       },
+      addCard: async (c) => {
+        const userId = await getCurrentUserId();
+        const { error } = await supabase.from("finance_cards").insert({
+          user_id: userId,
+          name: c.name,
+          closing_day: c.closingDay,
+          due_day: c.dueDay,
+          color: c.color,
+          position: cards.length,
+        });
+        if (error) throw error;
+        await refresh();
+      },
+      updateCard: async (id, patch) => {
+        const payload = {
+          ...(patch.name !== undefined ? { name: patch.name } : {}),
+          ...(patch.closingDay !== undefined ? { closing_day: patch.closingDay } : {}),
+          ...(patch.dueDay !== undefined ? { due_day: patch.dueDay } : {}),
+          ...(patch.color !== undefined ? { color: patch.color } : {}),
+        };
+        const { error } = await supabase.from("finance_cards").update(payload).eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      deleteCard: async (id) => {
+        // as compras do cartão continuam no histórico, só perdem a ligação com o cartão
+        const { error } = await supabase.from("finance_cards").delete().eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      setCardInvoicePaid: async (cardId, invoiceMonth, paid) => {
+        if (paid) {
+          const userId = await getCurrentUserId();
+          const { error } = await supabase
+            .from("finance_card_invoices")
+            .upsert(
+              { user_id: userId, card_id: cardId, invoice_month: invoiceMonth },
+              { onConflict: "card_id,invoice_month" },
+            );
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from("finance_card_invoices")
+            .delete()
+            .eq("card_id", cardId)
+            .eq("invoice_month", invoiceMonth);
+          if (error) throw error;
+        }
+        await refresh();
+      },
+      addDebt: async (d) => {
+        const userId = await getCurrentUserId();
+        const { error } = await supabase.from("finance_debts").insert({
+          user_id: userId,
+          name: d.name,
+          installment_amount: d.installmentAmount,
+          installments_total: d.installmentsTotal,
+          installments_paid: 0,
+          first_due_date: d.firstDueDate,
+          position: debts.length,
+        });
+        if (error) throw error;
+        await refresh();
+      },
+      updateDebt: async (id, patch) => {
+        const payload = {
+          ...(patch.name !== undefined ? { name: patch.name } : {}),
+          ...(patch.installmentAmount !== undefined
+            ? { installment_amount: patch.installmentAmount }
+            : {}),
+          ...(patch.installmentsTotal !== undefined
+            ? { installments_total: patch.installmentsTotal }
+            : {}),
+          ...(patch.installmentsPaid !== undefined
+            ? { installments_paid: patch.installmentsPaid }
+            : {}),
+          ...(patch.firstDueDate !== undefined ? { first_due_date: patch.firstDueDate } : {}),
+        };
+        const { error } = await supabase.from("finance_debts").update(payload).eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      deleteDebt: async (id) => {
+        const { error } = await supabase.from("finance_debts").delete().eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
+      payDebtInstallment: async (id, paid) => {
+        const debt = debts.find((d) => d.id === id);
+        if (!debt) return;
+        const installmentsPaid = paid
+          ? Math.min(debt.installmentsPaid + 1, debt.installmentsTotal)
+          : Math.max(debt.installmentsPaid - 1, 0);
+        const { error } = await supabase
+          .from("finance_debts")
+          .update({ installments_paid: installmentsPaid })
+          .eq("id", id);
+        if (error) throw error;
+        await refresh();
+      },
       matchRule: (description) => matchRuleFor(description, rules, categories),
       reapplyRulesAll: async () => {
         let updated = 0;
@@ -958,7 +1149,19 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         return { updated };
       },
     }),
-    [accounts, categories, loading, profile, recurrings, refresh, rules, transactions],
+    [
+      accounts,
+      cards,
+      cardInvoicePayments,
+      categories,
+      debts,
+      loading,
+      profile,
+      recurrings,
+      refresh,
+      rules,
+      transactions,
+    ],
   );
 
   return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;

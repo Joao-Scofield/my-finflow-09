@@ -1,3 +1,5 @@
+import { areValuesHidden, MASKED_VALUE } from "./privacy";
+
 export type FuelType = "gasolina" | "etanol" | "diesel" | "gnv" | "flex" | "eletrico";
 
 export const fuelTypes: { value: FuelType; label: string }[] = [
@@ -114,7 +116,7 @@ export interface FixedCost {
 }
 
 export const formatBRL = (v: number) =>
-  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  areValuesHidden() ? MASKED_VALUE : v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export const formatKm = (v: number) =>
   `${v.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} km`;

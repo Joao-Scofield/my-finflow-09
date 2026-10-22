@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { areValuesHidden, MASKED_VALUE } from "@/lib/privacy";
 import {
   Dialog,
   DialogContent,
@@ -68,7 +69,8 @@ const emptyDraft: Draft = {
   active: true,
 };
 
-const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const brl = (v: number) =>
+  areValuesHidden() ? MASKED_VALUE : v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export function RecurringsManager({ open, onOpenChange }: Props) {
   const { recurrings, categories, accounts, addRecurring, updateRecurring, deleteRecurring } =

@@ -46,6 +46,7 @@ import { RulesManager } from "@/components/finance/RulesManager";
 import { AccountsManager } from "@/components/finance/AccountsManager";
 import { ProfileModal } from "@/components/finance/ProfileModal";
 import { Login } from "@/components/finance/Login";
+import { PrivacyToggle } from "@/components/finance/PrivacyToggle";
 import { DashboardSkeleton } from "@/components/finance/Skeletons";
 import {
   LazyExpenseBreakdownChart,
@@ -219,6 +220,7 @@ function Dashboard() {
             <span className="hidden max-w-32 truncate text-sm text-muted-foreground md:inline">
               {profile?.displayName}
             </span>
+            <PrivacyToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="sm" className="gap-2">

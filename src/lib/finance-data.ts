@@ -1,3 +1,5 @@
+import { areValuesHidden, MASKED_VALUE } from "./privacy";
+
 export type TxType = "income" | "expense" | "transfer";
 export type TxStatus = "paid" | "pending";
 
@@ -312,7 +314,7 @@ export const defaultCategories: Category[] = [
 ];
 
 export const formatBRL = (n: number) =>
-  n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  areValuesHidden() ? MASKED_VALUE : n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export const monthNamesPt = [
   "Janeiro",

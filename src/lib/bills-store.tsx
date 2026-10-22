@@ -62,7 +62,7 @@ async function ensureBillsCategory(userId: string) {
 }
 
 const SELECT =
-  "id,name,amount,due_date,recurring,notify_days_before,category_id,account_id,payment_method,notes,status,paid_at";
+  "id,name,amount,due_date,recurring,category_id,account_id,payment_method,notes,status,paid_at";
 
 export function BillsProvider({ children }: { children: ReactNode }) {
   const { refresh: refreshFinance } = useFinance();
@@ -85,7 +85,6 @@ export function BillsProvider({ children }: { children: ReactNode }) {
           amount: Number(row.amount),
           dueDate: row.due_date,
           recurring: row.recurring,
-          notifyDaysBefore: Number(row.notify_days_before),
           categoryId: row.category_id ?? undefined,
           accountId: row.account_id ?? undefined,
           paymentMethod: row.payment_method as PaymentMethod,
@@ -119,7 +118,6 @@ export function BillsProvider({ children }: { children: ReactNode }) {
           amount: b.amount,
           due_date: b.dueDate,
           recurring: b.recurring,
-          notify_days_before: b.notifyDaysBefore,
           category_id: b.categoryId ?? null,
           account_id: b.accountId ?? null,
           payment_method: b.paymentMethod,
@@ -134,13 +132,8 @@ export function BillsProvider({ children }: { children: ReactNode }) {
           .update({
             ...(patch.name !== undefined ? { name: patch.name } : {}),
             ...(patch.amount !== undefined ? { amount: patch.amount } : {}),
-            ...(patch.dueDate !== undefined
-              ? { due_date: patch.dueDate, last_notified_for: null }
-              : {}),
+            ...(patch.dueDate !== undefined ? { due_date: patch.dueDate } : {}),
             ...(patch.recurring !== undefined ? { recurring: patch.recurring } : {}),
-            ...(patch.notifyDaysBefore !== undefined
-              ? { notify_days_before: patch.notifyDaysBefore }
-              : {}),
             ...(patch.categoryId !== undefined ? { category_id: patch.categoryId ?? null } : {}),
             ...(patch.accountId !== undefined ? { account_id: patch.accountId ?? null } : {}),
             ...(patch.paymentMethod !== undefined ? { payment_method: patch.paymentMethod } : {}),
@@ -191,7 +184,6 @@ export function BillsProvider({ children }: { children: ReactNode }) {
             amount: bill.amount,
             due_date: nextMonthDate(bill.dueDate),
             recurring: true,
-            notify_days_before: bill.notifyDaysBefore,
             category_id: bill.categoryId ?? null,
             account_id: bill.accountId ?? null,
             payment_method: bill.paymentMethod,

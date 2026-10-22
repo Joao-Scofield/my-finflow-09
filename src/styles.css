@@ -173,6 +173,14 @@
   font-feature-settings: "tnum";
 }
 
+/* Valores ocultos: o conteúdo principal fica borrado até o usuário clicar (ver src/lib/privacy.tsx). */
+html[data-privacy="hidden"] main {
+  filter: blur(10px);
+  user-select: none;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

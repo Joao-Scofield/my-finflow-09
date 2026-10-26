@@ -355,15 +355,18 @@ function Dashboard() {
               hasAccounts={accounts.length > 0}
             />
 
-            <div className="grid gap-4 lg:grid-cols-2">
-              <LazyExpenseBreakdownChart monthTransactions={monthTx} />
-              <LazyIncomeBreakdownChart monthTransactions={monthTx} />
+            <div className="grid gap-4 lg:grid-cols-6">
+              <div className="min-w-0 lg:col-span-4">
+                <LazyExpenseBreakdownChart monthTransactions={monthTx} />
+              </div>
+              <div className="flex min-w-0 flex-col gap-4 lg:col-span-2">
+                <LazyIncomeBreakdownChart monthTransactions={monthTx} />
+                <LazyPaymentMethodChart monthTransactions={monthTx} />
+              </div>
+              <div className="min-w-0 lg:col-span-6">
+                <LazyMonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
+              </div>
             </div>
-
-            <LazyPaymentMethodChart monthTransactions={monthTx} />
-
-            <LazyMonthlyComparisonChart month={month} year={year} monthTransactions={monthTx} />
-
 
             <Card className="bento-card">
               <CardHeader>

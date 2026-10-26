@@ -344,7 +344,8 @@ const RECURRING_SELECT =
   "id,type,amount,description,category_id,subcategory_id,account_id,payment_method,day_of_month,start_date,end_date,active";
 
 const TRANSACTION_SELECT =
-  "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id,transfer_account_id,recurring_id,recurring_month,reconciled,card_id";
+  // card_id fica fora do SELECT até a migração dividas_cartoes estar aplicada no banco
+  "id,type,amount,transaction_date,category_id,subcategory_id,description,status,payment_method,account_id,transfer_account_id,recurring_id,recurring_month,reconciled";
 
 function monthKey(year: number, month: number) {
   return `${year}-${String(month).padStart(2, "0")}`;
@@ -514,9 +515,14 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       ]);
 
       if (profileResult.error) throw profileResult.error;
-      if (cardsResult.error) throw cardsResult.error;
-      if (debtsResult.error) throw debtsResult.error;
-      if (invoicePaymentsResult.error) throw invoicePaymentsResult.error;
+      // cartões, dívidas e faturas são opcionais: se a tabela não existir, o resto do app continua
+      for (const [nome, result] of [
+        ["cartões", cardsResult],
+        ["dívidas", debtsResult],
+        ["faturas de cartão", invoicePaymentsResult],
+      ] as const) {
+        if (result.error) console.warn(`[finance] não foi possível carregar ${nome}:`, result.error.message);
+      }
       if (categoriesResult.error) throw categoriesResult.error;
       if (subcategoriesResult.error) throw subcategoriesResult.error;
       if (transactionsResult.error) throw transactionsResult.error;
@@ -524,10 +530,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       if (accountsResult.error) throw accountsResult.error;
       if (recurringsResult.error) throw recurringsResult.error;
 
-      setCards(mapCards(cardsResult.data as CardRow[]));
-      setDebts(mapDebts(debtsResult.data as DebtRow[]));
+      setCards(mapCards((cardsResult.data ?? []) as CardRow[]));
+      setDebts(mapDebts((debtsResult.data ?? []) as DebtRow[]));
       setCardInvoicePayments(
-        (invoicePaymentsResult.data as InvoicePaymentRow[]).map((row) => ({
+        ((invoicePaymentsResult.data ?? []) as InvoicePaymentRow[]).map((row) => ({
           cardId: row.card_id,
           invoiceMonth: row.invoice_month,
         })),
@@ -712,7 +718,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           payment_method: tx.paymentMethod,
           account_id: tx.accountId ?? null,
           transfer_account_id: isTransfer ? (tx.transferAccountId ?? null) : null,
-          card_id: isTransfer ? null : (tx.cardId ?? null),
+          // só envia card_id quando há cartão, para não depender da coluna em lançamentos comuns
+          ...(!isTransfer && tx.cardId ? { card_id: tx.cardId } : {}),
         });
         if (error) throw error;
         await refresh();
@@ -732,7 +739,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             payment_method: t.paymentMethod,
             account_id: t.accountId ?? null,
             transfer_account_id: isTransfer ? (t.transferAccountId ?? null) : null,
-            card_id: isTransfer ? null : (t.cardId ?? null),
+            ...(!isTransfer && t.cardId ? { card_id: t.cardId } : {}),
           })
           .eq("id", id);
         if (error) throw error;
